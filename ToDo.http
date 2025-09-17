@@ -1,0 +1,38 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+
+@host=localhost
+@port=5188
+
+###
+# @name memorize
+POST http://{{host}}:{{port}}/api/todo/memorize
+Content-Type: application/json
+
+{
+  "Title": "My first ToDo!"
+}
+
+###
+PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}/complete
+Content-Type: application/json
+
+{
+}
+
+###
+PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}/dismiss
+Content-Type: application/json
+
+{
+  "Reason": "I don't want to!"
+}
+
+###
+PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}/reopen
+Content-Type: application/json
+
+{
+}
+
+###
+GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}
