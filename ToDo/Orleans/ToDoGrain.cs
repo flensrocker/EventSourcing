@@ -3,7 +3,6 @@ using Orleans.Providers;
 using OrleansPlayground.Abstractions.EntityFrameworkCore;
 using OrleansPlayground.Abstractions.Orleans;
 using OrleansPlayground.ToDo.Domain;
-using OrleansPlayground.ToDo.Views;
 
 namespace OrleansPlayground.ToDo.Orleans;
 
@@ -27,13 +26,12 @@ public interface IToDoGrain : IGrainWithGuidKey
   Task<bool> Complete();
   Task<bool> Dismiss(DismissToDoDto dto);
   Task<bool> Reopen();
-  Task<ToDoView> GetToDo();
 }
 
 [LogConsistencyProvider(ProviderName = "ToDoStorage")]
-public class ToDoGrain : EventSourcedGrain<ToDoState, ToDoEvent>, ICustomStorageInterface<ToDoState, ToDoEvent>, IToDoGrain
+public class ToDoGrain : DomainEventSourcedGrain<ToDoState, ToDoEvent>, IToDoGrain
 {
-  public ToDoGrain(IEventStore<Guid, ToDoEvent> eventStore)
+  public ToDoGrain(IDomainEventStore<Guid, ToDoEvent> eventStore)
     : base(eventStore)
   {
   }
@@ -48,7 +46,7 @@ public class ToDoGrain : EventSourcedGrain<ToDoState, ToDoEvent>, ICustomStorage
     if (toDoEvent is null)
       return false;
 
-    RaiseEvent(toDoEvent);
+    RaiseDomainEvent(toDoEvent);
     await ConfirmEvents();
 
     return true;
@@ -64,7 +62,7 @@ public class ToDoGrain : EventSourcedGrain<ToDoState, ToDoEvent>, ICustomStorage
     if (toDoEvent is null)
       return false;
 
-    RaiseEvent(toDoEvent);
+    RaiseDomainEvent(toDoEvent);
     await ConfirmEvents();
 
     return true;
@@ -80,7 +78,7 @@ public class ToDoGrain : EventSourcedGrain<ToDoState, ToDoEvent>, ICustomStorage
     if (toDoEvent is null)
       return false;
 
-    RaiseEvent(toDoEvent);
+    RaiseDomainEvent(toDoEvent);
     await ConfirmEvents();
 
     return true;
@@ -96,20 +94,9 @@ public class ToDoGrain : EventSourcedGrain<ToDoState, ToDoEvent>, ICustomStorage
     if (toDoEvent is null)
       return false;
 
-    RaiseEvent(toDoEvent);
+    RaiseDomainEvent(toDoEvent);
     await ConfirmEvents();
 
     return true;
-  }
-
-  public Task<ToDoView> GetToDo()
-  {
-    return Task.FromResult(new ToDoView
-    {
-      ToDoId = this.GetPrimaryKey(),
-      Title = State.Title,
-      Status = State.Status,
-      DismissReason = State.DismissReason,
-    });
   }
 }

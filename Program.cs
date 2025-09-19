@@ -5,11 +5,14 @@ using OrleansPlayground.ToDo.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IEventStore<Guid, ToDoEvent>, InMemoryEventStore<Guid, ToDoEvent>>();
+builder.Services.AddScoped<IDomainEventStore<Guid, ToDoEvent>, InMemoryDomainEventStore<Guid, ToDoEvent>>();
 
 builder.Host.UseOrleans(static siloBuilder =>
 {
   siloBuilder.UseLocalhostClustering();
+  siloBuilder
+    .AddMemoryStreams("StreamProvider")
+    .AddMemoryGrainStorage("PubSubStore");
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider("ToDoStorage");
 });
 

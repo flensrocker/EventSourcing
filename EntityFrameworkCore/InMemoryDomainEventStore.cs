@@ -5,14 +5,14 @@ using OrleansPlayground.Abstractions.EntityFrameworkCore;
 namespace OrleansPlayground.EntityFrameworkCore;
 
 // TODO => EFCore/PostgreSQL
-public class InMemoryEventStore<TId, TEventBase> : IEventStore<TId, TEventBase>
+public class InMemoryDomainEventStore<TId, TEventBase> : IDomainEventStore<TId, TEventBase>
   where TId : notnull
   where TEventBase : class
 {
-  private ConcurrentDictionary<TId, IReadOnlyCollection<TEventBase>> _storage = new();
+  private static ConcurrentDictionary<TId, IReadOnlyCollection<DomainEvent<TEventBase>>> _storage = new();
 
   public Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(TId id)
-    where TState : class, IState<TEventBase>, new()
+    where TState : class, IEventSourceable<TEventBase>, new()
   {
     var events = _storage.GetOrAdd(id, static _ => []);
     var state = new TState();
@@ -20,7 +20,7 @@ public class InMemoryEventStore<TId, TEventBase> : IEventStore<TId, TEventBase>
     return Task.FromResult(new KeyValuePair<int, TState>(events.Count, state));
   }
 
-  public Task<bool> ApplyUpdatesToStorage(TId id, IReadOnlyList<TEventBase> updates, int expectedVersion)
+  public Task<bool> ApplyUpdatesToStorage(TId id, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)
   {
     if (!_storage.TryGetValue(id, out var events))
       return Task.FromResult(false);
