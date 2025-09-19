@@ -24,10 +24,10 @@ public abstract class DomainEventSourcedGrain<TState, TEventBase>
     return base.OnActivateAsync(cancellationToken);
   }
 
-  public void RaiseDomainEvent<TEvent>(TEvent payload)
+  public DomainEvent<TEventBase> RaiseDomainEvent<TEvent>(TEvent payload)
     where TEvent : TEventBase
   {
-    RaiseEvent(new DomainEvent<TEventBase>
+    var domainEvent = new DomainEvent<TEventBase>
     {
       Metadata = new DomainEventMetadata
       {
@@ -37,9 +37,12 @@ public abstract class DomainEventSourcedGrain<TState, TEventBase>
         EntityVersion = _nextVersion,
       },
       Payload = payload,
-    });
-
+    };
     _nextVersion++;
+
+    RaiseEvent(domainEvent);
+
+    return domainEvent;
   }
 
   public Task<bool> ApplyUpdatesToStorage(IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)

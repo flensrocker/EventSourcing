@@ -1,3 +1,5 @@
+using Orleans.Serialization;
+using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.Abstractions.EntityFrameworkCore;
 using OrleansPlayground.EntityFrameworkCore;
 using OrleansPlayground.ToDo.AspNetCore;
@@ -9,6 +11,11 @@ builder.Services.AddScoped<IDomainEventStore<Guid, ToDoEvent>, InMemoryDomainEve
 
 builder.Host.UseOrleans(static siloBuilder =>
 {
+  siloBuilder.Services.AddSerializer(serializerBuilder =>
+  {
+    serializerBuilder.AddJsonSerializer(isSupported: type => type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>)));
+  });
+
   siloBuilder.UseLocalhostClustering();
   siloBuilder
     .AddMemoryStreams("StreamProvider")

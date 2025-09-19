@@ -1,5 +1,7 @@
 ﻿using Orleans.EventSourcing.CustomStorage;
 using Orleans.Providers;
+using Orleans.Streams;
+using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.Abstractions.EntityFrameworkCore;
 using OrleansPlayground.Abstractions.Orleans;
 using OrleansPlayground.ToDo.Domain;
@@ -24,13 +26,23 @@ public record DismissToDoDto
 [LogConsistencyProvider(ProviderName = "ToDoStorage")]
 public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEvent>, IToDoAggregateGrain
 {
+  private IAsyncStream<DomainEvent<ToDoEvent>>? _stream;
+
   public ToDoAggregateGrain(IDomainEventStore<Guid, ToDoEvent> eventStore)
     : base(eventStore)
   {
   }
 
-  private async Task<bool> Execute<TCommand, TEvent>(TCommand? command, Func<TCommand, TEvent?> handler)
-    where TEvent: ToDoEvent
+  public override async Task OnActivateAsync(CancellationToken cancellationToken)
+  {
+    await base.OnActivateAsync(cancellationToken);
+
+    var streamProvider = this.GetStreamProvider("StreamProvider");
+    var streamId = StreamId.Create("ToDoEvent", this.GetPrimaryKey());
+    _stream = streamProvider.GetStream<DomainEvent<ToDoEvent>>(streamId);
+  }
+
+  private async Task<bool> Execute<TCommand>(TCommand? command, Func<TCommand, ToDoEvent?> handler)
   {
     if (command is null)
       return false;
@@ -39,10 +51,11 @@ public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEve
     if (@event is null)
       return false;
 
-    RaiseDomainEvent(@event);
+    var domainEvent = RaiseDomainEvent(@event);
     await ConfirmEvents();
 
-    // TODO Publish ToDo-Events
+    if (_stream is not null)
+      await _stream.OnNextAsync(domainEvent);
 
     return true;
   }

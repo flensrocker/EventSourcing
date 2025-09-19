@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.EventSourcing" Version="9.2.1" />
+    <PackageReference Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="9.2.1" />
     <PackageReference Include="Microsoft.Orleans.Server" Version="9.2.1" />
     <PackageReference Include="Microsoft.Orleans.Streaming" Version="9.2.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
