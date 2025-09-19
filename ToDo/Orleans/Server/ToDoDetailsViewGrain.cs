@@ -31,7 +31,7 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
     if (version > 0)
       _view = view;
 
-    // TODO Stream-Subscribe der ToDo-Events, um die View zur Laufzeit aktuell zu halten
+    // TODO Subscribe ToDo-Events => update View
   }
 
   public Task<ToDoDetailsView?> GetView()

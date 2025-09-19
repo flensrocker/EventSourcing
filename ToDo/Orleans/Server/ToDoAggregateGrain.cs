@@ -42,6 +42,8 @@ public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEve
     RaiseDomainEvent(@event);
     await ConfirmEvents();
 
+    // TODO Publish ToDo-Events
+
     return true;
   }
 
