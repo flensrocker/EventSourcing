@@ -1,13 +1,9 @@
 ﻿using OrleansPlayground.Abstractions.EntityFrameworkCore;
 using OrleansPlayground.ToDo.Domain;
+using OrleansPlayground.ToDo.Orleans.Abstractions;
 using OrleansPlayground.ToDo.Views;
 
 namespace OrleansPlayground.ToDo.Orleans.Server;
-
-public interface IToDoDetailsViewGrain : IGrainWithGuidKey
-{
-  Task<ToDoDetailsView?> GetView();
-}
 
 public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
 {

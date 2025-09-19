@@ -1,6 +1,18 @@
-﻿using OrleansPlayground.ToDo.Orleans.Server;
+﻿namespace OrleansPlayground.ToDo.Orleans.Abstractions;
 
-namespace OrleansPlayground.ToDo.Orleans.Abstractions;
+[GenerateSerializer]
+public record MemorizeToDoDto
+{
+  [Id(0)]
+  public string? Title { get; init; }
+}
+
+[GenerateSerializer]
+public record DismissToDoDto
+{
+  [Id(0)]
+  public string? Reason { get; init; }
+}
 
 public interface IToDoAggregateGrain : IGrainWithGuidKey
 {

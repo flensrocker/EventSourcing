@@ -9,20 +9,6 @@ using OrleansPlayground.ToDo.Orleans.Abstractions;
 
 namespace OrleansPlayground.ToDo.Orleans.Server;
 
-[GenerateSerializer]
-public record MemorizeToDoDto
-{
-  [Id(0)]
-  public string? Title { get; init; }
-}
-
-[GenerateSerializer]
-public record DismissToDoDto
-{
-  [Id(0)]
-  public string? Reason { get; init; }
-}
-
 [LogConsistencyProvider(ProviderName = "ToDoStorage")]
 public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEvent>, IToDoAggregateGrain
 {
