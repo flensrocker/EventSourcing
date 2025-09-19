@@ -9,34 +9,35 @@ public enum ToDoStatus
   Dismissed = 2,
 }
 
-public record ToDoState : IEventSourceable<ToDoEvent>
+public partial class ToDoAggregate : IEventSourceable<ToDoEvent>
 {
+  public int Version { get; private set; }
   public string Title { get; private set; } = "";
   public ToDoStatus Status { get; private set; }
   public string? DismissReason { get; private set; }
 
-  public ToDoState() { }
+  public ToDoAggregate() { }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
   {
     Title = payload.Title;
     Status = ToDoStatus.Open;
     DismissReason = null;
   }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
   {
     Status = ToDoStatus.Completed;
     DismissReason = null;
   }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
   {
     Status = ToDoStatus.Dismissed;
     DismissReason = payload.Reason;
   }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
   {
     Status = ToDoStatus.Open;
     DismissReason = null;
@@ -44,6 +45,8 @@ public record ToDoState : IEventSourceable<ToDoEvent>
 
   public void Apply(DomainEvent<ToDoEvent> @event)
   {
+    Version = @event.Metadata.EntityVersion;
+
     switch (@event.Payload)
     {
       case ToDoEvent.ToDoMemorized payload:

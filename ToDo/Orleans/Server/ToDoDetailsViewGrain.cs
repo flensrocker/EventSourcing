@@ -2,7 +2,7 @@
 using OrleansPlayground.ToDo.Domain;
 using OrleansPlayground.ToDo.Views;
 
-namespace OrleansPlayground.ToDo.Orleans;
+namespace OrleansPlayground.ToDo.Orleans.Server;
 
 public interface IToDoDetailsViewGrain : IGrainWithGuidKey
 {
