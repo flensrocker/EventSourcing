@@ -9,7 +9,7 @@ public enum ToDoStatus
   Dismissed = 2,
 }
 
-public partial class ToDoAggregate : IEventSourceable<ToDoEvent>
+public partial class ToDoAggregate : IDomainEventSourceable<ToDoEvent>
 {
   public int Version { get; private set; }
   public string Title { get; private set; } = "";

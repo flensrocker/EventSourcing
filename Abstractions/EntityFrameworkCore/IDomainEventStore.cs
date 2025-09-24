@@ -6,7 +6,7 @@ public interface IDomainEventStore<TEventBase>
   where TEventBase : class
 {
   Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid id)
-    where TState : class, IEventSourceable<TEventBase>, new();
+    where TState : class, IDomainEventSourceable<TEventBase>, new();
 
   Task<bool> ApplyUpdatesToStorage(Guid id, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion);
 

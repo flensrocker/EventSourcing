@@ -4,7 +4,7 @@ using OrleansPlayground.ToDo.Domain;
 namespace OrleansPlayground.ToDo.Views;
 
 [GenerateSerializer]
-public class ToDoDetailsView : IEventSourceable<ToDoEvent>
+public class ToDoDetailsView : IDomainEventSourceable<ToDoEvent>
 {
   [Id(0)]
   public int Version { get; private set; }

@@ -7,14 +7,16 @@ namespace OrleansPlayground.Abstractions.Orleans;
 
 public abstract class DomainEventSourcedGrain<TState, TEventBase>
   : JournaledGrain<TState, DomainEvent<TEventBase>>, ICustomStorageInterface<TState, DomainEvent<TEventBase>>
-  where TState : class, IEventSourceable<TEventBase>, new()
+  where TState : class, IDomainEventSourceable<TEventBase>, new()
   where TEventBase : class
 {
+  private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStore<TEventBase> _eventStore;
   private int _nextVersion;
 
-  public DomainEventSourcedGrain(IDomainEventStore<TEventBase> eventStore)
+  public DomainEventSourcedGrain(TimeProvider timeProvider, IDomainEventStore<TEventBase> eventStore)
   {
+    _timeProvider = timeProvider;
     _eventStore = eventStore;
   }
 
@@ -31,7 +33,7 @@ public abstract class DomainEventSourcedGrain<TState, TEventBase>
     {
       Metadata = new DomainEventMetadata
       {
-        CreatedAt = DateTime.UtcNow,
+        CreatedAt = _timeProvider.GetUtcNow(),
         EntityType = typeof(TState).FullName ?? "",
         EntityId = this.GetPrimaryKey(),
         EntityVersion = _nextVersion,

@@ -14,8 +14,8 @@ public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEve
 {
   private IAsyncStream<DomainEvent<ToDoEvent>>? _stream;
 
-  public ToDoAggregateGrain(IDomainEventStore<ToDoEvent> eventStore)
-    : base(eventStore)
+  public ToDoAggregateGrain(TimeProvider timeProvider, IDomainEventStore<ToDoEvent> eventStore)
+    : base(timeProvider, eventStore)
   {
   }
 

@@ -3,7 +3,7 @@
 public record DomainEventMetadata
 {
   // TODO TenantId, UserId etc.
-  public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
+  public DateTimeOffset CreatedAt { get; init; }
   public required string EntityType { get; init; }
   public required Guid EntityId { get; init; }
   public int EntityVersion { get; init; }

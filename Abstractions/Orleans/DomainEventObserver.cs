@@ -6,7 +6,7 @@ namespace OrleansPlayground.Abstractions.Orleans;
 
 public class DomainEventObserver<TEventBase, TView> : IAsyncObserver<DomainEvent<TEventBase>>
   where TEventBase : class
-  where TView : class, IEventSourceable<TEventBase>, new()
+  where TView : class, IDomainEventSourceable<TEventBase>, new()
 {
   private readonly IDomainEventStore<TEventBase> _eventStore;
   private readonly Guid _viewId;
