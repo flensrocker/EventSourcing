@@ -1,5 +1,8 @@
-﻿namespace OrleansPlayground.ToDo.Domain;
+﻿using System.Text.Json.Serialization;
 
+namespace OrleansPlayground.ToDo.Domain;
+
+[JsonDerivedType(typeof(ToDoMemorized), nameof(ToDoMemorized))]
 public abstract partial record ToDoEvent
 {
   public sealed record ToDoMemorized : ToDoEvent

@@ -9,4 +9,6 @@ public interface IDomainEventStore<TEventBase>
     where TState : class, IEventSourceable<TEventBase>, new();
 
   Task<bool> ApplyUpdatesToStorage(Guid id, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion);
+
+  Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid id, int fromVersion, int toVersionExcl);
 }
