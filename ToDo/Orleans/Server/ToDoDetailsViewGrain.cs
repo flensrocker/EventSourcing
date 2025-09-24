@@ -7,12 +7,12 @@ namespace OrleansPlayground.ToDo.Orleans.Server;
 
 public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
 {
-  private readonly IDomainEventStore<Guid, ToDoEvent> _eventStore;
+  private readonly IDomainEventStore<ToDoEvent> _eventStore;
 
   private int _viewVersion;
   private ToDoDetailsView? _view;
 
-  public ToDoDetailsViewGrain(IDomainEventStore<Guid, ToDoEvent> eventStore)
+  public ToDoDetailsViewGrain(IDomainEventStore<ToDoEvent> eventStore)
   {
     _eventStore = eventStore;
   }

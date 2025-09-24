@@ -2,11 +2,11 @@
 
 namespace OrleansPlayground.Abstractions.EntityFrameworkCore;
 
-public interface IDomainEventStore<TId, TEventBase>
-  where TId : notnull
+public interface IDomainEventStore<TEventBase>
   where TEventBase : class
 {
-  Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(TId id)
+  Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid id)
     where TState : class, IEventSourceable<TEventBase>, new();
-  Task<bool> ApplyUpdatesToStorage(TId id, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion);
+
+  Task<bool> ApplyUpdatesToStorage(Guid id, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion);
 }

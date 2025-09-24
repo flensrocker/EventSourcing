@@ -10,10 +10,10 @@ public abstract class DomainEventSourcedGrain<TState, TEventBase>
   where TState : class, IEventSourceable<TEventBase>, new()
   where TEventBase : class
 {
-  private readonly IDomainEventStore<Guid, TEventBase> _eventStore;
+  private readonly IDomainEventStore<TEventBase> _eventStore;
   private int _nextVersion;
 
-  public DomainEventSourcedGrain(IDomainEventStore<Guid, TEventBase> eventStore)
+  public DomainEventSourcedGrain(IDomainEventStore<TEventBase> eventStore)
   {
     _eventStore = eventStore;
   }
