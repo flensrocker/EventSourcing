@@ -41,7 +41,7 @@ public class DomainEventObserver<TEventBase, TView> : IAsyncObserver<DomainEvent
         View.ApplyEvents(missingEvents);
     }
 
-    View.ApplyEvents(item);
+    View.Apply(item);
     // TODO push updated view somewhere... stream? IAsyncEnumerable?
 
     return;
