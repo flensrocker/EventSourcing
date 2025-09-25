@@ -11,11 +11,23 @@ internal static class GlobalInMemoryDomainEventStoreState
   internal static long GlobalIndex = 0L;
 }
 
-// TODO => EFCore/PostgreSQL
-internal class InMemoryDomainEventStore<TEventBase> : IDomainEventStore<TEventBase>
+internal class DomainEventEntity<TEventBase>
   where TEventBase : class
 {
-  private static ConcurrentDictionary<Guid, ImmutableArray<DomainEvent<TEventBase>>> _storage = new();
+  internal required Guid Id { get; set; }
+  internal required DateTimeOffset CreatedAt { get; set; }
+  internal required long GlobalIndex { get; set; }
+  // PostgreSQL => columns for payload discrimintator as string and payload data as JSON
+  internal required DomainEvent<TEventBase> Event { get; set; }
+}
+
+// TODO => EFCore/PostgreSQL
+internal class InMemoryDomainEventStore<TEventBase>(TimeProvider timeProvider) : IDomainEventStore<TEventBase>
+  where TEventBase : class
+{
+  private static ConcurrentDictionary<Guid, ImmutableArray<DomainEventEntity<TEventBase>>> _storage = new();
+
+  private readonly TimeProvider _timeProvider = timeProvider;
 
   public Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid id)
     where TState : class, IDomainEventSourceable<TEventBase>, new()
@@ -25,13 +37,13 @@ internal class InMemoryDomainEventStore<TEventBase> : IDomainEventStore<TEventBa
     if (!_storage.TryGetValue(id, out var events))
       return Task.FromResult(new KeyValuePair<int, TState>(0, state));
 
-    state.ApplyEvents(events);
+    state.ApplyEvents(events.Select(ev => ev.Event));
     return Task.FromResult(new KeyValuePair<int, TState>(events.Length, state));
   }
 
   public Task<bool> ApplyUpdatesToStorage(Guid id, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)
   {
-    ImmutableArray<DomainEvent<TEventBase>> events;
+    ImmutableArray<DomainEventEntity<TEventBase>> events;
 
     if (expectedVersion == 0)
       events = [];
@@ -39,12 +51,12 @@ internal class InMemoryDomainEventStore<TEventBase> : IDomainEventStore<TEventBa
       return Task.FromResult(false);
 
     var nextEvents = events.AddRange(updates
-      .Select(ev => ev with
+      .Select(ev => new DomainEventEntity<TEventBase>
       {
-        Metadata = ev.Metadata with
-        {
-          GlobalIndex = Interlocked.Increment(ref GlobalInMemoryDomainEventStoreState.GlobalIndex),
-        }
+        Id = Guid.CreateVersion7(),
+        CreatedAt = _timeProvider.GetUtcNow(),
+        GlobalIndex = Interlocked.Increment(ref GlobalInMemoryDomainEventStoreState.GlobalIndex),
+        Event = ev,
       }));
     var success = expectedVersion == 0
       ? _storage.TryAdd(id, nextEvents)
@@ -69,6 +81,6 @@ internal class InMemoryDomainEventStore<TEventBase> : IDomainEventStore<TEventBa
     else if (toVersionExcl >= events.Length)
       return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(null);
 
-    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersion..toVersionExcl]);
+    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersion..toVersionExcl].Select(ev => ev.Event).ToImmutableArray());
   }
 }

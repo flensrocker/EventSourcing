@@ -10,13 +10,11 @@ public abstract class DomainEventSourcedGrain<TState, TEventBase>
   where TState : class, IDomainEventSourceable<TEventBase>, new()
   where TEventBase : class
 {
-  private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStore<TEventBase> _eventStore;
   private int _nextVersion;
 
-  public DomainEventSourcedGrain(TimeProvider timeProvider, IDomainEventStore<TEventBase> eventStore)
+  public DomainEventSourcedGrain(IDomainEventStore<TEventBase> eventStore)
   {
-    _timeProvider = timeProvider;
     _eventStore = eventStore;
   }
 
@@ -33,7 +31,6 @@ public abstract class DomainEventSourcedGrain<TState, TEventBase>
     {
       Metadata = new DomainEventMetadata
       {
-        CreatedAt = _timeProvider.GetUtcNow(),
         EntityType = typeof(TState).FullName ?? "",
         EntityId = this.GetPrimaryKey(),
         EntityVersion = _nextVersion,
