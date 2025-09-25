@@ -5,8 +5,14 @@ using OrleansPlayground.Abstractions.EntityFrameworkCore;
 
 namespace OrleansPlayground.EntityFrameworkCore;
 
+internal static class GlobalInMemoryDomainEventStoreState
+{
+  // PostgreSQL => Sequence
+  internal static long GlobalIndex = 0L;
+}
+
 // TODO => EFCore/PostgreSQL
-public class InMemoryDomainEventStore<TEventBase> : IDomainEventStore<TEventBase>
+internal class InMemoryDomainEventStore<TEventBase> : IDomainEventStore<TEventBase>
   where TEventBase : class
 {
   private static ConcurrentDictionary<Guid, ImmutableArray<DomainEvent<TEventBase>>> _storage = new();
@@ -32,7 +38,14 @@ public class InMemoryDomainEventStore<TEventBase> : IDomainEventStore<TEventBase
     else if (!_storage.TryGetValue(id, out events) || events.Length != expectedVersion)
       return Task.FromResult(false);
 
-    var nextEvents = events.AddRange(updates);
+    var nextEvents = events.AddRange(updates
+      .Select(ev => ev with
+      {
+        Metadata = ev.Metadata with
+        {
+          GlobalIndex = Interlocked.Increment(ref GlobalInMemoryDomainEventStoreState.GlobalIndex),
+        }
+      }));
     var success = expectedVersion == 0
       ? _storage.TryAdd(id, nextEvents)
       : _storage.TryUpdate(id, nextEvents, events);

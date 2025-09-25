@@ -3,10 +3,11 @@
 public record DomainEventMetadata
 {
   // TODO TenantId, UserId etc.
-  public DateTimeOffset CreatedAt { get; init; }
+  public required DateTimeOffset CreatedAt { get; init; }
+  public long GlobalIndex { get; init; }
   public required string EntityType { get; init; }
   public required Guid EntityId { get; init; }
-  public int EntityVersion { get; init; }
+  public required int EntityVersion { get; init; }
 }
 
 public record DomainEvent<TEventBase>
