@@ -2,5 +2,11 @@
 
 public interface IDomainEventSourceable<TEventBase>
 {
-  void ApplyEvents(params IEnumerable<DomainEvent<TEventBase>> @event);
+  void Apply(DomainEvent<TEventBase> @event);
+
+  void ApplyEvents(params IEnumerable<DomainEvent<TEventBase>> events)
+  {
+    foreach (var @event in events)
+      Apply(@event);
+  }
 }

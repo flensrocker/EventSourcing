@@ -64,10 +64,4 @@ public class ToDoDetailsView : IDomainEventSourceable<ToDoEvent>
         break;
     }
   }
-
-  public void ApplyEvents(params IEnumerable<DomainEvent<ToDoEvent>> events)
-  {
-    foreach (var @event in events)
-      Apply(@event);
-  }
 }
