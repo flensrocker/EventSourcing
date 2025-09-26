@@ -17,37 +17,35 @@ public class ToDoDetailsView : IDomainEventSourceable<ToDoEvent>
 
   public ToDoDetailsView() { }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
   {
-    Version++;
     Title = payload.Title;
     Status = ToDoStatus.Open;
     DismissReason = null;
   }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
   {
-    Version++;
     Status = ToDoStatus.Completed;
     DismissReason = null;
   }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
   {
-    Version++;
     Status = ToDoStatus.Dismissed;
     DismissReason = payload.Reason;
   }
 
-  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
+  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
   {
-    Version++;
     Status = ToDoStatus.Open;
     DismissReason = null;
   }
 
   public void Apply(DomainEvent<ToDoEvent> @event)
   {
+    Version = @event.Metadata.EntityVersion;
+
     switch (@event.Payload)
     {
       case ToDoEvent.ToDoMemorized payload:
