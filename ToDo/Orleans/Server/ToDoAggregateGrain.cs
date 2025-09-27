@@ -10,7 +10,7 @@ using OrleansPlayground.ToDo.Orleans.Abstractions;
 namespace OrleansPlayground.ToDo.Orleans.Server;
 
 [LogConsistencyProvider(ProviderName = ToDoNames.ToDoEventStorageProvider)]
-public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEvent>, IToDoAggregateGrain
+public class ToDoAggregateGrain : DomainAggregateGrain<ToDoAggregate, ToDoEvent>, IToDoAggregateGrain
 {
   private readonly IClusterClient _clusterClient;
   private IBroadcastChannelWriter<DomainEvent<ToDoEvent>>? _channel;

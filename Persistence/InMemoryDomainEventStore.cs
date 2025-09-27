@@ -17,7 +17,7 @@ internal class DomainEventEntity<TEventBase>
   internal required Guid Id { get; set; }
   internal required DateTimeOffset CreatedAt { get; set; }
   internal required long GlobalIndex { get; set; }
-  // PostgreSQL => columns for payload discrimintator as string and payload data as JSON
+  // PostgreSQL => columns for payload discriminator as string and payload data as JSON
   internal required DomainEvent<TEventBase> Event { get; set; }
 }
 

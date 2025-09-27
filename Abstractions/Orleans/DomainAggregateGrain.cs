@@ -5,7 +5,7 @@ using OrleansPlayground.Abstractions.Persistence;
 
 namespace OrleansPlayground.Abstractions.Orleans;
 
-public abstract class DomainEventSourcedGrain<TState, TEventBase>
+public abstract class DomainAggregateGrain<TState, TEventBase>
   : JournaledGrain<TState, DomainEvent<TEventBase>>, ICustomStorageInterface<TState, DomainEvent<TEventBase>>
   where TState : class, IDomainEventSourceable<TEventBase>, new()
   where TEventBase : class
@@ -13,7 +13,7 @@ public abstract class DomainEventSourcedGrain<TState, TEventBase>
   private readonly IDomainEventStore<TEventBase> _eventStore;
   private int _nextVersion;
 
-  public DomainEventSourcedGrain(IDomainEventStore<TEventBase> eventStore)
+  protected DomainAggregateGrain(IDomainEventStore<TEventBase> eventStore)
   {
     _eventStore = eventStore;
   }
