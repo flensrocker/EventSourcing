@@ -1,15 +1,10 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Text.Json;
 using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.Abstractions.Persistence;
 
 namespace OrleansPlayground.Persistence;
-
-internal static class GlobalInMemoryDomainEventStorageState
-{
-  // PostgreSQL => Sequence
-  internal static long GlobalIndex = 0L;
-}
 
 internal class DomainEventEntity<TEventBase>
   where TEventBase : class
@@ -17,8 +12,51 @@ internal class DomainEventEntity<TEventBase>
   internal required Guid Id { get; set; }
   internal required DateTimeOffset CreatedAt { get; set; }
   internal required long GlobalIndex { get; set; }
-  // PostgreSQL => columns for payload discriminator as string and payload data as JSON
-  internal required DomainEvent<TEventBase> Event { get; set; }
+  // PostgreSQL => maybe column per field of metadata
+  internal DomainEventMetadata Metadata { get; set; } = default!;
+  internal string PayloadType { get; set; } = "";
+  internal string PayloadJson { get; set; } = "";
+}
+
+internal static class InMemoryDomainEventStorageExtensions
+{
+  // PostgreSQL => Sequence
+  internal static long GlobalIndex = 0L;
+
+  internal static DomainEventEntity<TEventBase> SetPayload<TEventBase>(this DomainEventEntity<TEventBase> entity, TEventBase @event)
+    where TEventBase : class
+  {
+    entity.PayloadType = @event.GetType().FullName ?? "";
+    entity.PayloadJson = JsonSerializer.Serialize(@event);
+
+    return entity;
+  }
+
+  internal static TEventBase GetPayload<TEventBase>(this DomainEventEntity<TEventBase> entity)
+    where TEventBase : class
+  {
+    var type = Type.GetType(entity.PayloadType);
+    return (TEventBase)JsonSerializer.Deserialize(entity.PayloadJson, type!)!;
+  }
+
+  internal static DomainEventEntity<TEventBase> SetDomainEvent<TEventBase>(this DomainEventEntity<TEventBase> entity, DomainEvent<TEventBase> @event)
+    where TEventBase : class
+  {
+    entity.Metadata = @event.Metadata;
+    entity.SetPayload(@event.Payload);
+
+    return entity;
+  }
+
+  internal static DomainEvent<TEventBase> GetDomainEvent<TEventBase>(this DomainEventEntity<TEventBase> entity)
+    where TEventBase : class
+  {
+    return new DomainEvent<TEventBase>
+    {
+      Metadata = entity.Metadata,
+      Payload = entity.GetPayload(),
+    };
+  }
 }
 
 // TODO => EFCore/PostgreSQL
@@ -37,7 +75,7 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
     if (!_storage.TryGetValue(id, out var events))
       return Task.FromResult(new KeyValuePair<int, TState>(0, state));
 
-    state.ApplyEvents(events.Select(ev => ev.Event));
+    state.ApplyEvents(events.Select(ev => ev.GetDomainEvent()));
     return Task.FromResult(new KeyValuePair<int, TState>(events.Length, state));
   }
 
@@ -55,9 +93,8 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
       {
         Id = Guid.CreateVersion7(),
         CreatedAt = _timeProvider.GetUtcNow(),
-        GlobalIndex = Interlocked.Increment(ref GlobalInMemoryDomainEventStorageState.GlobalIndex),
-        Event = ev,
-      }));
+        GlobalIndex = Interlocked.Increment(ref InMemoryDomainEventStorageExtensions.GlobalIndex),
+      }.SetDomainEvent(ev)));
     var success = expectedVersion == 0
       ? _storage.TryAdd(id, nextEvents)
       : _storage.TryUpdate(id, nextEvents, events);
@@ -81,6 +118,6 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
     else if (toVersionExcl >= events.Length)
       return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(null);
 
-    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersion..toVersionExcl].Select(ev => ev.Event).ToImmutableArray());
+    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersion..toVersionExcl].Select(ev => ev.GetDomainEvent()).ToImmutableArray());
   }
 }
