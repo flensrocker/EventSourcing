@@ -6,8 +6,7 @@ using OrleansPlayground.Abstractions.Persistence;
 
 namespace OrleansPlayground.Persistence;
 
-internal class DomainEventEntity<TEventBase>
-  where TEventBase : class
+internal class DomainEventEntity
 {
   internal required Guid Id { get; set; }
   internal required DateTimeOffset CreatedAt { get; set; }
@@ -23,7 +22,7 @@ internal static class InMemoryDomainEventStorageExtensions
   // PostgreSQL => Sequence
   internal static long GlobalIndex = 0L;
 
-  internal static DomainEventEntity<TEventBase> SetPayload<TEventBase>(this DomainEventEntity<TEventBase> entity, TEventBase @event)
+  internal static DomainEventEntity SetPayload<TEventBase>(this DomainEventEntity entity, TEventBase @event)
     where TEventBase : class
   {
     entity.PayloadType = @event.GetType().FullName ?? "";
@@ -32,14 +31,14 @@ internal static class InMemoryDomainEventStorageExtensions
     return entity;
   }
 
-  internal static TEventBase GetPayload<TEventBase>(this DomainEventEntity<TEventBase> entity)
+  internal static TEventBase GetPayload<TEventBase>(this DomainEventEntity entity)
     where TEventBase : class
   {
     var type = Type.GetType(entity.PayloadType);
     return (TEventBase)JsonSerializer.Deserialize(entity.PayloadJson, type!)!;
   }
 
-  internal static DomainEventEntity<TEventBase> SetDomainEvent<TEventBase>(this DomainEventEntity<TEventBase> entity, DomainEvent<TEventBase> @event)
+  internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent<TEventBase> @event)
     where TEventBase : class
   {
     entity.Metadata = @event.Metadata;
@@ -48,13 +47,13 @@ internal static class InMemoryDomainEventStorageExtensions
     return entity;
   }
 
-  internal static DomainEvent<TEventBase> GetDomainEvent<TEventBase>(this DomainEventEntity<TEventBase> entity)
+  internal static DomainEvent<TEventBase> GetDomainEvent<TEventBase>(this DomainEventEntity entity)
     where TEventBase : class
   {
     return new DomainEvent<TEventBase>
     {
       Metadata = entity.Metadata,
-      Payload = entity.GetPayload(),
+      Payload = entity.GetPayload<TEventBase>(),
     };
   }
 }
@@ -63,7 +62,7 @@ internal static class InMemoryDomainEventStorageExtensions
 internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider) : IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
-  private static ConcurrentDictionary<Guid, ImmutableArray<DomainEventEntity<TEventBase>>> _storage = new();
+  private static ConcurrentDictionary<Guid, ImmutableArray<DomainEventEntity>> _storage = new();
 
   private readonly TimeProvider _timeProvider = timeProvider;
 
@@ -75,13 +74,13 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
     if (!_storage.TryGetValue(id, out var events))
       return Task.FromResult(new KeyValuePair<int, TState>(0, state));
 
-    state.ApplyEvents(events.Select(ev => ev.GetDomainEvent()));
+    state.ApplyEvents(events.Select(ev => ev.GetDomainEvent<TEventBase>()));
     return Task.FromResult(new KeyValuePair<int, TState>(events.Length, state));
   }
 
   public Task<bool> ApplyUpdatesToStorage(Guid id, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)
   {
-    ImmutableArray<DomainEventEntity<TEventBase>> events;
+    ImmutableArray<DomainEventEntity> events;
 
     if (expectedVersion == 0)
       events = [];
@@ -89,7 +88,7 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
       return Task.FromResult(false);
 
     var nextEvents = events.AddRange(updates
-      .Select(ev => new DomainEventEntity<TEventBase>
+      .Select(ev => new DomainEventEntity
       {
         Id = Guid.CreateVersion7(),
         CreatedAt = _timeProvider.GetUtcNow(),
@@ -118,6 +117,6 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
     else if (toVersionExcl >= events.Length)
       return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(null);
 
-    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersion..toVersionExcl].Select(ev => ev.GetDomainEvent()).ToImmutableArray());
+    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersion..toVersionExcl].Select(ev => ev.GetDomainEvent<TEventBase>()).ToImmutableArray());
   }
 }
