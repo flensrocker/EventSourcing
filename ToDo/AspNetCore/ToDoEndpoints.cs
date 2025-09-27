@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
-using OrleansPlayground.ToDo.Orleans.Server;
 
 namespace OrleansPlayground.ToDo.AspNetCore;
 
