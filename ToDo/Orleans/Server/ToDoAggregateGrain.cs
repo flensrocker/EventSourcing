@@ -3,7 +3,6 @@ using Orleans.EventSourcing.CustomStorage;
 using Orleans.Providers;
 using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.Abstractions.Orleans;
-using OrleansPlayground.Abstractions.Persistence;
 using OrleansPlayground.ToDo.Domain;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
 
@@ -12,22 +11,20 @@ namespace OrleansPlayground.ToDo.Orleans.Server;
 [LogConsistencyProvider(ProviderName = ToDoNames.ToDoEventStorageProvider)]
 public class ToDoAggregateGrain : DomainAggregateGrain<ToDoAggregate, ToDoEvent>, IToDoAggregateGrain
 {
-  private readonly IClusterClient _clusterClient;
+  private readonly IBroadcastChannelProvider _channelProvider;
   private IBroadcastChannelWriter<DomainEvent<ToDoEvent>>? _channel;
 
-  public ToDoAggregateGrain(IClusterClient clusterClient, IDomainEventStorage<ToDoEvent> eventStore)
-    : base(eventStore)
+  public ToDoAggregateGrain(IClusterClient clusterClient)
   {
-    _clusterClient = clusterClient;
+    _channelProvider = clusterClient.GetBroadcastChannelProvider(ToDoNames.ToDoEventChannelProvider);
   }
 
   public override async Task OnActivateAsync(CancellationToken cancellationToken)
   {
     await base.OnActivateAsync(cancellationToken);
 
-    var channelProvider = _clusterClient.GetBroadcastChannelProvider(ToDoNames.ToDoEventChannelProvider);
     var channelId = ChannelId.Create(ToDoNames.ToDoEventChannel, this.GetPrimaryKey());
-    _channel = channelProvider.GetChannelWriter<DomainEvent<ToDoEvent>>(channelId);
+    _channel = _channelProvider.GetChannelWriter<DomainEvent<ToDoEvent>>(channelId);
   }
 
   private async Task<bool> Execute<TCommand>(TCommand? command, Func<TCommand, ToDoEvent?> handler)

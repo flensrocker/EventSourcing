@@ -13,9 +13,9 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
   private readonly IDomainEventStorage<TEventBase> _eventStore;
   private int _nextVersion;
 
-  protected DomainAggregateGrain(IDomainEventStorage<TEventBase> eventStore)
+  protected DomainAggregateGrain()
   {
-    _eventStore = eventStore;
+    _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
   public override Task OnActivateAsync(CancellationToken cancellationToken)
@@ -24,7 +24,7 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
     return base.OnActivateAsync(cancellationToken);
   }
 
-  public DomainEvent<TEventBase> RaiseDomainEvent<TEvent>(TEvent payload)
+  protected DomainEvent<TEventBase> RaiseDomainEvent<TEvent>(TEvent payload)
     where TEvent : TEventBase
   {
     var domainEvent = new DomainEvent<TEventBase>
