@@ -22,7 +22,7 @@ builder.Host.UseOrleans(static siloBuilder =>
     .AddMemoryStreams("StreamProvider")
     .AddMemoryGrainStorage("PubSubStore")
     .AddBroadcastChannel(ToDoNames.ToDoEventChannelProvider);
-  siloBuilder.AddCustomStorageBasedLogConsistencyProvider("ToDoStorage");
+  siloBuilder.AddCustomStorageBasedLogConsistencyProvider(ToDoNames.ToDoEventStorageProvider);
 });
 
 using var app = builder.Build();
