@@ -11,11 +11,11 @@ namespace OrleansPlayground.ToDo.Orleans.Server;
 [ImplicitChannelSubscription(ToDoNames.ToDoEventChannel)]
 public class ToDoDetailsViewGrain : Grain, IOnBroadcastChannelSubscribed, IToDoDetailsViewGrain
 {
-  private readonly IDomainEventStore<ToDoEvent> _eventStore;
+  private readonly IDomainEventStorage<ToDoEvent> _eventStore;
 
   private DomainEventObserver<ToDoEvent, ToDoDetailsView>? _observer;
 
-  public ToDoDetailsViewGrain(IDomainEventStore<ToDoEvent> eventStore)
+  public ToDoDetailsViewGrain(IDomainEventStorage<ToDoEvent> eventStore)
   {
     _eventStore = eventStore;
   }

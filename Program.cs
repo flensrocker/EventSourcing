@@ -8,7 +8,7 @@ using OrleansPlayground.ToDo.Orleans.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IDomainEventStore<ToDoEvent>, InMemoryDomainEventStore<ToDoEvent>>();
+builder.Services.AddScoped<IDomainEventStorage<ToDoEvent>, InMemoryDomainEventStorage<ToDoEvent>>();
 
 builder.Host.UseOrleans(static siloBuilder =>
 {

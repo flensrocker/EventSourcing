@@ -2,7 +2,7 @@
 
 namespace OrleansPlayground.Abstractions.Persistence;
 
-public interface IDomainEventStore<TEventBase>
+public interface IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
   Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid id)

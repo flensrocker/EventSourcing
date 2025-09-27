@@ -15,7 +15,7 @@ public class ToDoAggregateGrain : DomainAggregateGrain<ToDoAggregate, ToDoEvent>
   private readonly IClusterClient _clusterClient;
   private IBroadcastChannelWriter<DomainEvent<ToDoEvent>>? _channel;
 
-  public ToDoAggregateGrain(IClusterClient clusterClient, IDomainEventStore<ToDoEvent> eventStore)
+  public ToDoAggregateGrain(IClusterClient clusterClient, IDomainEventStorage<ToDoEvent> eventStore)
     : base(eventStore)
   {
     _clusterClient = clusterClient;

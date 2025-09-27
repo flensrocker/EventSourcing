@@ -5,7 +5,7 @@ using OrleansPlayground.Abstractions.Persistence;
 
 namespace OrleansPlayground.Persistence;
 
-internal static class GlobalInMemoryDomainEventStoreState
+internal static class GlobalInMemoryDomainEventStorageState
 {
   // PostgreSQL => Sequence
   internal static long GlobalIndex = 0L;
@@ -22,7 +22,7 @@ internal class DomainEventEntity<TEventBase>
 }
 
 // TODO => EFCore/PostgreSQL
-internal class InMemoryDomainEventStore<TEventBase>(TimeProvider timeProvider) : IDomainEventStore<TEventBase>
+internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider) : IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
   private static ConcurrentDictionary<Guid, ImmutableArray<DomainEventEntity<TEventBase>>> _storage = new();
@@ -55,7 +55,7 @@ internal class InMemoryDomainEventStore<TEventBase>(TimeProvider timeProvider) :
       {
         Id = Guid.CreateVersion7(),
         CreatedAt = _timeProvider.GetUtcNow(),
-        GlobalIndex = Interlocked.Increment(ref GlobalInMemoryDomainEventStoreState.GlobalIndex),
+        GlobalIndex = Interlocked.Increment(ref GlobalInMemoryDomainEventStorageState.GlobalIndex),
         Event = ev,
       }));
     var success = expectedVersion == 0

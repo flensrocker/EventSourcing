@@ -8,18 +8,18 @@ public class DomainEventObserver<TEventBase, TView> : IAsyncObserver<DomainEvent
   where TEventBase : class
   where TView : class, IDomainEventSourceable<TEventBase>, new()
 {
-  private readonly IDomainEventStore<TEventBase> _eventStore;
+  private readonly IDomainEventStorage<TEventBase> _eventStore;
   private readonly Guid _viewId;
 
   public TView View { get; private set; } = default!;
 
-  private DomainEventObserver(IDomainEventStore<TEventBase> eventStore, Guid viewId)
+  private DomainEventObserver(IDomainEventStorage<TEventBase> eventStore, Guid viewId)
   {
     _eventStore = eventStore;
     _viewId = viewId;
   }
 
-  public static async Task<DomainEventObserver<TEventBase, TView>> Create(IDomainEventStore<TEventBase> eventStore, Guid viewId)
+  public static async Task<DomainEventObserver<TEventBase, TView>> Create(IDomainEventStorage<TEventBase> eventStore, Guid viewId)
   {
     var observer = new DomainEventObserver<TEventBase, TView>(eventStore, viewId);
 

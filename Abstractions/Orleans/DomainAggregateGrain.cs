@@ -10,10 +10,10 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
   where TState : class, IDomainEventSourceable<TEventBase>, new()
   where TEventBase : class
 {
-  private readonly IDomainEventStore<TEventBase> _eventStore;
+  private readonly IDomainEventStorage<TEventBase> _eventStore;
   private int _nextVersion;
 
-  protected DomainAggregateGrain(IDomainEventStore<TEventBase> eventStore)
+  protected DomainAggregateGrain(IDomainEventStorage<TEventBase> eventStore)
   {
     _eventStore = eventStore;
   }
