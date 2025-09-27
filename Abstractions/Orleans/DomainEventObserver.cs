@@ -11,7 +11,6 @@ public class DomainEventObserver<TEventBase, TView> : IAsyncObserver<DomainEvent
   private readonly IDomainEventStore<TEventBase> _eventStore;
   private readonly Guid _viewId;
 
-  public int ViewVersion { get; private set; }
   public TView View { get; private set; } = default!;
 
   private DomainEventObserver(IDomainEventStore<TEventBase> eventStore, Guid viewId)
@@ -24,19 +23,22 @@ public class DomainEventObserver<TEventBase, TView> : IAsyncObserver<DomainEvent
   {
     var observer = new DomainEventObserver<TEventBase, TView>(eventStore, viewId);
 
-    (observer.ViewVersion, observer.View) = await eventStore.ReadStateFromStorage<TView>(viewId);
+    (_, observer.View) = await eventStore.ReadStateFromStorage<TView>(viewId);
 
     return observer;
   }
 
+  public Task OnNextAsync(DomainEvent<TEventBase> item)
+    => OnNextAsync(item, null);
+
   public async Task OnNextAsync(DomainEvent<TEventBase> item, StreamSequenceToken? token = null)
   {
-    if (item.Metadata.EntityVersion <= ViewVersion)
+    if (item.Metadata.EntityVersion <= View.Version)
       return;
 
-    if (item.Metadata.EntityVersion > ViewVersion + 1)
+    if (item.Metadata.EntityVersion > View.Version + 1)
     {
-      var missingEvents = await _eventStore.ReadEventsFromStorage(_viewId, ViewVersion + 1, item.Metadata.EntityVersion);
+      var missingEvents = await _eventStore.ReadEventsFromStorage(_viewId, View.Version + 1, item.Metadata.EntityVersion);
       if (missingEvents is { Count: > 0 })
         View.ApplyEvents(missingEvents);
     }

@@ -20,15 +20,21 @@ public class ToDoDetailsViewGrain : Grain, IOnBroadcastChannelSubscribed, IToDoD
     _eventStore = eventStore;
   }
 
-  public async Task OnSubscribed(IBroadcastChannelSubscription streamSubscription)
+  private async Task<DomainEventObserver<ToDoEvent, ToDoDetailsView>> GetObserver()
   {
     _observer ??= await DomainEventObserver<ToDoEvent, ToDoDetailsView>.Create(_eventStore, this.GetPrimaryKey());
-
-    await streamSubscription.Attach<DomainEvent<ToDoEvent>>(ev => _observer.OnNextAsync(ev, null), ex => _observer.OnErrorAsync(ex));
+    return _observer;
   }
 
-  public Task<ToDoDetailsView?> GetView()
+  public async Task OnSubscribed(IBroadcastChannelSubscription streamSubscription)
   {
-    return Task.FromResult(_observer?.View);
+    var observer = await GetObserver();
+    await streamSubscription.Attach<DomainEvent<ToDoEvent>>(observer.OnNextAsync, observer.OnErrorAsync);
+  }
+
+  public async Task<ToDoDetailsView> GetView()
+  {
+    var observer = await GetObserver();
+    return observer.View;
   }
 }
