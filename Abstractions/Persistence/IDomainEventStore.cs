@@ -1,6 +1,6 @@
 ﻿using OrleansPlayground.Abstractions.Domain;
 
-namespace OrleansPlayground.Abstractions.EntityFrameworkCore;
+namespace OrleansPlayground.Abstractions.Persistence;
 
 public interface IDomainEventStore<TEventBase>
   where TEventBase : class

@@ -1,7 +1,7 @@
 ﻿using Orleans.EventSourcing;
 using Orleans.EventSourcing.CustomStorage;
 using OrleansPlayground.Abstractions.Domain;
-using OrleansPlayground.Abstractions.EntityFrameworkCore;
+using OrleansPlayground.Abstractions.Persistence;
 
 namespace OrleansPlayground.Abstractions.Orleans;
 

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using OrleansPlayground.Abstractions.Domain;
-using OrleansPlayground.Abstractions.EntityFrameworkCore;
+using OrleansPlayground.Abstractions.Persistence;
 
-namespace OrleansPlayground.EntityFrameworkCore;
+namespace OrleansPlayground.Persistence;
 
 internal static class GlobalInMemoryDomainEventStoreState
 {

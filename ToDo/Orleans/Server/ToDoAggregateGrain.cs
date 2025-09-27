@@ -1,9 +1,9 @@
-﻿using Orleans.EventSourcing.CustomStorage;
+﻿using Orleans.BroadcastChannel;
+using Orleans.EventSourcing.CustomStorage;
 using Orleans.Providers;
-using Orleans.Streams;
 using OrleansPlayground.Abstractions.Domain;
-using OrleansPlayground.Abstractions.EntityFrameworkCore;
 using OrleansPlayground.Abstractions.Orleans;
+using OrleansPlayground.Abstractions.Persistence;
 using OrleansPlayground.ToDo.Domain;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
 
@@ -12,20 +12,22 @@ namespace OrleansPlayground.ToDo.Orleans.Server;
 [LogConsistencyProvider(ProviderName = "ToDoStorage")]
 public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEvent>, IToDoAggregateGrain
 {
-  private IAsyncStream<DomainEvent<ToDoEvent>>? _stream;
+  private readonly IClusterClient _clusterClient;
+  private IBroadcastChannelWriter<DomainEvent<ToDoEvent>>? _channel;
 
-  public ToDoAggregateGrain(IDomainEventStore<ToDoEvent> eventStore)
+  public ToDoAggregateGrain(IClusterClient clusterClient, IDomainEventStore<ToDoEvent> eventStore)
     : base(eventStore)
   {
+    _clusterClient = clusterClient;
   }
 
   public override async Task OnActivateAsync(CancellationToken cancellationToken)
   {
     await base.OnActivateAsync(cancellationToken);
 
-    var streamProvider = this.GetStreamProvider("StreamProvider");
-    var streamId = StreamId.Create("ToDoEvent", this.GetPrimaryKey());
-    _stream = streamProvider.GetStream<DomainEvent<ToDoEvent>>(streamId);
+    var channelProvider = _clusterClient.GetBroadcastChannelProvider(ToDoNames.ToDoEventChannelProvider);
+    var channelId = ChannelId.Create(ToDoNames.ToDoEventChannel, this.GetPrimaryKey());
+    _channel = channelProvider.GetChannelWriter<DomainEvent<ToDoEvent>>(channelId);
   }
 
   private async Task<bool> Execute<TCommand>(TCommand? command, Func<TCommand, ToDoEvent?> handler)
@@ -40,8 +42,8 @@ public class ToDoAggregateGrain : DomainEventSourcedGrain<ToDoAggregate, ToDoEve
     var domainEvent = RaiseDomainEvent(@event);
     await ConfirmEvents();
 
-    if (_stream is not null)
-      await _stream.OnNextAsync(domainEvent);
+    if (_channel is not null)
+      await _channel.Publish(domainEvent);
 
     return true;
   }

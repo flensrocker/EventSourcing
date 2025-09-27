@@ -1,9 +1,10 @@
 using Orleans.Serialization;
 using OrleansPlayground.Abstractions.Domain;
-using OrleansPlayground.Abstractions.EntityFrameworkCore;
-using OrleansPlayground.EntityFrameworkCore;
+using OrleansPlayground.Abstractions.Persistence;
+using OrleansPlayground.Persistence;
 using OrleansPlayground.ToDo.AspNetCore;
 using OrleansPlayground.ToDo.Domain;
+using OrleansPlayground.ToDo.Orleans.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,8 @@ builder.Host.UseOrleans(static siloBuilder =>
   siloBuilder.UseLocalhostClustering();
   siloBuilder
     .AddMemoryStreams("StreamProvider")
-    .AddMemoryGrainStorage("PubSubStore");
+    .AddMemoryGrainStorage("PubSubStore")
+    .AddBroadcastChannel(ToDoNames.ToDoEventChannelProvider);
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider("ToDoStorage");
 });
 

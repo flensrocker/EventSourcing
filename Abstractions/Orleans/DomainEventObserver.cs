@@ -1,6 +1,6 @@
 ﻿using Orleans.Streams;
 using OrleansPlayground.Abstractions.Domain;
-using OrleansPlayground.Abstractions.EntityFrameworkCore;
+using OrleansPlayground.Abstractions.Persistence;
 
 namespace OrleansPlayground.Abstractions.Orleans;
 
