@@ -2,7 +2,8 @@
 
 public static class ToDoNames
 {
-  public const string ToDoEventChannelProvider = "ToDoEvent";
-  public const string ToDoEventChannel = "ToDoEvent";
   public const string ToDoEventStorageProvider = "ToDoEventStore";
+  public const string ToDoEventStreamProvider = "ToDoEvent";
+  public const string ToDoEventStream = "ToDoEvent";
+  public const string ToDoListViewStream = "ToDoListView";
 }

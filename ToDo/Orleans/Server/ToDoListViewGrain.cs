@@ -1,5 +1,4 @@
-﻿using Orleans.BroadcastChannel;
-using Orleans.Streams;
+﻿using Orleans.Streams;
 using Orleans.Streams.Core;
 using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.ToDo.Domain;
@@ -8,31 +7,32 @@ using OrleansPlayground.ToDo.Views;
 
 namespace OrleansPlayground.ToDo.Orleans.Server;
 
-[ImplicitChannelSubscription(ToDoNames.ToDoEventChannel)]
-public class ToDoEventRouterGrain : Grain, IGrainWithGuidKey, IOnBroadcastChannelSubscribed
+[ImplicitStreamSubscription(ToDoNames.ToDoEventStream)]
+public class ToDoEventRouterGrain : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent<ToDoEvent>>
 {
-  public async Task OnSubscribed(IBroadcastChannelSubscription streamSubscription)
+  public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
   {
-    await streamSubscription.Attach<DomainEvent<ToDoEvent>>(OnNextAsync, OnErrorAsync);
+    var handle = handleFactory.Create<DomainEvent<ToDoEvent>>();
+    await handle.ResumeAsync(this);
   }
 
-  private async Task OnNextAsync(DomainEvent<ToDoEvent> @event)
+  public async Task OnNextAsync(DomainEvent<ToDoEvent> item, StreamSequenceToken? token = null)
   {
-    var tenantId = Guid.Empty; // TODO derive from @event
-    var tenantStreamId = StreamId.Create("ToDoListView", tenantId);
-    var tenantStream = this.GetStreamProvider("StreamProvider").GetStream<DomainEvent<ToDoEvent>>(tenantStreamId);
+    var tenantId = Guid.Empty; // TODO derive from item
+    var tenantStreamId = StreamId.Create(ToDoNames.ToDoListViewStream, tenantId);
+    var tenantStream = this.GetStreamProvider(ToDoNames.ToDoEventStreamProvider).GetStream<DomainEvent<ToDoEvent>>(tenantStreamId);
 
-    await tenantStream.OnNextAsync(@event);
+    await tenantStream.OnNextAsync(item);
   }
 
-  private Task OnErrorAsync(Exception ex)
+  public Task OnErrorAsync(Exception ex)
   {
     // TODO add error handling
     return Task.CompletedTask;
   }
 }
 
-[ImplicitStreamSubscription("ToDoListView")]
+[ImplicitStreamSubscription(ToDoNames.ToDoListViewStream)]
 public class ToDoListViewGrain : Grain, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent<ToDoEvent>>, IToDoListViewGrain
 {
   private readonly ToDoListView _view;

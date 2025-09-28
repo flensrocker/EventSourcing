@@ -12,16 +12,14 @@ builder.Services.AddScoped<IDomainEventStorage<ToDoEvent>, InMemoryDomainEventSt
 
 builder.Host.UseOrleans(static siloBuilder =>
 {
+  siloBuilder.UseLocalhostClustering();
+  siloBuilder.AddMemoryGrainStorage("PubSubStore");
+
   siloBuilder.Services.AddSerializer(serializerBuilder =>
   {
     serializerBuilder.AddJsonSerializer(isSupported: type => type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>)));
   });
-
-  siloBuilder.UseLocalhostClustering();
-  siloBuilder
-    .AddMemoryStreams("StreamProvider")
-    .AddMemoryGrainStorage("PubSubStore")
-    .AddBroadcastChannel(ToDoNames.ToDoEventChannelProvider);
+  siloBuilder.AddMemoryStreams(ToDoNames.ToDoEventStreamProvider);
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider(ToDoNames.ToDoEventStorageProvider);
 });
 
