@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using OrleansPlayground.Abstractions.Domain;
+﻿using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.ToDo.Abstractions;
 using OrleansPlayground.ToDo.Domain;
 
