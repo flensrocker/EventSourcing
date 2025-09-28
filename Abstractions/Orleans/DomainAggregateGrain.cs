@@ -7,7 +7,7 @@ namespace OrleansPlayground.Abstractions.Orleans;
 
 public abstract class DomainAggregateGrain<TState, TEventBase>
   : JournaledGrain<TState, DomainEvent<TEventBase>>, ICustomStorageInterface<TState, DomainEvent<TEventBase>>
-  where TState : class, IDomainEventSourceable<TEventBase>, new()
+  where TState : class, IDomainEventProjectable<TEventBase>, new()
   where TEventBase : class
 {
   private readonly IDomainEventStorage<TEventBase> _eventStore;

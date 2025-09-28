@@ -1,6 +1,6 @@
 ﻿namespace OrleansPlayground.Abstractions.Domain;
 
-public interface IDomainEventProjection<TEventBase>
+public interface IDomainEventProjectable<TEventBase>
 {
   void Apply(DomainEvent<TEventBase> @event);
 

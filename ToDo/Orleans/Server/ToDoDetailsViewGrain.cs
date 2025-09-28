@@ -12,7 +12,7 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
 {
   private readonly IDomainEventStorage<ToDoEvent> _eventStore;
 
-  private DomainEventObserver<ToDoEvent, ToDoDetailsView>? _observer;
+  private DomainEventProjection<ToDoEvent, ToDoDetailsView>? _observer;
   private StreamSubscriptionHandle<DomainEvent<ToDoEvent>>? _subscriptionHandle;
 
   public ToDoDetailsViewGrain(IDomainEventStorage<ToDoEvent> eventStore)
@@ -20,9 +20,9 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
     _eventStore = eventStore;
   }
 
-  private async Task<DomainEventObserver<ToDoEvent, ToDoDetailsView>> GetObserver()
+  private async Task<DomainEventProjection<ToDoEvent, ToDoDetailsView>> GetObserver()
   {
-    _observer ??= await DomainEventObserver<ToDoEvent, ToDoDetailsView>.Create(_eventStore, this.GetPrimaryKey());
+    _observer ??= await DomainEventProjection<ToDoEvent, ToDoDetailsView>.Create(_eventStore, this.GetPrimaryKey());
     return _observer;
   }
 

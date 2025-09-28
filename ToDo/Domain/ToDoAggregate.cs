@@ -1,4 +1,5 @@
 ﻿using OrleansPlayground.Abstractions.Domain;
+using OrleansPlayground.ToDo.Abstractions;
 
 namespace OrleansPlayground.ToDo.Domain;
 
@@ -9,29 +10,27 @@ public enum ToDoStatus
   Dismissed = 2,
 }
 
-public partial class ToDoAggregate : IDomainEventSourceable<ToDoEvent>
+public partial class ToDoAggregate : IDomainEventVersionable, IToDoEventProjectable
 {
   public int Version { get; private set; }
   public ToDoStatus Status { get; private set; }
 
-  public ToDoAggregate() { }
-
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
   {
     Status = ToDoStatus.Open;
   }
 
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
   {
     Status = ToDoStatus.Completed;
   }
 
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
   {
     Status = ToDoStatus.Dismissed;
   }
 
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
   {
     Status = ToDoStatus.Open;
   }
@@ -40,20 +39,6 @@ public partial class ToDoAggregate : IDomainEventSourceable<ToDoEvent>
   {
     Version = @event.Metadata.EntityVersion;
 
-    switch (@event.Payload)
-    {
-      case ToDoEvent.ToDoMemorized payload:
-        Apply(@event.Metadata, payload);
-        break;
-      case ToDoEvent.ToDoCompleted payload:
-        Apply(@event.Metadata, payload);
-        break;
-      case ToDoEvent.ToDoDismissed payload:
-        Apply(@event.Metadata, payload);
-        break;
-      case ToDoEvent.ToDoReopened payload:
-        Apply(@event.Metadata, payload);
-        break;
-    }
+    ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
   }
 }

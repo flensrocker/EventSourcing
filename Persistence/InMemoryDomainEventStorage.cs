@@ -67,7 +67,7 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
   private readonly TimeProvider _timeProvider = timeProvider;
 
   public Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid id)
-    where TState : class, IDomainEventSourceable<TEventBase>, new()
+    where TState : class, IDomainEventProjectable<TEventBase>, new()
   {
     var state = new TState();
 

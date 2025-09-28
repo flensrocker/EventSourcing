@@ -1,6 +1,5 @@
 ﻿namespace OrleansPlayground.Abstractions.Domain;
 
-public interface IDomainEventSourceable<TEventBase> : IDomainEventProjection<TEventBase>
+public interface IDomainEventSourceable<TEventBase> : IDomainEventProjectable<TEventBase>, IDomainEventVersionable
 {
-  int Version { get; }
 }

@@ -1,91 +1,86 @@
 ﻿using OrleansPlayground.Abstractions.Domain;
+using OrleansPlayground.ToDo.Abstractions;
 using OrleansPlayground.ToDo.Domain;
 
 namespace OrleansPlayground.ToDo.Views;
 
 [GenerateSerializer]
-public record ToDoListItemView
+public class ToDoListItemView : IToDoEventProjectable
 {
   [Id(0)]
-  public Guid ToDoId { get; init; }
+  public Guid ToDoId { get; private set; }
   [Id(1)]
-  public required DateTimeOffset CreatedAt { get; init; }
+  public DateTimeOffset CreatedAt { get; private set; }
   [Id(2)]
-  public required string Title { get; init; }
+  public string Title { get; private set; } = "";
   [Id(3)]
-  public ToDoStatus Status { get; init; }
+  public ToDoStatus Status { get; private set; }
+
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
+  {
+    ToDoId = metadata.EntityId;
+    CreatedAt = payload.CreatedAt;
+    Title = payload.Title;
+    Status = ToDoStatus.Open;
+  }
+
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
+  {
+    Status = ToDoStatus.Completed;
+  }
+
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
+  {
+    Status = ToDoStatus.Dismissed;
+  }
+
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
+  {
+    Status = ToDoStatus.Open;
+  }
+
+  public void Apply(DomainEvent<ToDoEvent> @event)
+  {
+    ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
+  }
 }
 
 [GenerateSerializer]
-public class ToDoListView : IDomainEventProjection<ToDoEvent>
+public class ToDoListView : IToDoEventProjectable
 {
   [Id(0)]
   public required Guid TenantId { get; init; }
   [Id(1)]
   public Dictionary<Guid, ToDoListItemView> ToDoItems { get; private set; } = new();
 
-  public ToDoListView() { }
-
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
+  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
   {
-    ToDoItems.TryAdd(metadata.EntityId, new ToDoListItemView
-    {
-      ToDoId = metadata.EntityId,
-      CreatedAt = payload.CreatedAt,
-      Title = payload.Title,
-      Status = ToDoStatus.Open,
-    });
+    var todoItem = new ToDoListItemView();
+    ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
+
+    ToDoItems.TryAdd(metadata.EntityId, todoItem);
   }
 
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
+  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
   {
     if (ToDoItems.TryGetValue(metadata.EntityId, out var todoItem))
-    {
-      ToDoItems[metadata.EntityId] = todoItem with
-      {
-        Status = ToDoStatus.Completed,
-      };
-    }
+      ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
   }
 
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
+  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
   {
     if (ToDoItems.TryGetValue(metadata.EntityId, out var todoItem))
-    {
-      ToDoItems[metadata.EntityId] = todoItem with
-      {
-        Status = ToDoStatus.Dismissed,
-      };
-    }
+      ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
   }
 
-  private void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
+  public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
   {
     if (ToDoItems.TryGetValue(metadata.EntityId, out var todoItem))
-    {
-      ToDoItems[metadata.EntityId] = todoItem with
-      {
-        Status = ToDoStatus.Open,
-      };
-    }
+      ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
   }
 
   public void Apply(DomainEvent<ToDoEvent> @event)
   {
-    switch (@event.Payload)
-    {
-      case ToDoEvent.ToDoMemorized payload:
-        Apply(@event.Metadata, payload);
-        break;
-      case ToDoEvent.ToDoCompleted payload:
-        Apply(@event.Metadata, payload);
-        break;
-      case ToDoEvent.ToDoDismissed payload:
-        Apply(@event.Metadata, payload);
-        break;
-      case ToDoEvent.ToDoReopened payload:
-        Apply(@event.Metadata, payload);
-        break;
-    }
+    ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
   }
 }
