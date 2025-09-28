@@ -7,6 +7,7 @@ public abstract partial record ToDoEvent
 {
   public sealed record ToDoMemorized : ToDoEvent
   {
+    public required DateTimeOffset CreatedAt { get; init; }
     public required string Title { get; init; }
   }
 }

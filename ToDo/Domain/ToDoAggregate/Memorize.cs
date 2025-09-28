@@ -9,6 +9,7 @@ public partial class ToDoAggregate
 
     return new ToDoEvent.ToDoMemorized
     {
+      CreatedAt = DateTimeOffset.UtcNow, // TODO TimeProvider?
       Title = command.Title,
     };
   }

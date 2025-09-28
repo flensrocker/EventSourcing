@@ -53,6 +53,14 @@ public static class ToDoEndpoints
         : Results.NotFound();
     });
 
+    builder.MapGet("/api/todo", static async (IClusterClient client) =>
+    {
+      var tenantId = Guid.Empty;
+      var grain = client.GetGrain<IToDoListViewGrain>(tenantId);
+      var items = await grain.GetList();
+      return Results.Ok(items);
+    });
+
     return builder;
   }
 }
