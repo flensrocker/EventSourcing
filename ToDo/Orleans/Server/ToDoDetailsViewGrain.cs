@@ -12,18 +12,18 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
 {
   private readonly IDomainEventStorage<ToDoEvent> _eventStore;
 
-  private DomainEventProjection<ToDoEvent, ToDoDetailsView>? _observer;
-  private StreamSubscriptionHandle<DomainEvent<ToDoEvent>>? _subscriptionHandle;
+  private DomainEventProjection<ToDoEvent, ToDoDetailsView>? _viewProjection;
+  private StreamSubscriptionHandle<DomainEvent<ToDoEvent>>? _viewSubscription;
 
   public ToDoDetailsViewGrain(IDomainEventStorage<ToDoEvent> eventStore)
   {
     _eventStore = eventStore;
   }
 
-  private async Task<DomainEventProjection<ToDoEvent, ToDoDetailsView>> GetObserver()
+  private async Task<DomainEventProjection<ToDoEvent, ToDoDetailsView>> GetViewProjection()
   {
-    _observer ??= await DomainEventProjection<ToDoEvent, ToDoDetailsView>.Create(_eventStore, this.GetPrimaryKey());
-    return _observer;
+    _viewProjection ??= await DomainEventProjection<ToDoEvent, ToDoDetailsView>.Create(_eventStore, this.GetPrimaryKey());
+    return _viewProjection;
   }
 
   public override async Task OnActivateAsync(CancellationToken cancellationToken)
@@ -32,20 +32,20 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
     var streamId = StreamId.Create(ToDoNames.ToDoEventStream, this.GetPrimaryKey());
     var stream = streamProvider.GetStream<DomainEvent<ToDoEvent>>(streamId);
 
-    var observer = await GetObserver();
-    _subscriptionHandle = await stream.SubscribeAsync(observer);
+    var viewProjection = await GetViewProjection();
+    _viewSubscription = await stream.SubscribeAsync(viewProjection);
 
     await base.OnActivateAsync(cancellationToken);
   }
 
   public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
   {
-    _observer = null;
+    _viewProjection = null;
 
-    if (_subscriptionHandle is not null)
+    if (_viewSubscription is not null)
     {
-      await _subscriptionHandle.UnsubscribeAsync();
-      _subscriptionHandle = null;
+      await _viewSubscription.UnsubscribeAsync();
+      _viewSubscription = null;
     }
 
     await base.OnDeactivateAsync(reason, cancellationToken);
@@ -53,7 +53,7 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
 
   public async Task<ToDoDetailsView> GetView()
   {
-    var observer = await GetObserver();
-    return observer.View;
+    var viewProjection = await GetViewProjection();
+    return viewProjection.View;
   }
 }
