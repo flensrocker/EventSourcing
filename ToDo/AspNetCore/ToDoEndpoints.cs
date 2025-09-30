@@ -11,8 +11,8 @@ public static class ToDoEndpoints
     {
       var toDoId = Guid.CreateVersion7();
       var grain = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var @event = await grain.Memorize(dto);
-      return @event
+      var result = await grain.Memorize(dto);
+      return result
         ? Results.Created($"/api/todo/{toDoId}", new { ToDoId = toDoId })
         : Results.BadRequest();
     });
@@ -20,8 +20,8 @@ public static class ToDoEndpoints
     builder.MapPut("/api/todo/{toDoId}/complete", static async (Guid toDoId, IClusterClient client) =>
     {
       var grain = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var @event = await grain.Complete();
-      return @event
+      var result = await grain.Complete();
+      return result
         ? Results.Ok()
         : Results.BadRequest();
     });
@@ -29,8 +29,8 @@ public static class ToDoEndpoints
     builder.MapPut("/api/todo/{toDoId}/dismiss", static async (Guid toDoId, [FromBody] DismissToDoDto dto, IClusterClient client) =>
     {
       var grain = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var @event = await grain.Dismiss(dto);
-      return @event
+      var result = await grain.Dismiss(dto);
+      return result
         ? Results.Ok()
         : Results.BadRequest();
     });
@@ -38,8 +38,8 @@ public static class ToDoEndpoints
     builder.MapPut("/api/todo/{toDoId}/reopen", static async (Guid toDoId, IClusterClient client) =>
     {
       var grain = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var @event = await grain.Reopen();
-      return @event
+      var result = await grain.Reopen();
+      return result
         ? Results.Ok()
         : Results.BadRequest();
     });
@@ -47,9 +47,9 @@ public static class ToDoEndpoints
     builder.MapGet("/api/todo/{toDoId}", static async (Guid toDoId, IClusterClient client) =>
     {
       var grain = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
-      var view = await grain.GetView();
-      return view is { Version: > 0 }
-        ? Results.Ok(view)
+      var result = await grain.GetView();
+      return result is { Version: > 0 }
+        ? Results.Ok(result)
         : Results.NotFound();
     });
 
@@ -57,8 +57,8 @@ public static class ToDoEndpoints
     {
       var tenantId = Guid.Empty;
       var grain = client.GetGrain<IToDoListViewGrain>(tenantId);
-      var items = await grain.GetList();
-      return Results.Ok(items);
+      var result = await grain.GetList();
+      return Results.Ok(result);
     });
 
     return builder;
