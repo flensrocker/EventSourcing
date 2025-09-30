@@ -48,7 +48,7 @@ public static class ToDoEndpoints
     {
       var grain = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
       var result = await grain.GetView();
-      return result is { Version: > 0 }
+      return result is not null
         ? Results.Ok(result)
         : Results.NotFound();
     });

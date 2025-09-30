@@ -51,9 +51,14 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
     await base.OnDeactivateAsync(reason, cancellationToken);
   }
 
-  public async Task<ToDoDetailsView> GetView()
+  public async Task<ToDoDetailsView?> GetView()
   {
     var viewProjection = await GetViewProjection();
-    return viewProjection.View;
+
+    if (viewProjection.View is { Version: > 0 })
+      return viewProjection.View;
+
+    DeactivateOnIdle();
+    return null;
   }
 }
