@@ -10,11 +10,13 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
   where TState : class, IDomainEventProjectable<TEventBase>, new()
   where TEventBase : class
 {
+  private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStorage<TEventBase> _eventStore;
   private int _nextVersion;
 
   protected DomainAggregateGrain()
   {
+    _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
@@ -33,9 +35,11 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
 
     var domainEvent = new DomainEvent<TEventBase>
     {
+      EventId = Guid.CreateVersion7(),
       Metadata = new DomainEventMetadata
       {
         TenantId = tenantId,
+        CreatedAt = _timeProvider.GetUtcNow(), // ignoring the clock skew in a cluster, the exact time stamp is not important
         CreatedByUserId = userId,
         EntityType = typeof(TState).FullName ?? "",
         EntityId = this.GetPrimaryKey(),

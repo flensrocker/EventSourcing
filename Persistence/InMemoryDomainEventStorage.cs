@@ -9,10 +9,13 @@ namespace OrleansPlayground.Persistence;
 internal class DomainEventEntity
 {
   internal required Guid Id { get; set; }
-  internal required DateTimeOffset CreatedAt { get; set; }
   internal required long GlobalIndex { get; set; }
-  // PostgreSQL => maybe column per field of metadata
-  internal DomainEventMetadata Metadata { get; set; } = default!;
+  internal Guid TenantId { get; set; }
+  internal DateTimeOffset CreatedAt { get; set; }
+  internal Guid CreatedByUserId { get; set; }
+  internal string EntityType { get; set; } = "";
+  internal Guid EntityId { get; set; }
+  internal int EntityVersion { get; set; }
   internal string PayloadType { get; set; } = "";
   internal string PayloadJson { get; set; } = "";
 }
@@ -41,7 +44,13 @@ internal static class InMemoryDomainEventStorageExtensions
   internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent<TEventBase> @event)
     where TEventBase : class
   {
-    entity.Metadata = @event.Metadata;
+    entity.Id = @event.EventId;
+    entity.TenantId = @event.Metadata.TenantId;
+    entity.CreatedAt = @event.Metadata.CreatedAt;
+    entity.CreatedByUserId = @event.Metadata.CreatedByUserId;
+    entity.EntityType = @event.Metadata.EntityType;
+    entity.EntityId = @event.Metadata.EntityId;
+    entity.EntityVersion = @event.Metadata.EntityVersion;
     entity.SetPayload(@event.Payload);
 
     return entity;
@@ -52,19 +61,26 @@ internal static class InMemoryDomainEventStorageExtensions
   {
     return new DomainEvent<TEventBase>
     {
-      Metadata = entity.Metadata,
+      EventId = entity.Id,
+      Metadata = new DomainEventMetadata
+      {
+        TenantId = entity.TenantId,
+        CreatedAt = entity.CreatedAt,
+        CreatedByUserId = entity.CreatedByUserId,
+        EntityType = entity.EntityType,
+        EntityId = entity.EntityId,
+        EntityVersion = entity.EntityVersion,
+      },
       Payload = entity.GetPayload<TEventBase>(),
     };
   }
 }
 
 // TODO => EFCore/PostgreSQL
-internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider) : IDomainEventStorage<TEventBase>
+internal class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
   private static ConcurrentDictionary<Guid, ImmutableArray<DomainEventEntity>> _storage = new();
-
-  private readonly TimeProvider _timeProvider = timeProvider;
 
   public Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid stateId)
     where TState : class, IDomainEventProjectable<TEventBase>, new()
@@ -90,8 +106,7 @@ internal class InMemoryDomainEventStorage<TEventBase>(TimeProvider timeProvider)
     var nextEvents = events.AddRange(updates
       .Select(ev => new DomainEventEntity
       {
-        Id = Guid.CreateVersion7(),
-        CreatedAt = _timeProvider.GetUtcNow(),
+        Id = ev.EventId,
         GlobalIndex = Interlocked.Increment(ref InMemoryDomainEventStorageExtensions.GlobalIndex),
       }.SetDomainEvent(ev)));
     var success = expectedVersion == 0
