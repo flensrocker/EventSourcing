@@ -7,31 +7,6 @@ using OrleansPlayground.ToDo.Views;
 
 namespace OrleansPlayground.ToDo.Orleans.Server;
 
-[ImplicitStreamSubscription(ToDoNames.ToDoEventStream)]
-public class ToDoEventRouterGrain : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent<ToDoEvent>>
-{
-  public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
-  {
-    var handle = handleFactory.Create<DomainEvent<ToDoEvent>>();
-    await handle.ResumeAsync(this);
-  }
-
-  public async Task OnNextAsync(DomainEvent<ToDoEvent> item, StreamSequenceToken? token = null)
-  {
-    var tenantId = Guid.Empty; // TODO derive from item
-    var tenantStreamId = StreamId.Create(ToDoNames.ToDoListViewStream, tenantId);
-    var tenantStream = this.GetStreamProvider(ToDoNames.ToDoEventStreamProvider).GetStream<DomainEvent<ToDoEvent>>(tenantStreamId);
-
-    await tenantStream.OnNextAsync(item);
-  }
-
-  public Task OnErrorAsync(Exception ex)
-  {
-    // TODO add error handling
-    return Task.CompletedTask;
-  }
-}
-
 [ImplicitStreamSubscription(ToDoNames.ToDoListViewStream)]
 public class ToDoListViewGrain : Grain, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent<ToDoEvent>>, IToDoListViewGrain
 {

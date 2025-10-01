@@ -2,7 +2,8 @@
 
 public record DomainEventMetadata
 {
-  // TODO TenantId, UserId etc.
+  public required Guid TenantId { get; init; }
+  public required Guid CreatedByUserId { get; init; }
   public required string EntityType { get; init; }
   public required Guid EntityId { get; init; }
   public required int EntityVersion { get; init; }

@@ -27,10 +27,16 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
   protected DomainEvent<TEventBase> RaiseDomainEvent<TEvent>(TEvent payload)
     where TEvent : TEventBase
   {
+    var user = DomainRequestContextExtensions.GetUser();
+    var tenantId = user?.TenantId ?? Guid.Empty;
+    var userId = user?.UserId ?? Guid.Empty;
+
     var domainEvent = new DomainEvent<TEventBase>
     {
       Metadata = new DomainEventMetadata
       {
+        TenantId = tenantId,
+        CreatedByUserId = userId,
         EntityType = typeof(TState).FullName ?? "",
         EntityId = this.GetPrimaryKey(),
         EntityVersion = _nextVersion,
