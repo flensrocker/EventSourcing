@@ -34,8 +34,6 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
 
     var viewProjection = await GetViewProjection();
     _viewSubscription = await stream.SubscribeAsync(viewProjection);
-
-    await base.OnActivateAsync(cancellationToken);
   }
 
   public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
@@ -47,8 +45,6 @@ public class ToDoDetailsViewGrain : Grain, IToDoDetailsViewGrain
       await _viewSubscription.UnsubscribeAsync();
       _viewSubscription = null;
     }
-
-    await base.OnDeactivateAsync(reason, cancellationToken);
   }
 
   public async Task<ToDoDetailsView?> GetView()
