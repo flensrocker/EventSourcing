@@ -4,5 +4,10 @@
     <File Path="Directory.packages.props" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="OrleansPlayground.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/Domain.Abstractions/Flensrocker.Domain.Abstractions.csproj" />
+    <Project Path="src/Domain.Persistence.InMemory/Flensrocker.Domain.Persistence.InMemory.csproj" />
+    <Project Path="src/Orleans.Abstractions/Flensrocker.Orleans.Abstractions.csproj" />
+    <Project Path="src/OrleansPlayground/OrleansPlayground.csproj" />
+  </Folder>
 </Solution>
