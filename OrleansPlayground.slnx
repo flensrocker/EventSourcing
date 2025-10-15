@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path="Directory.packages.props" />
     <File Path="README.md" />
   </Folder>
   <Project Path="OrleansPlayground.csproj" />
