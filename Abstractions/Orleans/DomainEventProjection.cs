@@ -32,12 +32,12 @@ public class DomainEventProjection<TEventBase, TView> : IAsyncObserver<DomainEve
   {
     if (View is IDomainEventVersionable versionedView)
     {
-      if (item.Metadata.EntityVersion <= versionedView.Version)
+      if (item.Metadata.StreamVersion <= versionedView.Version)
         return;
 
-      if (item.Metadata.EntityVersion > versionedView.Version + 1)
+      if (item.Metadata.StreamVersion > versionedView.Version + 1)
       {
-        var missingEvents = await _eventStore.ReadEventsFromStorage(_viewId, versionedView.Version + 1, item.Metadata.EntityVersion);
+        var missingEvents = await _eventStore.ReadEventsFromStorage(_viewId, versionedView.Version + 1, item.Metadata.StreamVersion);
         if (missingEvents is { Count: > 0 })
           View.ApplyEvents(missingEvents);
       }

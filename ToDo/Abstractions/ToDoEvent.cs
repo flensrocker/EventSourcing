@@ -1,4 +1,4 @@
-﻿namespace OrleansPlayground.ToDo.Domain;
+﻿namespace OrleansPlayground.ToDo.Abstractions;
 
 public abstract partial record ToDoEvent
 {

@@ -43,7 +43,7 @@ public class ToDoDetailsView : IDomainEventVersionable, IToDoEventProjectable
 
   public void Apply(DomainEvent<ToDoEvent> @event)
   {
-    Version = @event.Metadata.EntityVersion;
+    Version = @event.Metadata.StreamVersion;
 
     ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
   }

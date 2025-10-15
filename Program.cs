@@ -1,6 +1,6 @@
 using OrleansPlayground.Persistence;
+using OrleansPlayground.ToDo.Abstractions;
 using OrleansPlayground.ToDo.AspNetCore;
-using OrleansPlayground.ToDo.Domain;
 using OrleansPlayground.ToDo.Orleans.Server;
 
 var builder = WebApplication.CreateBuilder(args);

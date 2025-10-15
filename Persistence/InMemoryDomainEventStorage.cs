@@ -8,14 +8,19 @@ namespace OrleansPlayground.Persistence;
 
 internal class DomainEventEntity
 {
-  internal required Guid Id { get; set; }
-  internal required long GlobalIndex { get; set; }
+  // Primary Key
+  internal Guid Id { get; set; }
+  // Unique
+  internal long GlobalIndex { get; set; }
+  // Unique (StreamType, StreamId, StreamVersion, TenantId)
+  internal string StreamType { get; set; } = "";
+  internal Guid StreamId { get; set; }
+  internal int StreamVersion { get; set; }
   internal Guid TenantId { get; set; }
+
   internal DateTimeOffset CreatedAt { get; set; }
   internal Guid CreatedByUserId { get; set; }
-  internal string EntityType { get; set; } = "";
-  internal Guid EntityId { get; set; }
-  internal int EntityVersion { get; set; }
+
   internal string PayloadType { get; set; } = "";
   internal string PayloadJson { get; set; } = "";
 }
@@ -28,8 +33,8 @@ internal static class InMemoryDomainEventStorageExtensions
   internal static DomainEventEntity SetPayload<TEventBase>(this DomainEventEntity entity, TEventBase @event)
     where TEventBase : class
   {
-    entity.PayloadType = @event.GetType().FullName ?? "";
-    entity.PayloadJson = JsonSerializer.Serialize(@event);
+    entity.PayloadType = @event?.GetType()?.FullName ?? "";
+    entity.PayloadJson = @event is null ? "" : JsonSerializer.Serialize(@event);
 
     return entity;
   }
@@ -37,20 +42,23 @@ internal static class InMemoryDomainEventStorageExtensions
   internal static TEventBase GetPayload<TEventBase>(this DomainEventEntity entity)
     where TEventBase : class
   {
-    var type = Type.GetType(entity.PayloadType);
-    return (TEventBase)JsonSerializer.Deserialize(entity.PayloadJson, type!)!;
+    return !string.IsNullOrWhiteSpace(entity.PayloadType)
+      && Type.GetType(entity.PayloadType) is Type type
+      && JsonSerializer.Deserialize(entity.PayloadJson, type) is TEventBase payload
+      ? payload
+      : default!;
   }
 
   internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent<TEventBase> @event)
     where TEventBase : class
   {
-    entity.Id = @event.EventId;
+    entity.Id = @event.Metadata.EventId;
+    entity.StreamType = @event.Metadata.StreamType;
+    entity.StreamId = @event.Metadata.StreamId;
+    entity.StreamVersion = @event.Metadata.StreamVersion;
     entity.TenantId = @event.Metadata.TenantId;
     entity.CreatedAt = @event.Metadata.CreatedAt;
     entity.CreatedByUserId = @event.Metadata.CreatedByUserId;
-    entity.EntityType = @event.Metadata.EntityType;
-    entity.EntityId = @event.Metadata.EntityId;
-    entity.EntityVersion = @event.Metadata.EntityVersion;
     entity.SetPayload(@event.Payload);
 
     return entity;
@@ -61,15 +69,15 @@ internal static class InMemoryDomainEventStorageExtensions
   {
     return new DomainEvent<TEventBase>
     {
-      EventId = entity.Id,
       Metadata = new DomainEventMetadata
       {
+        EventId = entity.Id,
+        StreamType = entity.StreamType,
+        StreamId = entity.StreamId,
+        StreamVersion = entity.StreamVersion,
         TenantId = entity.TenantId,
         CreatedAt = entity.CreatedAt,
         CreatedByUserId = entity.CreatedByUserId,
-        EntityType = entity.EntityType,
-        EntityId = entity.EntityId,
-        EntityVersion = entity.EntityVersion,
       },
       Payload = entity.GetPayload<TEventBase>(),
     };
@@ -106,7 +114,7 @@ internal class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEve
     var nextEvents = events.AddRange(updates
       .Select(ev => new DomainEventEntity
       {
-        Id = ev.EventId,
+        Id = ev.Metadata.EventId,
         GlobalIndex = Interlocked.Increment(ref InMemoryDomainEventStorageExtensions.GlobalIndex),
       }.SetDomainEvent(ev)));
     var success = expectedVersion == 0
@@ -116,12 +124,12 @@ internal class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEve
     return Task.FromResult(success);
   }
 
-  public Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid stateId, int fromVersionIncl, int toVersionExcl)
+  public Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid streamId, int fromVersionIncl, int toVersionExcl)
   {
     if (fromVersionIncl < 0)
       return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(null);
 
-    if (!_storage.TryGetValue(stateId, out var events))
+    if (!_storage.TryGetValue(streamId, out var events))
       return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(null);
 
     if (fromVersionIncl >= events.Length)

@@ -2,7 +2,7 @@
 using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.Abstractions.Orleans;
 using OrleansPlayground.Abstractions.Persistence;
-using OrleansPlayground.ToDo.Domain;
+using OrleansPlayground.ToDo.Abstractions;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
 using OrleansPlayground.ToDo.Views;
 

@@ -1,7 +1,7 @@
 ﻿using Orleans.Serialization;
 using OrleansPlayground.Abstractions.Domain;
 using OrleansPlayground.Abstractions.Persistence;
-using OrleansPlayground.ToDo.Domain;
+using OrleansPlayground.ToDo.Abstractions;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
 
 namespace OrleansPlayground.ToDo.Orleans.Server;

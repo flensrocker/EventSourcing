@@ -35,15 +35,15 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
 
     var domainEvent = new DomainEvent<TEventBase>
     {
-      EventId = Guid.CreateVersion7(),
       Metadata = new DomainEventMetadata
       {
+        EventId = Guid.CreateVersion7(),
+        StreamType = typeof(TEventBase).FullName ?? "",
+        StreamId = this.GetPrimaryKey(),
+        StreamVersion = _nextVersion,
         TenantId = tenantId,
         CreatedAt = _timeProvider.GetUtcNow(), // ignoring the clock skew in a cluster, the exact time stamp is not important
         CreatedByUserId = userId,
-        EntityType = typeof(TState).FullName ?? "",
-        EntityId = this.GetPrimaryKey(),
-        EntityVersion = _nextVersion,
       },
       Payload = payload,
     };

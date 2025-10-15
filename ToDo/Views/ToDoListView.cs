@@ -20,8 +20,8 @@ public class ToDoListItemView : IDomainEventVersionable, IToDoEventProjectable
 
   void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
   {
-    Version = metadata.EntityVersion;
-    ToDoId = metadata.EntityId;
+    Version = metadata.StreamVersion;
+    ToDoId = metadata.StreamId;
     CreatedAt = payload.CreatedAt;
     Title = payload.Title;
     Status = ToDoStatus.Open;
@@ -29,25 +29,25 @@ public class ToDoListItemView : IDomainEventVersionable, IToDoEventProjectable
 
   void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
   {
-    Version = metadata.EntityVersion;
+    Version = metadata.StreamVersion;
     Status = ToDoStatus.Completed;
   }
 
   void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
   {
-    Version = metadata.EntityVersion;
+    Version = metadata.StreamVersion;
     Status = ToDoStatus.Dismissed;
   }
 
   void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
   {
-    Version = metadata.EntityVersion;
+    Version = metadata.StreamVersion;
     Status = ToDoStatus.Open;
   }
 
   public void Apply(DomainEvent<ToDoEvent> @event)
   {
-    Version = @event.Metadata.EntityVersion;
+    Version = @event.Metadata.StreamVersion;
 
     ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
   }
@@ -66,24 +66,24 @@ public class ToDoListView : IToDoEventProjectable
     var todoItem = new ToDoListItemView();
     ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
 
-    ToDoItems.TryAdd(metadata.EntityId, todoItem);
+    ToDoItems.TryAdd(metadata.StreamId, todoItem);
   }
 
   public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
   {
-    if (ToDoItems.TryGetValue(metadata.EntityId, out var todoItem))
+    if (ToDoItems.TryGetValue(metadata.StreamId, out var todoItem))
       ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
   }
 
   public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
   {
-    if (ToDoItems.TryGetValue(metadata.EntityId, out var todoItem))
+    if (ToDoItems.TryGetValue(metadata.StreamId, out var todoItem))
       ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
   }
 
   public void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
   {
-    if (ToDoItems.TryGetValue(metadata.EntityId, out var todoItem))
+    if (ToDoItems.TryGetValue(metadata.StreamId, out var todoItem))
       ((IToDoEventProjectable)todoItem).Apply(metadata, payload);
   }
 

@@ -1,5 +1,4 @@
 ﻿using OrleansPlayground.Abstractions.Domain;
-using OrleansPlayground.ToDo.Domain;
 
 namespace OrleansPlayground.ToDo.Abstractions;
 

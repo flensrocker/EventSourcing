@@ -1,7 +1,7 @@
 ﻿using Orleans.Streams;
 using Orleans.Streams.Core;
 using OrleansPlayground.Abstractions.Domain;
-using OrleansPlayground.ToDo.Domain;
+using OrleansPlayground.ToDo.Abstractions;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
 using OrleansPlayground.ToDo.Views;
 

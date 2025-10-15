@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace OrleansPlayground.ToDo.Domain;
+namespace OrleansPlayground.ToDo.Abstractions;
 
 [JsonDerivedType(typeof(ToDoDismissed), nameof(ToDoDismissed))]
 public abstract partial record ToDoEvent
