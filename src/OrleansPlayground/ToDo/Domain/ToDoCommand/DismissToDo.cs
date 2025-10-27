@@ -1,10 +1,15 @@
-﻿namespace OrleansPlayground.ToDo.Domain;
+﻿using System.Text.Json.Serialization;
+
+namespace OrleansPlayground.ToDo.Domain;
 
 public abstract partial record ToDoCommand
 {
   public sealed record DismissToDo : ToDoCommand
   {
     public required string Reason { get; init; }
+
+    [JsonConstructor]
+    private DismissToDo() { }
 
     public static DismissToDo? Create(string? reason)
     {

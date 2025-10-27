@@ -1,18 +1,39 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Orleans;
+using OrleansPlayground.ToDo.Domain;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
 
 namespace OrleansPlayground.ToDo.AspNetCore;
 
 public static class ToDoEndpoints
 {
+  public record MemorizeToDoDto
+  {
+    public string? Title { get; init; }
+  }
+
+  public record DismissToDoDto
+  {
+    public string? Reason { get; init; }
+  }
+
+  private static async Task<bool> ExecuteCommandAsync(this IClusterClient client, Guid toDoId, ToDoCommand command)
+  {
+    var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
+    var result = await toDo.ExecuteCommand(command);
+    return result;
+  }
+
   public static IEndpointRouteBuilder MapToDo(this IEndpointRouteBuilder builder)
   {
     builder.MapPost("/api/todo/memorize", static async ([FromBody] MemorizeToDoDto dto, IClusterClient client) =>
     {
+      var command = ToDoCommand.MemorizeToDo.Create(dto.Title);
+      if (command is null)
+        return Results.BadRequest();
+
       var toDoId = Guid.CreateVersion7();
-      var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var result = await toDo.Memorize(dto);
+      var result = await client.ExecuteCommandAsync(toDoId, command);
       return result
         ? Results.Created($"/api/todo/{toDoId}", new { ToDoId = toDoId })
         : Results.BadRequest();
@@ -20,8 +41,11 @@ public static class ToDoEndpoints
 
     builder.MapPut("/api/todo/{toDoId}/complete", static async (Guid toDoId, IClusterClient client) =>
     {
-      var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var result = await toDo.Complete();
+      var command = ToDoCommand.CompleteToDo.Create();
+      if (command is null)
+        return Results.BadRequest();
+
+      var result = await client.ExecuteCommandAsync(toDoId, command);
       return result
         ? Results.Ok()
         : Results.BadRequest();
@@ -29,8 +53,11 @@ public static class ToDoEndpoints
 
     builder.MapPut("/api/todo/{toDoId}/dismiss", static async (Guid toDoId, [FromBody] DismissToDoDto dto, IClusterClient client) =>
     {
-      var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var result = await toDo.Dismiss(dto);
+      var command = ToDoCommand.DismissToDo.Create(dto.Reason);
+      if (command is null)
+        return Results.BadRequest();
+
+      var result = await client.ExecuteCommandAsync(toDoId, command);
       return result
         ? Results.Ok()
         : Results.BadRequest();
@@ -38,8 +65,11 @@ public static class ToDoEndpoints
 
     builder.MapPut("/api/todo/{toDoId}/reopen", static async (Guid toDoId, IClusterClient client) =>
     {
-      var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
-      var result = await toDo.Reopen();
+      var command = ToDoCommand.ReopenToDo.Create();
+      if (command is null)
+        return Results.BadRequest();
+
+      var result = await client.ExecuteCommandAsync(toDoId, command);
       return result
         ? Results.Ok()
         : Results.BadRequest();

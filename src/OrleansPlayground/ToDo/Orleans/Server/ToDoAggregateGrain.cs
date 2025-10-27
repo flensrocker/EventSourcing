@@ -25,47 +25,20 @@ public class ToDoAggregateGrain : DomainAggregateGrain<ToDoAggregate, ToDoEvent>
     _stream = streamProvider.GetStream<DomainEvent<ToDoEvent>>(streamId);
   }
 
-  private async Task<bool> Execute<TCommand>(TCommand? command, Func<TCommand, ToDoEvent?> handler)
+  public async Task<bool> ExecuteCommand(ToDoCommand command)
   {
-    if (command is null)
+    var events = State.ExecuteCommand(command);
+    if (events is not { Length: > 0 })
       return false;
 
-    var @event = handler(command);
-    if (@event is null)
-      return false;
-
-    var domainEvent = RaiseDomainEvent(@event);
+    var domainEvents = RaiseDomainEvents(events);
     await ConfirmEvents();
 
     // TODO Transaction-Gap between stored and published events
 
     if (_stream is not null)
-      await _stream.OnNextAsync(domainEvent);
+      await _stream.OnNextBatchAsync(domainEvents);
 
     return true;
-  }
-
-  public async Task<bool> Memorize(MemorizeToDoDto dto)
-  {
-    var command = ToDoCommand.MemorizeToDo.Create(dto.Title);
-    return await Execute(command, State.Memorize);
-  }
-
-  public async Task<bool> Complete()
-  {
-    var command = ToDoCommand.CompleteToDo.Create();
-    return await Execute(command, State.Complete);
-  }
-
-  public async Task<bool> Dismiss(DismissToDoDto dto)
-  {
-    var command = ToDoCommand.DismissToDo.Create(dto.Reason);
-    return await Execute(command, State.Dismiss);
-  }
-
-  public async Task<bool> Reopen()
-  {
-    var command = ToDoCommand.ReopenToDo.Create();
-    return await Execute(command, State.Reopen);
   }
 }

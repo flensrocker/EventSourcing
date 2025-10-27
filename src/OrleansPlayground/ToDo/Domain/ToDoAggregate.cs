@@ -10,7 +10,7 @@ public enum ToDoStatus
   Dismissed = 2,
 }
 
-public partial class ToDoAggregate : IDomainEventVersionable, IToDoEventProjectable
+public partial class ToDoAggregate : IDomainAggregate<ToDoCommand, ToDoEvent>, IDomainEventVersionable, IToDoEventProjectable
 {
   public int Version { get; private set; }
   public ToDoStatus Status { get; private set; }
@@ -40,5 +40,17 @@ public partial class ToDoAggregate : IDomainEventVersionable, IToDoEventProjecta
     Version = @event.Metadata.StreamVersion;
 
     ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
+  }
+
+  public ToDoEvent[]? ExecuteCommand(ToDoCommand command)
+  {
+    return command switch
+    {
+      ToDoCommand.MemorizeToDo memorizeToDo => Memorize(memorizeToDo),
+      ToDoCommand.CompleteToDo completeToDo => Complete(completeToDo),
+      ToDoCommand.DismissToDo dismissToDo => Dismiss(dismissToDo),
+      ToDoCommand.ReopenToDo reopenToDo => Reopen(reopenToDo),
+      _ => throw new NotImplementedException($"command type {command.GetType().FullName}"),
+    };
   }
 }

@@ -27,32 +27,31 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
     return base.OnActivateAsync(cancellationToken);
   }
 
-  protected DomainEvent<TEventBase> RaiseDomainEvent<TEvent>(TEvent payload)
+  protected DomainEvent<TEventBase>[] RaiseDomainEvents<TEvent>(params IEnumerable<TEvent> payloads)
     where TEvent : TEventBase
   {
     var user = DomainRequestContextExtensions.GetUser();
     var tenantId = user?.TenantId ?? Guid.Empty;
     var userId = user?.UserId ?? Guid.Empty;
 
-    var domainEvent = new DomainEvent<TEventBase>
+    var domainEvents = payloads.Select(payload => new DomainEvent<TEventBase>
     {
       Metadata = new DomainEventMetadata
       {
         EventId = Guid.CreateVersion7(),
         StreamType = typeof(TEventBase).FullName ?? "",
         StreamId = this.GetPrimaryKey(),
-        StreamVersion = _nextVersion,
+        StreamVersion = _nextVersion++,
         TenantId = tenantId,
         CreatedAt = _timeProvider.GetUtcNow(), // ignoring the clock skew in a cluster, the exact time stamp is not important
         CreatedByUserId = userId,
       },
       Payload = payload,
-    };
-    _nextVersion++;
+    }).ToArray();
 
-    RaiseEvent(domainEvent);
+    RaiseEvents(domainEvents);
 
-    return domainEvent;
+    return domainEvents;
   }
 
   public Task<bool> ApplyUpdatesToStorage(IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)

@@ -2,6 +2,7 @@
 using Orleans.Hosting;
 using Orleans.Serialization;
 using OrleansPlayground.ToDo.Abstractions;
+using OrleansPlayground.ToDo.Domain;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
 
 namespace OrleansPlayground.ToDo.Orleans.Server;
@@ -14,7 +15,7 @@ public static class ToDoSiloBuilderExtensions
     siloBuilder.Services.AddScoped<IDomainEventStorage<ToDoEvent>, TDomainEventStorage>();
     siloBuilder.Services.AddSerializer(serializerBuilder =>
     {
-      serializerBuilder.AddJsonSerializer(isSupported: type => type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>)));
+      serializerBuilder.AddJsonSerializer(isSupported: type => type.IsAssignableTo(typeof(ToDoCommand)) || type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>)));
     });
 
     siloBuilder.AddMemoryStreams(ToDoNames.ToDoEventStreamProvider);
