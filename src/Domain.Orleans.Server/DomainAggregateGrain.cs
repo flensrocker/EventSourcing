@@ -1,10 +1,8 @@
 ﻿using Flensrocker.Domain.Abstractions;
 using Flensrocker.Domain.Orleans.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans;
 using Orleans.EventSourcing;
 using Orleans.EventSourcing.CustomStorage;
-using Orleans.Runtime;
 using Orleans.Streams;
 
 namespace Flensrocker.Domain.Orleans.Server;
@@ -75,11 +73,11 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
 
   public async Task<bool> ExecuteCommand(TCommandBase command)
   {
-    var events = State.ExecuteCommand(command);
-    if (events is not { Length: > 0 })
+    var payloads = State.ExecuteCommand(command);
+    if (payloads is not { Length: > 0 })
       return false;
 
-    var domainEvents = RaiseDomainEvents(events);
+    var domainEvents = RaiseDomainEvents(payloads);
     await ConfirmEvents();
 
     // TODO Transaction-Gap between stored and published events

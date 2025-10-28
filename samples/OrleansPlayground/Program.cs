@@ -1,8 +1,7 @@
 using Flensrocker.Domain.Persistence.InMemory;
-using Orleans.Hosting;
-using OrleansPlayground.ToDo.Abstractions;
-using OrleansPlayground.ToDo.AspNetCore;
-using OrleansPlayground.ToDo.Orleans.Server;
+using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Orleans.Server;
+using Flensrocker.ToDo.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 

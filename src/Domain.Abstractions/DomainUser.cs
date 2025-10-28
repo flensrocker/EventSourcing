@@ -1,6 +1,4 @@
-﻿using Orleans;
-
-namespace Flensrocker.Domain.Abstractions;
+﻿namespace Flensrocker.Domain.Abstractions;
 
 [GenerateSerializer]
 public sealed record DomainUserClaim

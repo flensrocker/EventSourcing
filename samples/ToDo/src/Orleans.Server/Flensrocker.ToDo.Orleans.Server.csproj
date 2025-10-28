@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Orleans.Serialization.SystemTextJson" />
+    <PackageReference Include="Microsoft.Orleans.Sdk" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Domain.Orleans.Server\Flensrocker.Domain.Orleans.Server.csproj" />
+    <ProjectReference Include="..\Domain\Flensrocker.ToDo.Domain.csproj" />
+    <ProjectReference Include="..\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

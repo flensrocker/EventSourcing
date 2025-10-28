@@ -1,6 +1,4 @@
-﻿using Orleans;
-
-namespace Flensrocker.Domain.Orleans.Abstractions;
+﻿namespace Flensrocker.Domain.Orleans.Abstractions;
 
 public interface IDomainAggegrateGrain<TCommandBase> : IGrainWithGuidKey
 {
