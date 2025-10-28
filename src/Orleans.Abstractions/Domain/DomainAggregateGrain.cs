@@ -39,7 +39,7 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
       Metadata = new DomainEventMetadata
       {
         EventId = Guid.CreateVersion7(),
-        StreamType = typeof(TEventBase).FullName ?? "",
+        StreamType = typeof(TEventBase).GetTypeName(),
         StreamId = this.GetPrimaryKey(),
         StreamVersion = _nextVersion++,
         TenantId = tenantId,

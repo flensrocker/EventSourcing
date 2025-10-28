@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Flensrocker.Domain.Abstractions;
 
@@ -31,19 +30,11 @@ internal static class InMemoryDomainEventStorageExtensions
   // PostgreSQL => Sequence
   internal static long GlobalIndex = 0L;
 
-  [return: NotNullIfNotNull(parameterName: nameof(type))]
-  internal static string? GetJsonTypeName(this Type? type)
-  {
-    if (type is null)
-      return null;
-    return $"{type.FullName}, {type.Assembly.GetName().Name}";
-  }
-
   internal static DomainEventEntity SetPayload<TEventBase>(this DomainEventEntity entity, TEventBase @event)
     where TEventBase : class
   {
-    entity.PayloadType = @event?.GetType()?.GetJsonTypeName() ?? "";
-    entity.PayloadJson = @event is null ? "" : JsonSerializer.Serialize(@event);
+    entity.PayloadType = @event.GetType().GetTypeName();
+    entity.PayloadJson = JsonSerializer.Serialize(@event);
 
     return entity;
   }
