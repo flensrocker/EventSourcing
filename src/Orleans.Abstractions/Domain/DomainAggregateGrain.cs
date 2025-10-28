@@ -3,20 +3,30 @@ using Microsoft.Extensions.DependencyInjection;
 using Orleans;
 using Orleans.EventSourcing;
 using Orleans.EventSourcing.CustomStorage;
+using Orleans.Runtime;
+using Orleans.Streams;
 
 namespace Flensrocker.Orleans.Domain.Abstractions;
 
-public abstract class DomainAggregateGrain<TState, TEventBase>
+public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   : JournaledGrain<TState, DomainEvent<TEventBase>>, ICustomStorageInterface<TState, DomainEvent<TEventBase>>
-  where TState : class, IDomainEventProjectable<TEventBase>, new()
+  , IDomainAggegrateGrain<TCommandBase>
+  where TState : class, IDomainAggregate<TCommandBase, TEventBase>, IDomainEventProjectable<TEventBase>, new()
+  where TCommandBase : class
   where TEventBase : class
 {
+  private readonly string? _domainEventStreamProvider;
+  private readonly string? _domainEventStreamNamespace;
   private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStorage<TEventBase> _eventStore;
-  private int _nextVersion;
 
-  protected DomainAggregateGrain()
+  private int _nextVersion;
+  private IAsyncStream<DomainEvent<TEventBase>>? _domainEventStream;
+
+  protected DomainAggregateGrain(string? domainEventStreamProvider, string? domainEventStreamNamespace)
   {
+    _domainEventStreamProvider = domainEventStreamProvider;
+    _domainEventStreamNamespace = domainEventStreamNamespace;
     _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
@@ -24,6 +34,14 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
   public override Task OnActivateAsync(CancellationToken cancellationToken)
   {
     _nextVersion = Version + 1;
+
+    if (!string.IsNullOrWhiteSpace(_domainEventStreamProvider) && !string.IsNullOrWhiteSpace(_domainEventStreamNamespace))
+    {
+      var streamProvider = this.GetStreamProvider(_domainEventStreamProvider);
+      var streamId = StreamId.Create(_domainEventStreamNamespace, this.GetPrimaryKey());
+      _domainEventStream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
+    }
+
     return base.OnActivateAsync(cancellationToken);
   }
 
@@ -54,9 +72,27 @@ public abstract class DomainAggregateGrain<TState, TEventBase>
     return domainEvents;
   }
 
-  public Task<bool> ApplyUpdatesToStorage(IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)
+  public async Task<bool> ExecuteCommand(TCommandBase command)
+  {
+    var events = State.ExecuteCommand(command);
+    if (events is not { Length: > 0 })
+      return false;
+
+    var domainEvents = RaiseDomainEvents(events);
+    await ConfirmEvents();
+
+    // TODO Transaction-Gap between stored and published events
+    // TODO Extract publishing to stream into some outbox implementation
+
+    if (_domainEventStream is not null)
+      await _domainEventStream.OnNextBatchAsync(domainEvents);
+
+    return true;
+  }
+
+  Task<bool> ICustomStorageInterface<TState, DomainEvent<TEventBase>>.ApplyUpdatesToStorage(IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)
     => _eventStore.ApplyUpdatesToStorage(this.GetPrimaryKey(), updates, expectedVersion);
 
-  public Task<KeyValuePair<int, TState>> ReadStateFromStorage()
+  Task<KeyValuePair<int, TState>> ICustomStorageInterface<TState, DomainEvent<TEventBase>>.ReadStateFromStorage()
     => _eventStore.ReadStateFromStorage<TState>(this.GetPrimaryKey());
 }

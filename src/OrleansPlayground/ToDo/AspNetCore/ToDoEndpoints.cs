@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Flensrocker.Orleans.Domain.Abstractions;
+using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using OrleansPlayground.ToDo.Domain;
 using OrleansPlayground.ToDo.Orleans.Abstractions;
@@ -19,7 +20,7 @@ public static class ToDoEndpoints
 
   private static async Task<bool> ExecuteCommandAsync(this IClusterClient client, Guid toDoId, ToDoCommand command)
   {
-    var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
+    var toDo = client.GetGrain<IDomainAggegrateGrain<ToDoCommand>>(toDoId);
     var result = await toDo.ExecuteCommand(command);
     return result;
   }
