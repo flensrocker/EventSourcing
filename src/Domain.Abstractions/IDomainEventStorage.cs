@@ -8,5 +8,5 @@ public interface IDomainEventStorage<TEventBase>
 
   Task<bool> ApplyUpdatesToStorage(Guid stateId, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion);
 
-  Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid stateId, int fromVersion, int toVersionExcl);
+  Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid stateId, int fromVersion, int toVersionExcl, CancellationToken cancellationToken);
 }

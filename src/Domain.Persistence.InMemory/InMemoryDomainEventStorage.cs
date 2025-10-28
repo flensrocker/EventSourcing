@@ -46,7 +46,7 @@ public class InMemoryDomainEventStorage<TEventBase>(InMemoryDomainEventStorageOp
     return Task.FromResult(success);
   }
 
-  public Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid streamId, int fromVersionIncl, int toVersionExcl)
+  public Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid streamId, int fromVersionIncl, int toVersionExcl, CancellationToken cancellationToken)
   {
     if (fromVersionIncl < 0)
       return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(null);
