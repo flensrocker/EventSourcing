@@ -1,34 +1,15 @@
 ﻿using System.Text.Json;
 using Flensrocker.Domain.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Flensrocker.Domain.Persistence.InMemory;
 
-internal static class InMemoryDomainEventStorageExtensions
+public static class InMemoryDomainEventStorageExtensions
 {
   // PostgreSQL => Sequence
   internal static long GlobalIndex = 0L;
 
-  internal static DomainEventEntity SetPayload<TEventBase>(this DomainEventEntity entity, TEventBase @event)
-    where TEventBase : class
-  {
-    entity.PayloadType = @event.GetType().GetTypeName();
-    entity.PayloadJson = JsonSerializer.Serialize(@event);
-
-    return entity;
-  }
-
-  internal static TEventBase GetPayload<TEventBase>(this DomainEventEntity entity)
-    where TEventBase : class
-  {
-    if (string.IsNullOrWhiteSpace(entity.PayloadType)
-      || Type.GetType(entity.PayloadType) is not Type type
-      || JsonSerializer.Deserialize(entity.PayloadJson, type) is not TEventBase payload)
-      return default!;
-
-    return payload;
-  }
-
-  internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent<TEventBase> @event)
+  internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent<TEventBase> @event, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
     entity.Id = @event.Metadata.EventId;
@@ -38,27 +19,32 @@ internal static class InMemoryDomainEventStorageExtensions
     entity.TenantId = @event.Metadata.TenantId;
     entity.CreatedAt = @event.Metadata.CreatedAt;
     entity.CreatedByUserId = @event.Metadata.CreatedByUserId;
-    entity.SetPayload(@event.Payload);
+    entity.EventType = @event.GetType().GetTypeName();
+    entity.EventJson = JsonSerializer.Serialize(@event, jsonOptions);
 
     return entity;
   }
 
-  internal static DomainEvent<TEventBase> GetDomainEvent<TEventBase>(this DomainEventEntity entity)
+  internal static DomainEvent<TEventBase> GetDomainEvent<TEventBase>(this DomainEventEntity entity, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
-    return new DomainEvent<TEventBase>
-    {
-      Metadata = new DomainEventMetadata
-      {
-        EventId = entity.Id,
-        StreamType = entity.StreamType,
-        StreamId = entity.StreamId,
-        StreamVersion = entity.StreamVersion,
-        TenantId = entity.TenantId,
-        CreatedAt = entity.CreatedAt,
-        CreatedByUserId = entity.CreatedByUserId,
-      },
-      Payload = entity.GetPayload<TEventBase>(),
-    };
+    if (string.IsNullOrWhiteSpace(entity.EventType)
+      || Type.GetType(entity.EventType) is not Type type
+      || JsonSerializer.Deserialize(entity.EventJson, type, jsonOptions) is not DomainEvent<TEventBase> @event)
+      return default!;
+
+    return @event;
+  }
+
+  public static IServiceCollection AddInMemoryDomainEventStorage<TEventBase>(this IServiceCollection services, Func<InMemoryDomainEventStorageOptions<TEventBase>> configureOptions)
+    where TEventBase : class
+  {
+    var options = configureOptions() ?? new InMemoryDomainEventStorageOptions<TEventBase>();
+    services.AddSingleton(options);
+
+    services.AddScoped<InMemoryDomainEventStorage<TEventBase>>();
+    services.AddScoped<IDomainEventStorage<TEventBase>>(sp => sp.GetRequiredService<InMemoryDomainEventStorage<TEventBase>>());
+
+    return services;
   }
 }

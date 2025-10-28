@@ -16,6 +16,6 @@ internal class DomainEventEntity
   internal Guid CreatedByUserId { get; set; }
 
   // Format: "Type.FullName, Assembly.Name" like AssemblyQualifiedName but without version
-  internal string PayloadType { get; set; } = "";
-  internal string PayloadJson { get; set; } = "";
+  internal string EventType { get; set; } = "";
+  internal string EventJson { get; set; } = "";
 }

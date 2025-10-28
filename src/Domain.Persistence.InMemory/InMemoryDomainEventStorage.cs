@@ -5,10 +5,12 @@ using Flensrocker.Domain.Abstractions;
 namespace Flensrocker.Domain.Persistence.InMemory;
 
 // TODO => EFCore/PostgreSQL
-public class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEventBase>
+public class InMemoryDomainEventStorage<TEventBase>(InMemoryDomainEventStorageOptions<TEventBase> options) : IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
   private static ConcurrentDictionary<Guid, ImmutableArray<DomainEventEntity>> _storage = new();
+
+  private readonly InMemoryDomainEventStorageOptions<TEventBase> _options = options;
 
   public Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid stateId, CancellationToken cancellationToken)
     where TState : class, IDomainEventProjectable<TEventBase>, new()
@@ -18,7 +20,7 @@ public class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEvent
     if (!_storage.TryGetValue(stateId, out var events))
       return Task.FromResult(new KeyValuePair<int, TState>(0, state));
 
-    state.ApplyEvents(events.Select(ev => ev.GetDomainEvent<TEventBase>()));
+    state.ApplyEvents(events.Select(ev => ev.GetDomainEvent<TEventBase>(_options.JsonOptions)));
     return Task.FromResult(new KeyValuePair<int, TState>(events.Length, state));
   }
 
@@ -36,7 +38,7 @@ public class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEvent
       {
         Id = ev.Metadata.EventId,
         GlobalIndex = Interlocked.Increment(ref InMemoryDomainEventStorageExtensions.GlobalIndex),
-      }.SetDomainEvent(ev)));
+      }.SetDomainEvent(ev, _options.JsonOptions)));
     var success = expectedVersion == 0
       ? _storage.TryAdd(stateId, nextEvents)
       : _storage.TryUpdate(stateId, nextEvents, events);
@@ -60,6 +62,6 @@ public class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEvent
     else if (toVersionExcl > events.Length)
       return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(null);
 
-    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersionIncl..toVersionExcl].Select(ev => ev.GetDomainEvent<TEventBase>()).ToImmutableArray());
+    return Task.FromResult<IReadOnlyList<DomainEvent<TEventBase>>?>(events[fromVersionIncl..toVersionExcl].Select(ev => ev.GetDomainEvent<TEventBase>(_options.JsonOptions)).ToImmutableArray());
   }
 }
