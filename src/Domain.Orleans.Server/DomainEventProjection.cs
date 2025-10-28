@@ -1,7 +1,7 @@
 ﻿using Flensrocker.Domain.Abstractions;
 using Orleans.Streams;
 
-namespace Flensrocker.Orleans.Domain.Abstractions;
+namespace Flensrocker.Domain.Orleans.Server;
 
 public class DomainEventProjection<TEventBase, TView> : IAsyncObserver<DomainEvent<TEventBase>>
   where TEventBase : class

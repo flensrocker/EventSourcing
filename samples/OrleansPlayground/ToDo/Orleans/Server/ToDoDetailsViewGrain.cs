@@ -1,5 +1,5 @@
 ﻿using Flensrocker.Domain.Abstractions;
-using Flensrocker.Orleans.Domain.Abstractions;
+using Flensrocker.Domain.Orleans.Server;
 using Orleans;
 using Orleans.Runtime;
 using Orleans.Streams;

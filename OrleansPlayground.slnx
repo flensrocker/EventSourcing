@@ -9,7 +9,8 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Domain.Abstractions/Flensrocker.Domain.Abstractions.csproj" />
+    <Project Path="src/Domain.Orleans.Abstractions/Flensrocker.Domain.Orleans.Abstractions.csproj" />
+    <Project Path="src/Domain.Orleans.Server/Flensrocker.Domain.Orleans.Server.csproj" />
     <Project Path="src/Domain.Persistence.InMemory/Flensrocker.Domain.Persistence.InMemory.csproj" />
-    <Project Path="src/Orleans.Abstractions/Flensrocker.Orleans.Abstractions.csproj" />
   </Folder>
 </Solution>

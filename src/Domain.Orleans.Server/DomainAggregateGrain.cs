@@ -1,4 +1,5 @@
 ﻿using Flensrocker.Domain.Abstractions;
+using Flensrocker.Domain.Orleans.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans;
 using Orleans.EventSourcing;
@@ -6,7 +7,7 @@ using Orleans.EventSourcing.CustomStorage;
 using Orleans.Runtime;
 using Orleans.Streams;
 
-namespace Flensrocker.Orleans.Domain.Abstractions;
+namespace Flensrocker.Domain.Orleans.Server;
 
 public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   : JournaledGrain<TState, DomainEvent<TEventBase>>, ICustomStorageInterface<TState, DomainEvent<TEventBase>>

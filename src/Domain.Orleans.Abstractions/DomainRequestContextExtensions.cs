@@ -1,7 +1,7 @@
 ﻿using Flensrocker.Domain.Abstractions;
 using Orleans.Runtime;
 
-namespace Flensrocker.Orleans.Domain.Abstractions;
+namespace Flensrocker.Domain.Orleans.Abstractions;
 
 public static class DomainRequestContextExtensions
 {

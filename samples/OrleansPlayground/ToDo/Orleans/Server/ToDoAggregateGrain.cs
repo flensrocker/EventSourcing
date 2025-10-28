@@ -1,4 +1,4 @@
-﻿using Flensrocker.Orleans.Domain.Abstractions;
+﻿using Flensrocker.Domain.Orleans.Server;
 using Orleans.EventSourcing.CustomStorage;
 using Orleans.Providers;
 using OrleansPlayground.ToDo.Abstractions;

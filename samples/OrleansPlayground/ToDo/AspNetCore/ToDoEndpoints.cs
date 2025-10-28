@@ -1,4 +1,4 @@
-﻿using Flensrocker.Orleans.Domain.Abstractions;
+﻿using Flensrocker.Domain.Orleans.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using OrleansPlayground.ToDo.Domain;
