@@ -7,6 +7,7 @@ internal class DomainEventEntity
   // Unique
   internal long GlobalIndex { get; set; }
   // Unique (StreamType, StreamId, StreamVersion, TenantId)
+  // StreamType = typeof(TEventBase).GetTypeName()
   internal string StreamType { get; set; } = "";
   internal Guid StreamId { get; set; }
   internal int StreamVersion { get; set; }
@@ -15,7 +16,6 @@ internal class DomainEventEntity
   internal DateTimeOffset CreatedAt { get; set; }
   internal Guid CreatedByUserId { get; set; }
 
-  // Format: "Type.FullName, Assembly.Name" like AssemblyQualifiedName but without version
-  internal string EventType { get; set; } = "";
+  // Full DomainEvent<TEventBase>
   internal string EventJson { get; set; } = "";
 }

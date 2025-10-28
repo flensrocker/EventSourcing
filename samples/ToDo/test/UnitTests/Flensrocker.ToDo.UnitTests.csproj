@@ -1,0 +1,16 @@
+<Project Sdk="MSTest.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Domain.Abstractions\Flensrocker.Domain.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

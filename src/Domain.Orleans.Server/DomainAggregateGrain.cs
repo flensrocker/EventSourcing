@@ -15,17 +15,16 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   where TEventBase : class
 {
   private readonly string _domainEventStreamProvider;
-  private readonly string _domainEventStreamNamespace;
+  private readonly string _streamType = typeof(TEventBase).GetTypeName();
   private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStorage<TEventBase> _eventStore;
 
   private int _nextVersion;
   private IAsyncStream<DomainEvent<TEventBase>>? _domainEventStream;
 
-  protected DomainAggregateGrain(string domainEventStreamProvider, string domainEventStreamNamespace)
+  protected DomainAggregateGrain(string domainEventStreamProvider)
   {
     _domainEventStreamProvider = domainEventStreamProvider;
-    _domainEventStreamNamespace = domainEventStreamNamespace;
     _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
@@ -34,10 +33,10 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   {
     _nextVersion = Version + 1;
 
-    if (!string.IsNullOrWhiteSpace(_domainEventStreamProvider) && !string.IsNullOrWhiteSpace(_domainEventStreamNamespace))
+    if (!string.IsNullOrWhiteSpace(_domainEventStreamProvider) && !string.IsNullOrWhiteSpace(_streamType))
     {
       var streamProvider = this.GetStreamProvider(_domainEventStreamProvider);
-      var streamId = StreamId.Create(_domainEventStreamNamespace, this.GetPrimaryKey());
+      var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
       _domainEventStream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
     }
 
@@ -56,7 +55,7 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
       Metadata = new DomainEventMetadata
       {
         EventId = Guid.CreateVersion7(),
-        StreamType = _domainEventStreamNamespace,
+        StreamType = _streamType,
         StreamId = this.GetPrimaryKey(),
         StreamVersion = _nextVersion++,
         TenantId = tenantId,

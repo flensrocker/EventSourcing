@@ -19,7 +19,6 @@ public static class InMemoryDomainEventStorageExtensions
     entity.TenantId = @event.Metadata.TenantId;
     entity.CreatedAt = @event.Metadata.CreatedAt;
     entity.CreatedByUserId = @event.Metadata.CreatedByUserId;
-    entity.EventType = @event.GetType().GetTypeName();
     entity.EventJson = JsonSerializer.Serialize(@event, jsonOptions);
 
     return entity;
@@ -28,12 +27,9 @@ public static class InMemoryDomainEventStorageExtensions
   internal static DomainEvent<TEventBase> GetDomainEvent<TEventBase>(this DomainEventEntity entity, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
-    if (string.IsNullOrWhiteSpace(entity.EventType)
-      || Type.GetType(entity.EventType) is not Type type
-      || JsonSerializer.Deserialize(entity.EventJson, type, jsonOptions) is not DomainEvent<TEventBase> @event)
-      return default!;
-
-    return @event;
+    return JsonSerializer.Deserialize(entity.EventJson, typeof(DomainEvent<TEventBase>), jsonOptions) is DomainEvent<TEventBase> @event
+      ? @event
+      : default!;
   }
 
   public static IServiceCollection AddInMemoryDomainEventStorage<TEventBase>(this IServiceCollection services, Func<InMemoryDomainEventStorageOptions<TEventBase>> configureOptions)

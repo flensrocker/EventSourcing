@@ -7,9 +7,13 @@
     <Project Path="samples/ToDo/src/Orleans.Server/Flensrocker.ToDo.Orleans.Server.csproj" />
     <Project Path="samples/ToDo/src/WebApi/Flensrocker.ToDo.WebApi.csproj" />
   </Folder>
+  <Folder Name="/samples/ToDo/test/">
+    <Project Path="samples/ToDo/test/UnitTests/Flensrocker.ToDo.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="Directory.packages.props" />
+    <File Path="global.json" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/samples/">

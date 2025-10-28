@@ -11,16 +11,15 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   where TProjection : class, IDomainEventProjectable<TEventBase>, new()
 {
   private readonly string _streamProvider;
-  private readonly string _streamNamespace;
+  private readonly string _streamType = typeof(TEventBase).GetTypeName();
   private readonly IDomainEventStorage<TEventBase> _eventStore;
 
   private DomainEventProjection<TEventBase, TProjection>? _projection;
   private StreamSubscriptionHandle<DomainEvent<TEventBase>>? _subscription;
 
-  public ExplicitDomainEventProjectionGrain(string streamProvider, string streamNamespace)
+  public ExplicitDomainEventProjectionGrain(string streamProvider)
   {
     _streamProvider = streamProvider;
-    _streamNamespace = streamNamespace;
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
@@ -33,7 +32,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   public override async Task OnActivateAsync(CancellationToken cancellationToken)
   {
     var streamProvider = this.GetStreamProvider(_streamProvider);
-    var streamId = StreamId.Create(_streamNamespace, this.GetPrimaryKey());
+    var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
     var stream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
 
     var projection = await GetOrCreateProjection(cancellationToken);

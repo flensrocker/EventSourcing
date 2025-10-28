@@ -7,7 +7,7 @@ namespace Flensrocker.ToDo.Orleans.Server;
 public class ToDoDetailsViewGrain : ExplicitDomainEventProjectionGrain<ToDoEvent, ToDoDetailsView>
 {
   public ToDoDetailsViewGrain()
-    : base(ToDoNames.ToDoEventStreamProvider, ToDoNames.ToDoEventStream)
+    : base(ToDoNames.ToDoEventStreamProvider)
   {
   }
 }
