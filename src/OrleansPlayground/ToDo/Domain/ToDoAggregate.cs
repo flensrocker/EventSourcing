@@ -50,7 +50,7 @@ public partial class ToDoAggregate : IDomainAggregate<ToDoCommand, ToDoEvent>, I
       ToDoCommand.CompleteToDo completeToDo => Complete(completeToDo),
       ToDoCommand.DismissToDo dismissToDo => Dismiss(dismissToDo),
       ToDoCommand.ReopenToDo reopenToDo => Reopen(reopenToDo),
-      _ => throw new NotImplementedException($"command type {command.GetType().FullName}"),
+      _ => throw new NotImplementedException($"command type {command.GetType().GetTypeName()}"),
     };
   }
 }
