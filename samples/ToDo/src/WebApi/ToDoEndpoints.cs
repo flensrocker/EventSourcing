@@ -1,5 +1,6 @@
 ﻿using Flensrocker.Domain.Orleans.Abstractions;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Abstractions.Views;
 using Flensrocker.ToDo.Orleans.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -78,10 +79,10 @@ public static class ToDoEndpoints
         : Results.BadRequest();
     });
 
-    builder.MapGet("/api/todo/{toDoId}", static async (Guid toDoId, IClusterClient client) =>
+    builder.MapGet("/api/todo/{toDoId}", static async (Guid toDoId, IClusterClient client, CancellationToken cancellationToken) =>
     {
-      var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
-      var result = await toDoDetails.GetView();
+      var toDoDetails = client.GetGrain<IDomainEventProjectionGrain<ToDoDetailsView>>(toDoId);
+      var result = await toDoDetails.GetProjection(cancellationToken);
       return result is not null
         ? Results.Ok(result)
         : Results.NotFound();

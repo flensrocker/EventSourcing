@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Domain.Orleans.Abstractions\Flensrocker.Domain.Orleans.Abstractions.csproj" />
     <ProjectReference Include="..\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
   </ItemGroup>
 

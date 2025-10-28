@@ -93,5 +93,5 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
     => _eventStore.ApplyUpdatesToStorage(this.GetPrimaryKey(), updates, expectedVersion);
 
   Task<KeyValuePair<int, TState>> ICustomStorageInterface<TState, DomainEvent<TEventBase>>.ReadStateFromStorage()
-    => _eventStore.ReadStateFromStorage<TState>(this.GetPrimaryKey());
+    => _eventStore.ReadStateFromStorage<TState>(this.GetPrimaryKey(), default);
 }

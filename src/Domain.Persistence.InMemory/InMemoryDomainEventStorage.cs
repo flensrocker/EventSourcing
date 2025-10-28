@@ -10,7 +10,7 @@ public class InMemoryDomainEventStorage<TEventBase> : IDomainEventStorage<TEvent
 {
   private static ConcurrentDictionary<Guid, ImmutableArray<DomainEventEntity>> _storage = new();
 
-  public Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid stateId)
+  public Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid stateId, CancellationToken cancellationToken)
     where TState : class, IDomainEventProjectable<TEventBase>, new()
   {
     var state = new TState();

@@ -18,11 +18,11 @@ public class DomainEventProjection<TEventBase, TView> : IAsyncObserver<DomainEve
     _viewId = viewId;
   }
 
-  public static async Task<DomainEventProjection<TEventBase, TView>> Create(IDomainEventStorage<TEventBase> eventStore, Guid viewId)
+  public static async Task<DomainEventProjection<TEventBase, TView>> Create(IDomainEventStorage<TEventBase> eventStore, Guid viewId, CancellationToken cancellationToken)
   {
     var observer = new DomainEventProjection<TEventBase, TView>(eventStore, viewId);
 
-    (_, observer.View) = await eventStore.ReadStateFromStorage<TView>(viewId);
+    (_, observer.View) = await eventStore.ReadStateFromStorage<TView>(viewId, cancellationToken);
 
     return observer;
   }
