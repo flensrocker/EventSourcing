@@ -8,7 +8,7 @@ namespace Flensrocker.ToDo.Orleans.Server;
 
 public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection> : Grain, IDomainEventProjectionGrain<TProjection>
   where TEventBase : class
-  where TProjection : class, IDomainEventProjectable<TEventBase>, IDomainEventVersionable, new()
+  where TProjection : class, IDomainEventProjectable<TEventBase>, new()
 {
   private readonly string _streamProvider;
   private readonly string _streamNamespace;
@@ -24,7 +24,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
-  private async Task<DomainEventProjection<TEventBase, TProjection>> GetOrCreateProjection(CancellationToken cancellationToken)
+  private async Task<DomainEventProjection<TEventBase, TProjection>?> GetOrCreateProjection(CancellationToken cancellationToken)
   {
     _projection ??= await DomainEventProjection<TEventBase, TProjection>.Create(_eventStore, this.GetPrimaryKey(), cancellationToken);
     return _projection;
@@ -37,7 +37,8 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     var stream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
 
     var projection = await GetOrCreateProjection(cancellationToken);
-    _subscription = await stream.SubscribeAsync(projection);
+    if (projection is not null)
+      _subscription = await stream.SubscribeAsync(projection);
   }
 
   public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
@@ -54,9 +55,8 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   public async Task<TProjection?> GetProjection(CancellationToken cancellationToken)
   {
     var projection = await GetOrCreateProjection(cancellationToken);
-
-    if (projection.View is { Version: > 0 })
-      return projection.View;
+    if (projection is not null)
+      return projection.Projection;
 
     DeactivateOnIdle();
     return default;

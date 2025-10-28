@@ -3,49 +3,48 @@ using Orleans.Streams;
 
 namespace Flensrocker.Domain.Orleans.Server;
 
-public class DomainEventProjection<TEventBase, TView> : IAsyncObserver<DomainEvent<TEventBase>>
+public class DomainEventProjection<TEventBase, TProjection> : IAsyncObserver<DomainEvent<TEventBase>>
   where TEventBase : class
-  where TView : class, IDomainEventProjectable<TEventBase>, new()
+  where TProjection : class, IDomainEventProjectable<TEventBase>, new()
 {
   private readonly IDomainEventStorage<TEventBase> _eventStore;
-  private readonly Guid _viewId;
+  private readonly Guid _projectionId;
 
-  public TView View { get; private set; } = default!;
+  public TProjection Projection { get; private set; } = default!;
 
-  private DomainEventProjection(IDomainEventStorage<TEventBase> eventStore, Guid viewId)
+  private DomainEventProjection(IDomainEventStorage<TEventBase> eventStore, Guid projectionId)
   {
     _eventStore = eventStore;
-    _viewId = viewId;
+    _projectionId = projectionId;
   }
 
-  public static async Task<DomainEventProjection<TEventBase, TView>> Create(IDomainEventStorage<TEventBase> eventStore, Guid viewId, CancellationToken cancellationToken)
+  public static async Task<DomainEventProjection<TEventBase, TProjection>?> Create(IDomainEventStorage<TEventBase> eventStore, Guid projectionId, CancellationToken cancellationToken)
   {
-    var observer = new DomainEventProjection<TEventBase, TView>(eventStore, viewId);
+    var observer = new DomainEventProjection<TEventBase, TProjection>(eventStore, projectionId);
 
-    (_, observer.View) = await eventStore.ReadStateFromStorage<TView>(viewId, cancellationToken);
+    (var version, observer.Projection) = await eventStore.ReadStateFromStorage<TProjection>(projectionId, cancellationToken);
 
-    return observer;
+    return version == 0
+      ? null
+      : observer;
   }
 
   public async Task OnNextAsync(DomainEvent<TEventBase> item, StreamSequenceToken? token = null)
   {
-    if (View is IDomainEventVersionable versionedView)
+    if (Projection is IDomainEventVersionable withVersion)
     {
-      if (item.Metadata.StreamVersion <= versionedView.Version)
+      if (item.Metadata.StreamVersion <= withVersion.Version)
         return;
 
-      if (item.Metadata.StreamVersion > versionedView.Version + 1)
+      if (item.Metadata.StreamVersion > withVersion.Version + 1)
       {
-        var missingEvents = await _eventStore.ReadEventsFromStorage(_viewId, versionedView.Version + 1, item.Metadata.StreamVersion, default);
+        var missingEvents = await _eventStore.ReadEventsFromStorage(_projectionId, withVersion.Version + 1, item.Metadata.StreamVersion, default);
         if (missingEvents is { Count: > 0 })
-          View.ApplyEvents(missingEvents);
+          Projection.ApplyEvents(missingEvents);
       }
     }
 
-    View.Apply(item);
-    // TODO push updated view somewhere... stream? IAsyncEnumerable?
-
-    return;
+    Projection.Apply(item);
   }
 
   public Task OnErrorAsync(Exception ex)
