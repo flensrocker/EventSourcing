@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain.Persistence.InMemory\Flensrocker.Domain.Persistence.InMemory.csproj" />
-    <ProjectReference Include="..\Orleans.Abstractions\Flensrocker.Orleans.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Domain.Persistence.InMemory\Flensrocker.Domain.Persistence.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\Orleans.Abstractions\Flensrocker.Orleans.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
