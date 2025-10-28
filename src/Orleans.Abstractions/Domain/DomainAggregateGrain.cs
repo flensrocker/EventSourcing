@@ -15,15 +15,15 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   where TCommandBase : class
   where TEventBase : class
 {
-  private readonly string? _domainEventStreamProvider;
-  private readonly string? _domainEventStreamNamespace;
+  private readonly string _domainEventStreamProvider;
+  private readonly string _domainEventStreamNamespace;
   private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStorage<TEventBase> _eventStore;
 
   private int _nextVersion;
   private IAsyncStream<DomainEvent<TEventBase>>? _domainEventStream;
 
-  protected DomainAggregateGrain(string? domainEventStreamProvider, string? domainEventStreamNamespace)
+  protected DomainAggregateGrain(string domainEventStreamProvider, string domainEventStreamNamespace)
   {
     _domainEventStreamProvider = domainEventStreamProvider;
     _domainEventStreamNamespace = domainEventStreamNamespace;
@@ -57,7 +57,7 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
       Metadata = new DomainEventMetadata
       {
         EventId = Guid.CreateVersion7(),
-        StreamType = typeof(TEventBase).GetTypeName(),
+        StreamType = _domainEventStreamNamespace,
         StreamId = this.GetPrimaryKey(),
         StreamVersion = _nextVersion++,
         TenantId = tenantId,
