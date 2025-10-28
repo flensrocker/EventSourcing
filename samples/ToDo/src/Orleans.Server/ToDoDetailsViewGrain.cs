@@ -4,7 +4,7 @@ using Flensrocker.ToDo.Orleans.Abstractions;
 
 namespace Flensrocker.ToDo.Orleans.Server;
 
-public class ToDoDetailsViewGrain : ExplicitDomainEventProjectionGrain<ToDoEvent, ToDoDetailsView>
+public class ToDoDetailsViewGrain : ExplicitDomainEventProjectionGrain<ToDoEvent, ToDoDetailsView>, IToDoDetailsViewGrain
 {
   public ToDoDetailsViewGrain()
     : base(ToDoNames.ToDoEventStreamProvider)

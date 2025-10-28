@@ -1,6 +1,4 @@
-﻿using Flensrocker.Domain.Orleans.Abstractions;
-using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Abstractions.Views;
+﻿using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +21,7 @@ public static class ToDoEndpoints
 
   private static async Task<bool> ExecuteCommandAsync(this IClusterClient client, Guid toDoId, ToDoCommand command)
   {
-    var toDo = client.GetGrain<IDomainAggegrateGrain<ToDoCommand>>(toDoId);
+    var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
     var result = await toDo.ExecuteCommand(command);
     return result;
   }
@@ -81,7 +79,7 @@ public static class ToDoEndpoints
 
     builder.MapGet("/api/todo/{toDoId}", static async (Guid toDoId, IClusterClient client, CancellationToken cancellationToken) =>
     {
-      var toDoDetails = client.GetGrain<IDomainEventProjectionGrain<ToDoDetailsView>>(toDoId);
+      var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
       var result = await toDoDetails.GetProjection(cancellationToken);
       return result is not null
         ? Results.Ok(result)

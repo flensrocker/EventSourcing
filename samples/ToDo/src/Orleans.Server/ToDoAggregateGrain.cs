@@ -8,7 +8,7 @@ using Orleans.Providers;
 namespace Flensrocker.ToDo.Orleans.Server;
 
 [LogConsistencyProvider(ProviderName = ToDoNames.ToDoEventStorageProvider)]
-public class ToDoAggregateGrain : DomainAggregateGrain<ToDoAggregate, ToDoCommand, ToDoEvent>
+public class ToDoAggregateGrain : DomainAggregateGrain<ToDoAggregate, ToDoCommand, ToDoEvent>, IToDoAggregateGrain
 {
   public ToDoAggregateGrain()
     : base(ToDoNames.ToDoEventStreamProvider)
