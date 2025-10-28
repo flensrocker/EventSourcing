@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Flensrocker.ToDo.Domain;
+namespace Flensrocker.ToDo.Abstractions;
 
 public abstract partial record ToDoCommand
 {
@@ -9,7 +9,7 @@ public abstract partial record ToDoCommand
     public required string Title { get; init; }
 
     [JsonConstructor]
-    private MemorizeToDo() { }
+    internal MemorizeToDo() { }
 
     public static MemorizeToDo? Create(string? title)
     {

@@ -1,5 +1,5 @@
 ﻿using Flensrocker.Domain.Orleans.Abstractions;
-using Flensrocker.ToDo.Domain;
+using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

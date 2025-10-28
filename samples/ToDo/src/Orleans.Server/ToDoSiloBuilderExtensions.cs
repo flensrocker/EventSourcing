@@ -1,6 +1,5 @@
 ﻿using Flensrocker.Domain.Abstractions;
 using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Domain;
 using Flensrocker.ToDo.Orleans.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Serialization;
@@ -16,7 +15,7 @@ public static class ToDoSiloBuilderExtensions
     siloBuilder.Services.AddScoped<IDomainEventStorage<ToDoEvent>>(sp => sp.GetRequiredService<TDomainEventStorage>());
     siloBuilder.Services.AddSerializer(serializerBuilder =>
     {
-      serializerBuilder.AddJsonSerializer(isSupported: type => type.IsAssignableTo(typeof(ToDoCommand)) || type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>)));
+      serializerBuilder.AddJsonSerializer(isSupported: type => type.IsAssignableTo(typeof(ToDoCommand)) || type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>)), ToDoJsonSerializerContext.Default.Options);
     });
 
     siloBuilder.AddMemoryStreams(ToDoNames.ToDoEventStreamProvider);

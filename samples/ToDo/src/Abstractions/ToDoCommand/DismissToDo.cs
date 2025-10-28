@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Flensrocker.ToDo.Domain;
+namespace Flensrocker.ToDo.Abstractions;
 
 public abstract partial record ToDoCommand
 {
@@ -9,7 +9,7 @@ public abstract partial record ToDoCommand
     public required string Reason { get; init; }
 
     [JsonConstructor]
-    private DismissToDo() { }
+    internal DismissToDo() { }
 
     public static DismissToDo? Create(string? reason)
     {

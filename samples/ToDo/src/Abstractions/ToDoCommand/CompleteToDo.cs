@@ -1,13 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Flensrocker.ToDo.Domain;
+namespace Flensrocker.ToDo.Abstractions;
 
 public abstract partial record ToDoCommand
 {
   public sealed record CompleteToDo : ToDoCommand
   {
     [JsonConstructor]
-    private CompleteToDo() { }
+    internal CompleteToDo() { }
 
     public static CompleteToDo? Create()
     {
