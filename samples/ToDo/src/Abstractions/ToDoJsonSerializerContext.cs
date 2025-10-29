@@ -12,7 +12,7 @@ namespace Flensrocker.ToDo.Abstractions;
 [JsonSerializable(typeof(ToDoCommand.DismissToDo))]
 [JsonSerializable(typeof(ToDoCommand.MemorizeToDo))]
 [JsonSerializable(typeof(ToDoCommand.ReopenToDo))]
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
+[JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true, PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
 public partial class ToDoJsonSerializerContext : JsonSerializerContext
 {
 }
