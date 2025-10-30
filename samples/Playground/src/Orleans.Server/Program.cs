@@ -3,20 +3,21 @@ using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Server;
 using Microsoft.Extensions.Hosting;
 
-await Host
-  .CreateDefaultBuilder(args)
-  .ConfigureServices(services =>
-  {
-    services.AddInMemoryDomainEventStorage(() => new InMemoryDomainEventStorageOptions<ToDoEvent>
-    {
-      JsonOptions = ToDoJsonSerializerContext.Default.Options,
-    });
-  })
-  .UseOrleans(siloBuilder =>
-  {
-    siloBuilder.UseLocalhostClustering();
-    siloBuilder.AddMemoryGrainStorage("PubSubStore");
+var builder = Host.CreateApplicationBuilder(args);
 
-    siloBuilder.AddToDo();
-  })
-  .RunConsoleAsync();
+builder.AddServiceDefaults();
+
+builder.Services.AddInMemoryDomainEventStorage(() => new InMemoryDomainEventStorageOptions<ToDoEvent>
+{
+  JsonOptions = ToDoJsonSerializerContext.Default.Options,
+});
+
+builder.UseOrleans(siloBuilder =>
+{
+  siloBuilder.UseLocalhostClustering();
+  siloBuilder.AddMemoryGrainStorage("PubSubStore");
+
+  siloBuilder.AddToDo();
+});
+
+await builder.Build().RunAsync();

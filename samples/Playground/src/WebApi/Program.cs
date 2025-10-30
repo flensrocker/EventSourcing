@@ -4,6 +4,8 @@ using Flensrocker.ToDo.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Host.UseOrleansClient(static clientBuilder =>
 {
   clientBuilder.UseLocalhostClustering();
@@ -19,6 +21,8 @@ builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 });
 
 using var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.MapToDo();
 
