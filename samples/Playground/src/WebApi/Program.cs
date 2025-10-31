@@ -6,10 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.AddKeyedRedisClient("redis");
+
 builder.Host.UseOrleansClient(static clientBuilder =>
 {
-  clientBuilder.UseLocalhostClustering();
-
+  clientBuilder.UseRedisClustering("redis");
   clientBuilder.Services.AddToDoSerializer();
 });
 

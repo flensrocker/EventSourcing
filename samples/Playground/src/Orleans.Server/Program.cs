@@ -7,6 +7,8 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.AddKeyedRedisClient("redis");
+
 builder.Services.AddInMemoryDomainEventStorage(() => new InMemoryDomainEventStorageOptions<ToDoEvent>
 {
   JsonOptions = ToDoJsonSerializerContext.Default.Options,
@@ -14,9 +16,7 @@ builder.Services.AddInMemoryDomainEventStorage(() => new InMemoryDomainEventStor
 
 builder.UseOrleans(siloBuilder =>
 {
-  siloBuilder.UseLocalhostClustering();
-  siloBuilder.AddMemoryGrainStorage("PubSubStore");
-
+  siloBuilder.UseRedisClustering("redis");
   siloBuilder.AddToDo();
 });
 
