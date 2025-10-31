@@ -11,14 +11,14 @@ Content-Type: application/json
 }
 
 ###
-PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}/complete
+PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/complete
 Content-Type: application/json
 
 {
 }
 
 ###
-PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}/dismiss
+PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/dismiss
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}/reopen
+PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/reopen
 Content-Type: application/json
 
 {
@@ -36,4 +36,4 @@ Content-Type: application/json
 GET http://{{host}}:{{port}}/api/todo
 
 ###
-GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.toDoId}}
+GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}

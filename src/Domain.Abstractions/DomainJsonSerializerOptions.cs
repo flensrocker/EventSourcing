@@ -1,0 +1,36 @@
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace Flensrocker.Domain.Abstractions;
+
+public interface ISupportJsonSerialization
+{
+  bool Supports(Type type);
+}
+
+public class DomainJsonSerializerOptions
+{
+  public static DomainJsonSerializerOptions Default { get; } = new();
+
+  private readonly List<Func<Type, bool>> _supports = new();
+
+  public JsonSerializerOptions Options { get; } = DomainExtensions.CreateBaseJsonSerializerOptions();
+
+  public DomainJsonSerializerOptions Add<T>(T context)
+    where T : JsonSerializerContext, ISupportJsonSerialization
+  {
+    return Add(context.Supports, context);
+  }
+
+  public DomainJsonSerializerOptions Add(Func<Type, bool> supports, JsonSerializerContext context)
+  {
+    _supports.Add(supports);
+    Options.WithTypeResolversOf(context);
+    return this;
+  }
+
+  public bool Supports(Type type)
+  {
+    return _supports.Any(supports => supports(type));
+  }
+}

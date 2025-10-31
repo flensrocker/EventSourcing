@@ -1,24 +1,32 @@
+using Flensrocker.Domain.Abstractions;
 using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Orleans.Abstractions;
 using Flensrocker.ToDo.WebApi;
+using Orleans.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+var globalJsonOptions = DomainJsonSerializerOptions.Default
+  .AddToDoJsonOptions();
+
 builder.AddKeyedRedisClient("redis");
 
-builder.Host.UseOrleansClient(static clientBuilder =>
+builder.Host.UseOrleansClient(clientBuilder =>
 {
   clientBuilder.UseRedisClustering("redis");
-  clientBuilder.Services.AddToDoSerializer();
+  clientBuilder.Services.AddSerializer(serializerBuilder =>
+  {
+    serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions.Options);
+  });
 });
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 {
-  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = ToDoJsonSerializerContext.Default.Options.AllowOutOfOrderMetadataProperties;
-  jsonOptions.SerializerOptions.PropertyNamingPolicy = ToDoJsonSerializerContext.Default.Options.PropertyNamingPolicy;
-  jsonOptions.SerializerOptions.TypeInfoResolverChain.Add(ToDoJsonSerializerContext.Default);
+  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = globalJsonOptions.Options.AllowOutOfOrderMetadataProperties;
+  jsonOptions.SerializerOptions.PropertyNamingPolicy = globalJsonOptions.Options.PropertyNamingPolicy;
+  foreach (var typeResolver in globalJsonOptions.Options.TypeInfoResolverChain)
+    jsonOptions.SerializerOptions.TypeInfoResolverChain.Add(typeResolver);
 });
 
 using var app = builder.Build();
