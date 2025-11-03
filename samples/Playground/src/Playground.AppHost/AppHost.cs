@@ -8,6 +8,8 @@ var redis = builder
 
 var orleans = builder
   .AddOrleans("ToDo")
+  .WithServiceId("ToDo")
+  .WithClusterId("default")
   .WithClustering(redis)
   .WithMemoryGrainStorage("PubSubStore");
 
