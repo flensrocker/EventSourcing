@@ -14,7 +14,7 @@ var orleans = builder
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
   .WithReference(orleans)
-  .WithReplicas(3)
+  //.WithReplicas(3)
   .WaitFor(redis);
 
 builder
