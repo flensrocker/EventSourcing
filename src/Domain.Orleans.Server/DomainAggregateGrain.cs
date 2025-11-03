@@ -14,7 +14,6 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   where TCommandBase : class
   where TEventBase : class
 {
-  private readonly string _domainEventStreamProvider;
   private readonly string _streamType = typeof(TEventBase).GetTypeName();
   private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStorage<TEventBase> _eventStore;
@@ -22,9 +21,8 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   private int _nextVersion;
   private IAsyncStream<DomainEvent<TEventBase>>? _domainEventStream;
 
-  protected DomainAggregateGrain(string domainEventStreamProvider)
+  protected DomainAggregateGrain()
   {
-    _domainEventStreamProvider = domainEventStreamProvider;
     _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
@@ -33,9 +31,9 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   {
     _nextVersion = Version + 1;
 
-    if (!string.IsNullOrWhiteSpace(_domainEventStreamProvider) && !string.IsNullOrWhiteSpace(_streamType))
+    if (!string.IsNullOrWhiteSpace(DomainConstants.StreamProviderDomainEvents) && !string.IsNullOrWhiteSpace(_streamType))
     {
-      var streamProvider = this.GetStreamProvider(_domainEventStreamProvider);
+      var streamProvider = this.GetStreamProvider(DomainConstants.StreamProviderDomainEvents);
       var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
       _domainEventStream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
     }

@@ -11,7 +11,6 @@ namespace Flensrocker.ToDo.Orleans.Server;
 public class ToDoAggregateGrain : DomainAggregateGrain<ToDoAggregate, ToDoCommand, ToDoEvent>, IToDoAggregateGrain
 {
   public ToDoAggregateGrain()
-    : base(ToDoNames.ToDoEventStreamProvider)
   {
   }
 }

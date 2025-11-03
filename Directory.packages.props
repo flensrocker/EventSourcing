@@ -4,8 +4,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+    <PackageVersion Include="Aspire.Hosting.Nats" Version="9.5.2" />
     <PackageVersion Include="Aspire.Hosting.Orleans" Version="9.5.2" />
     <PackageVersion Include="Aspire.Hosting.Redis" Version="9.5.2" />
+    <PackageVersion Include="Aspire.NATS.Net" Version="9.5.2" />
     <PackageVersion Include="Aspire.StackExchange.Redis" Version="9.5.2" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.2" />
@@ -19,6 +21,7 @@
     <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="9.2.1" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="9.2.1" />
     <PackageVersion Include="Microsoft.Orleans.Streaming" Version="9.2.1" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="9.2.0-nightly.20251031.1.alpha.1" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.12.0" />

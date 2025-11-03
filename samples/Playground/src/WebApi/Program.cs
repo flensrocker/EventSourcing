@@ -14,11 +14,12 @@ builder.AddKeyedRedisClient("redis");
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {
-  clientBuilder.UseRedisClustering("redis");
   clientBuilder.Services.AddSerializer(serializerBuilder =>
   {
     serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions.Options);
   });
+
+  clientBuilder.UseRedisClustering("redis");
 });
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>

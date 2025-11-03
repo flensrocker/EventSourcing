@@ -1,4 +1,5 @@
 ﻿using Flensrocker.Domain.Abstractions;
+using Flensrocker.Domain.Orleans.Abstractions;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Abstractions;
 using Orleans.Streams;
@@ -19,7 +20,7 @@ public class ToDoEventToTenantRouterGrain : Grain, IGrainWithGuidKey, IStreamSub
   {
     var tenantId = item.Metadata.TenantId;
     var tenantStreamId = StreamId.Create(ToDoNames.ToDoListViewStream, tenantId);
-    var tenantStream = this.GetStreamProvider(ToDoNames.ToDoEventStreamProvider).GetStream<DomainEvent<ToDoEvent>>(tenantStreamId);
+    var tenantStream = this.GetStreamProvider(DomainConstants.StreamProviderDomainEvents).GetStream<DomainEvent<ToDoEvent>>(tenantStreamId);
 
     await tenantStream.OnNextAsync(item);
   }
