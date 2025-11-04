@@ -18,8 +18,6 @@ builder.Host.UseOrleansClient(clientBuilder =>
   {
     serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions.Options);
   });
-
-  clientBuilder.UseRedisClustering("redis");
 });
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>

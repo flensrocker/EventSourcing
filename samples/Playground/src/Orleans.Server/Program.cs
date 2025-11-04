@@ -26,7 +26,6 @@ builder.UseOrleans(siloBuilder =>
     serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions.Options);
   });
 
-  siloBuilder.UseRedisClustering("redis");
   siloBuilder.AddToDo();
 });
 
