@@ -6,8 +6,6 @@ public static class ToDoExtensions
 {
   public static DomainJsonSerializerOptions AddToDoJsonOptions(this DomainJsonSerializerOptions jsonOptions)
   {
-    return jsonOptions
-      .Add(ToDoEventJsonSerializerContext.Default)
-      .Add(ToDoCommandJsonSerializerContext.Default);
+    return jsonOptions.Add(ToDoJsonSerializerContext.Default);
   }
 }
