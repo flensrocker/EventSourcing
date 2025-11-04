@@ -2,11 +2,6 @@ using Flensrocker.Domain.Orleans.Abstractions;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var nats = builder
-  .AddNats("nats")
-  .WithJetStream()
-  .WithDataVolume();
-
 var redis = builder
   .AddRedis("redis")
   .WithImageRegistry("ghcr.io")
@@ -14,17 +9,23 @@ var redis = builder
   .WithEntrypoint("/app/GarnetServer")
   .WithDataVolume();
 
+var nats = builder
+  .AddNats("nats")
+  .WithJetStream()
+  .WithDataVolume();
+
 var orleans = builder
   .AddOrleans("ToDo")
   .WithServiceId("ToDo")
   .WithClusterId("default")
   .WithClustering(redis)
-  .WithMemoryGrainStorage("PubSubStore")
-  .WithMemoryStreaming(DomainConstants.StreamProviderDomainEvents);
+  .WithMemoryGrainStorage("PubSubStore");
+  //.WithMemoryStreaming(DomainConstants.StreamProviderDomainEvents);
   //.WithStreaming(DomainConstants.StreamProviderDomainEvents, nats);
 
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
+  .WithReference(nats)
   .WithReference(orleans)
   //.WithReplicas(3)
   .WaitFor(nats)
@@ -32,6 +33,7 @@ var silo = builder
 
 builder
   .AddProject<Projects.Playground_WebApi>("playground-webapi")
+  .WithReference(nats)
   .WithReference(orleans.AsClient())
   .WithExternalHttpEndpoints()
   .WaitFor(nats)

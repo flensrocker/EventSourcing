@@ -22,8 +22,16 @@ public static class DomainExtensions
 
   public static string GetTypeName(this Type? type)
   {
-    return type is null
+    return type is null || type.FullName is not string typeFullName || type.Assembly.GetName().Name is not string assemblyName
       ? ""
-      : $"{type.FullName}, {type.Assembly.GetName().Name}";
+      : $"{typeFullName.Replace(".", "-")}_-_{assemblyName.Replace(".", "-")}";
+  }
+
+  public static Type? GetTypeFromName(string typeName)
+  {
+    if (string.IsNullOrWhiteSpace(typeName))
+      return null;
+
+    return Type.GetType(typeName.Replace("_-_", ", ").Replace("-", "."), false);
   }
 }

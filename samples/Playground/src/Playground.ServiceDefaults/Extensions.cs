@@ -65,6 +65,7 @@ public static class Extensions
       {
         //tracing.AddSource("Microsoft.Orleans.Runtime");
         tracing.AddSource("Microsoft.Orleans.Application");
+        tracing.AddSource("NATS.Net");
 
         tracing
           .AddSource(builder.Environment.ApplicationName)

@@ -12,4 +12,11 @@ public sealed class ToDoNamesTests
   {
     Assert.AreEqual(typeof(ToDoEvent).GetTypeName(), ToDoNames.ToDoEventStream);
   }
+
+  [TestMethod]
+  public void ToDoEventStreamNamespaceCanBeConvertedToType()
+  {
+    var toDoEventType = DomainExtensions.GetTypeFromName(ToDoNames.ToDoEventStream);
+    Assert.AreEqual(typeof(ToDoEvent), toDoEventType);
+  }
 }
