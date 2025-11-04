@@ -1,5 +1,3 @@
-using Flensrocker.Domain.Orleans.Abstractions;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 var redis = builder
@@ -20,12 +18,11 @@ var orleans = builder
   .WithClusterId("default")
   .WithClustering(redis)
   .WithMemoryGrainStorage("PubSubStore");
-  //.WithMemoryStreaming(DomainConstants.StreamProviderDomainEvents);
-  //.WithStreaming(DomainConstants.StreamProviderDomainEvents, nats);
+//.WithStreaming(Flensrocker.Domain.Orleans.Abstractions.DomainConstants.StreamProviderDomainEvents, nats); // TODO needs NatsStreamProviderBuilder
 
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
-  .WithReference(nats)
+  .WithReference(nats) // TODO remove when NatsStreamProviderBuilder exist
   .WithReference(orleans)
   //.WithReplicas(3)
   .WaitFor(nats)
@@ -33,7 +30,7 @@ var silo = builder
 
 builder
   .AddProject<Projects.Playground_WebApi>("playground-webapi")
-  .WithReference(nats)
+  .WithReference(nats) // TODO remove when NatsStreamProviderBuilder exist
   .WithReference(orleans.AsClient())
   .WithExternalHttpEndpoints()
   .WaitFor(nats)
