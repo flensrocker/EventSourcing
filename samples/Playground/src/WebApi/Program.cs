@@ -15,7 +15,6 @@ var globalJsonOptions = DomainJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
-builder.AddKeyedNatsClient("nats");
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {

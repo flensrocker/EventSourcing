@@ -18,7 +18,6 @@ var globalJsonOptions = DomainJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
-builder.AddKeyedNatsClient("nats");
 
 builder.Services.AddInMemoryDomainEventStorage(() => new InMemoryDomainEventStorageOptions<ToDoEvent>
 {
@@ -43,6 +42,7 @@ builder.UseOrleans(siloBuilder =>
       Url = natsUri.OriginalString,
     };
   });
+
   siloBuilder.AddToDo();
 });
 
