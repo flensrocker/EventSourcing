@@ -17,7 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\ToDo\src\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\WebApi\Flensrocker.ToDo.WebApi.csproj" />
-    <ProjectReference Include="..\Playground.ServiceDefaults\Playground.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

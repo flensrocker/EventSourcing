@@ -25,7 +25,7 @@
     <ProjectReference Include="..\..\..\..\src\Domain.Persistence.InMemory\Flensrocker.Domain.Persistence.InMemory.csproj" />
     <ProjectReference Include="..\..\..\..\src\Domain.Orleans.Server\Flensrocker.Domain.Orleans.Server.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\Orleans.Server\Flensrocker.ToDo.Orleans.Server.csproj" />
-    <ProjectReference Include="..\Playground.ServiceDefaults\Playground.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
