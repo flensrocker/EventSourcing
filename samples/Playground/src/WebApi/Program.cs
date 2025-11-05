@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Flensrocker.Domain.Abstractions;
 using Flensrocker.Domain.Orleans.Abstractions;
 using Flensrocker.ToDo.Abstractions;
@@ -28,7 +27,7 @@ builder.Host.UseOrleansClient(clientBuilder =>
   clientBuilder.AddNatsStreams(DomainConstants.StreamProviderDomainEvents, options =>
   {
     options.StreamName = "Orleans";
-    options.JsonSerializerOptions = new JsonSerializerOptions(globalJsonOptions.Options);
+    options.JsonSerializerOptions = globalJsonOptions;
     options.NatsClientOptions = NatsOpts.Default with
     {
       Url = natsUri.OriginalString,

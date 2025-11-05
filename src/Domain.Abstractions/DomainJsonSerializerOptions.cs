@@ -33,4 +33,7 @@ public class DomainJsonSerializerOptions
   {
     return _supports.Any(supports => supports(type));
   }
+
+  public static implicit operator JsonSerializerOptions(DomainJsonSerializerOptions options)
+    => new JsonSerializerOptions(options.Options);
 }

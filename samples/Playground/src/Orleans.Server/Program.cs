@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Flensrocker.Domain.Abstractions;
+﻿using Flensrocker.Domain.Abstractions;
 using Flensrocker.Domain.Orleans.Abstractions;
 using Flensrocker.Domain.Persistence.InMemory;
 using Flensrocker.ToDo.Abstractions;
@@ -28,7 +27,7 @@ builder.UseOrleans(siloBuilder =>
 {
   siloBuilder.Services.AddSerializer(serializerBuilder =>
   {
-    serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions.Options);
+    serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions);
   });
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
@@ -36,7 +35,7 @@ builder.UseOrleans(siloBuilder =>
   siloBuilder.AddNatsStreams(DomainConstants.StreamProviderDomainEvents, options =>
   {
     options.StreamName = "Orleans";
-    options.JsonSerializerOptions = new JsonSerializerOptions(globalJsonOptions.Options);
+    options.JsonSerializerOptions = globalJsonOptions;
     options.NatsClientOptions = NatsOpts.Default with
     {
       Url = natsUri.OriginalString,
