@@ -10,7 +10,7 @@ public sealed class ToDoNamesTests
   [TestMethod]
   public void ToDoEventStreamNamespaceMatchesTypeName()
   {
-    Assert.AreEqual(typeof(ToDoEvent).GetTypeName(), ToDoNames.ToDoEventStream);
+    Assert.AreEqual(ToDoNames.ToDoEventStream, typeof(ToDoEvent).GetTypeName());
   }
 
   [TestMethod]

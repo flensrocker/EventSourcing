@@ -5,12 +5,25 @@ var redis = builder
   .WithImageRegistry("ghcr.io")
   .WithImage("microsoft/garnet", "1")
   .WithEntrypoint("/app/GarnetServer")
-  .WithDataVolume();
+  .WithDataVolume("redis-data");
 
 var nats = builder
   .AddNats("nats")
   .WithJetStream()
-  .WithDataVolume();
+  .WithDataVolume("nats-data");
+
+var postgres = builder
+  .AddPostgres("postgres")
+  .WithImageTag("18-alpine")
+  .WithArgs("-c", "wal_level=logical")
+  .WithDataVolume("postgres-data");
+
+var tododb = postgres.AddDatabase("todo");
+
+var migrate = builder
+  .AddProject<Projects.Playground_Migrate>("migrate")
+  .WithReference(tododb)
+  .WaitFor(tododb);
 
 var orleans = builder
   .AddOrleans("ToDo")
@@ -23,10 +36,12 @@ var orleans = builder
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
   .WithReference(nats) // TODO remove when NatsStreamProviderBuilder exist
+  .WithReference(tododb)
   .WithReference(orleans)
   //.WithReplicas(3)
   .WaitFor(nats)
-  .WaitFor(redis);
+  .WaitFor(redis)
+  .WaitForCompletion(migrate);
 
 builder
   .AddProject<Projects.Playground_WebApi>("playground-webapi")
