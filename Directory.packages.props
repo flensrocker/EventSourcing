@@ -19,6 +19,7 @@
     <PackageVersion Include="Microsoft.Orleans.Core.Abstractions" Version="9.2.0-nightly.20251103.1" />
     <PackageVersion Include="Microsoft.Orleans.EventSourcing" Version="9.2.0-nightly.20251103.1" />
     <PackageVersion Include="Microsoft.Orleans.Persistence.Memory" Version="9.2.0-nightly.20251103.1" />
+    <PackageVersion Include="Microsoft.Orleans.Persistence.AdoNet" Version="9.2.0-nightly.20251103.1" />
     <PackageVersion Include="Microsoft.Orleans.Sdk" Version="9.2.0-nightly.20251103.1" />
     <PackageVersion Include="Microsoft.Orleans.Serialization.Abstractions" Version="9.2.0-nightly.20251103.1" />
     <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="9.2.0-nightly.20251103.1" />

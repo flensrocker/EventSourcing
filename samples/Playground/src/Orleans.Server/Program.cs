@@ -31,14 +31,13 @@ builder.UseOrleans(siloBuilder =>
   });
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  var natsUri = new Uri(natsConnectionString);
   siloBuilder.AddNatsStreams(DomainConstants.StreamProviderDomainEvents, options =>
   {
-    options.StreamName = "Orleans";
+    options.StreamName = DomainConstants.StreamProviderDomainEvents;
     options.JsonSerializerOptions = globalJsonOptions;
     options.NatsClientOptions = NatsOpts.Default with
     {
-      Url = natsUri.OriginalString,
+      Url = natsConnectionString,
     };
   });
 

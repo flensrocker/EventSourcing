@@ -14,10 +14,6 @@ var logger = host.Services.GetRequiredService<ILogger<Program>>();
 
 logger.LogInformation("Migration starting");
 
-for (var tick = 1; tick <= 5; tick++)
-{
-  await Task.Delay(TimeSpan.FromSeconds(2));
-  logger.LogInformation($"Migrating {tick * 20}%");
-}
+// TODO
 
 logger.LogInformation("Migration finished");

@@ -14,9 +14,11 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.NATS.Net" />
+    <PackageReference Include="Aspire.Npgsql" />
     <PackageReference Include="Aspire.StackExchange.Redis" />
     <PackageReference Include="Microsoft.Orleans.Clustering.Redis" />
     <PackageReference Include="Microsoft.Orleans.Persistence.Memory" />
+    <PackageReference Include="Microsoft.Orleans.Persistence.AdoNet" />
     <PackageReference Include="Microsoft.Orleans.Server" />
     <PackageReference Include="Microsoft.Orleans.Streaming.NATS" />
   </ItemGroup>

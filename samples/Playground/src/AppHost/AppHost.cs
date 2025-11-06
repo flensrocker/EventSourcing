@@ -23,6 +23,7 @@ var tododb = postgres.AddDatabase("todo");
 var migrate = builder
   .AddProject<Projects.Playground_Migrate>("migrate")
   .WithReference(tododb)
+  .WithParentRelationship(tododb)
   .WaitFor(tododb);
 
 var orleans = builder
@@ -31,11 +32,10 @@ var orleans = builder
   .WithClusterId("default")
   .WithClustering(redis)
   .WithMemoryGrainStorage("PubSubStore");
-//.WithStreaming(Flensrocker.Domain.Orleans.Abstractions.DomainConstants.StreamProviderDomainEvents, nats); // TODO needs NatsStreamProviderBuilder
 
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
-  .WithReference(nats) // TODO remove when NatsStreamProviderBuilder exist
+  .WithReference(nats)
   .WithReference(tododb)
   .WithReference(orleans)
   //.WithReplicas(3)
@@ -45,7 +45,7 @@ var silo = builder
 
 builder
   .AddProject<Projects.Playground_WebApi>("playground-webapi")
-  .WithReference(nats) // TODO remove when NatsStreamProviderBuilder exist
+  .WithReference(nats)
   .WithReference(orleans.AsClient())
   .WithExternalHttpEndpoints()
   .WaitFor(nats)
