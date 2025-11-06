@@ -6,7 +6,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddNpgsqlDataSource("tododb");
+builder.AddNpgsqlDataSource("todo");
 
 var host = builder.Build();
 

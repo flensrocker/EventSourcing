@@ -17,6 +17,7 @@ var globalJsonOptions = DomainJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
+builder.AddNpgsqlDataSource("todo");
 
 builder.Services.AddInMemoryDomainEventStorage(() => new InMemoryDomainEventStorageOptions<ToDoEvent>
 {
