@@ -3,10 +3,15 @@
 public interface IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
-  Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid stateId, CancellationToken cancellationToken)
+  /// <returns>If the state does not exist, the result of the parameterless constructor is returned.</returns>
+  Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid streamId, CancellationToken cancellationToken)
     where TState : class, IDomainEventProjectable<TEventBase>, new();
 
-  Task<bool> ApplyUpdatesToStorage(Guid stateId, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion);
+  /// <param name="expectedVersion">If the state is expected to not exist, the expected version is 0</param>
+  Task<bool> ApplyUpdatesToStorage(Guid streamId, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion);
 
-  Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid stateId, int fromVersion, int toVersionExcl, CancellationToken cancellationToken);
+  /// <param name="fromVersionIncl">Must be positive, the first event has a version equal to 1</param>
+  /// <param name="toVersionExcl">A value of 0 means all events up to the last, otherwise must be greater than <c>fromVersionIncl</c></param>
+  /// <returns><c>null</c> if the range is invalid or referencing non existing events</returns>
+  Task<IReadOnlyList<DomainEvent<TEventBase>>?> ReadEventsFromStorage(Guid streamId, int fromVersionIncl, int toVersionExcl, CancellationToken cancellationToken);
 }

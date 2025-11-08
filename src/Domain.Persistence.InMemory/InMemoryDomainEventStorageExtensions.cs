@@ -6,7 +6,6 @@ namespace Flensrocker.Domain.Persistence.InMemory;
 
 public static class InMemoryDomainEventStorageExtensions
 {
-  // PostgreSQL => Sequence
   internal static long GlobalIndex = 0L;
 
   internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent<TEventBase> @event, JsonSerializerOptions? jsonOptions)
