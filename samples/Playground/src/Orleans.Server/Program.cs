@@ -21,7 +21,7 @@ builder.AddNpgsqlDataSource("todo");
 
 builder.Services.AddInMemoryDomainEventStorage(() => new InMemoryDomainEventStorageOptions<ToDoEvent>
 {
-  JsonOptions = globalJsonOptions.Options,
+  JsonOptions = globalJsonOptions,
 });
 
 builder.UseOrleans(siloBuilder =>

@@ -19,7 +19,7 @@ builder.Host.UseOrleansClient(clientBuilder =>
 {
   clientBuilder.Services.AddSerializer(serializerBuilder =>
   {
-    serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions.Options);
+    serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions);
   });
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
