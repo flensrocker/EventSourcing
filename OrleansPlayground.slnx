@@ -31,6 +31,6 @@
     <Project Path="src/Domain.Orleans.Abstractions/Flensrocker.Domain.Orleans.Abstractions.csproj" />
     <Project Path="src/Domain.Orleans.Server/Flensrocker.Domain.Orleans.Server.csproj" />
     <Project Path="src/Domain.Persistence.InMemory/Flensrocker.Domain.Persistence.InMemory.csproj" />
-    <Project Path="src/Domain.Persistence.PostgeSQL/Flensrocker.Domain.Persistence.PostgreSQL.csproj" />
+    <Project Path="src/Domain.Persistence.PostgreSQL/Flensrocker.Domain.Persistence.PostgreSQL.csproj" />
   </Folder>
 </Solution>

@@ -16,6 +16,7 @@ namespace Flensrocker.ToDo.Abstractions;
 [JsonSerializable(typeof(ToDoDetailsView))]
 [JsonSerializable(typeof(ToDoListItemView))]
 [JsonSerializable(typeof(ToDoListView))]
+[JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
 public partial class ToDoJsonSerializerContext : JsonSerializerContext, ISupportJsonSerialization
 {
   public bool Supports(Type type)

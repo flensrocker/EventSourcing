@@ -1,0 +1,20 @@
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Flensrocker.Domain.Persistence.PostgreSQL;
+
+internal class DomainDbContext : DbContext
+{
+  public DbSet<DomainEventEntity> DomainEvent { get => Set<DomainEventEntity>(); }
+
+  public DomainDbContext(DbContextOptions<DomainDbContext> options)
+    : base(options)
+  {
+  }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
+  {
+    base.OnModelCreating(modelBuilder);
+
+    modelBuilder.ApplyConfiguration(new DomainEventEntiyConfiguration(modelBuilder));
+  }
+}

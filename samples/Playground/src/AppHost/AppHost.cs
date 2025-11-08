@@ -16,7 +16,8 @@ var postgres = builder
   .AddPostgres("postgres")
   .WithImageTag("18-alpine")
   .WithArgs("-c", "wal_level=logical")
-  .WithDataVolume("postgres-data");
+  .WithDataVolume("postgres-data")
+  .WithPgAdmin();
 
 var tododb = postgres.AddDatabase("todo");
 

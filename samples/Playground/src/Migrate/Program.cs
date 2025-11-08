@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Flensrocker.Domain.Abstractions;
+using Flensrocker.Domain.Persistence.PostgreSQL;
+using Flensrocker.ToDo.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -6,14 +9,28 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddNpgsqlDataSource("todo");
+var globalJsonOptions = DomainJsonSerializerOptions.Default
+  .AddToDoJsonOptions();
+
+builder.Services.AddPostgreSQLDomainEventStorage(() =>
+{
+  return new PostgreSQLDomainEventStorageOptions<ToDoEvent>
+  {
+    ConnectionName = "todo",
+    JsonOptions = globalJsonOptions,
+  };
+});
 
 var host = builder.Build();
 
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
+await using (var scope = host.Services.CreateAsyncScope())
+{
+  var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-logger.LogInformation("Migration starting");
+  logger.LogInformation("Migration starting");
 
-// TODO
+  logger.LogInformation("Migrate DomainDbContext");
+  await scope.ServiceProvider.MigratePostgreSQLDomainEventStorageAsync();
 
-logger.LogInformation("Migration finished");
+  logger.LogInformation("Migration finished");
+}
