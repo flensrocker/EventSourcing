@@ -45,8 +45,8 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
     where TEvent : TEventBase
   {
     var user = DomainRequestContextExtensions.GetUser();
-    var tenantId = user?.TenantId ?? Guid.Empty;
-    var userId = user?.UserId ?? Guid.Empty;
+    var tenantId = user?.TenantId;
+    var userId = user?.UserId;
 
     var domainEvents = payloads.Select(payload => new DomainEvent<TEventBase>
     {

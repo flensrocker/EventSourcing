@@ -6,9 +6,9 @@ public record DomainEventMetadata
   public required string StreamType { get; init; }
   public required Guid StreamId { get; init; }
   public required int StreamVersion { get; init; }
-  public required Guid TenantId { get; init; }
+  public required Guid? TenantId { get; init; }
   public required DateTimeOffset CreatedAt { get; init; }
-  public required Guid CreatedByUserId { get; init; }
+  public required Guid? CreatedByUserId { get; init; }
 }
 
 public record DomainEvent<TEventBase>

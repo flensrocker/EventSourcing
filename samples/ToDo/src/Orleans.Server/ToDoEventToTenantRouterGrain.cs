@@ -19,7 +19,10 @@ public class ToDoEventToTenantRouterGrain : Grain, IGrainWithGuidKey, IStreamSub
   public async Task OnNextAsync(DomainEvent<ToDoEvent> item, StreamSequenceToken? token = null)
   {
     var tenantId = item.Metadata.TenantId;
-    var tenantStreamId = StreamId.Create(ToDoNames.ToDoListViewStream, tenantId);
+    if (tenantId.HasValue is false)
+      return;
+
+    var tenantStreamId = StreamId.Create(ToDoNames.ToDoListViewStream, tenantId.Value);
     var tenantStream = this.GetStreamProvider(DomainConstants.StreamProviderDomainEvents).GetStream<DomainEvent<ToDoEvent>>(tenantStreamId);
 
     await tenantStream.OnNextAsync(item);
