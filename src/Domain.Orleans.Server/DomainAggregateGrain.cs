@@ -71,7 +71,7 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
 
   public async Task<bool> ExecuteCommand(TCommandBase command)
   {
-    var payloads = State.ExecuteCommand(command);
+    var payloads = await State.ExecuteCommandAsync(command);
     if (payloads is not { Length: > 0 })
       return false;
 

@@ -35,15 +35,15 @@ public partial class ToDoAggregate : IDomainAggregate<ToDoCommand, ToDoEvent>, I
     ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
   }
 
-  public ToDoEvent[]? ExecuteCommand(ToDoCommand command)
+  public ValueTask<ToDoEvent[]?> ExecuteCommandAsync(ToDoCommand command)
   {
-    return command switch
+    return ValueTask.FromResult(command switch
     {
       ToDoCommand.MemorizeToDo memorizeToDo => Memorize(memorizeToDo),
       ToDoCommand.CompleteToDo completeToDo => Complete(completeToDo),
       ToDoCommand.DismissToDo dismissToDo => Dismiss(dismissToDo),
       ToDoCommand.ReopenToDo reopenToDo => Reopen(reopenToDo),
       _ => throw new NotImplementedException($"command type {command.GetType().GetTypeName()}"),
-    };
+    });
   }
 }

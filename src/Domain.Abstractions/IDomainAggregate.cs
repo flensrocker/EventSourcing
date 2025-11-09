@@ -2,5 +2,5 @@
 
 public interface IDomainAggregate<TCommandBase, TEventBase>
 {
-  TEventBase[]? ExecuteCommand(TCommandBase command);
+  ValueTask<TEventBase[]?> ExecuteCommandAsync(TCommandBase command);
 }
