@@ -31,6 +31,18 @@ builder.UseOrleans(siloBuilder =>
     serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions);
   });
 
+  var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  siloBuilder.AddAdoNetGrainStorage("Default", options =>
+  {
+    options.Invariant = "Npgsql";
+    options.ConnectionString = npgsqlConnectionString;
+  });
+  siloBuilder.AddAdoNetGrainStorage("PubSubStore", options =>
+  {
+    options.Invariant = "Npgsql";
+    options.ConnectionString = npgsqlConnectionString;
+  });
+
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
   siloBuilder.AddNatsStreams(DomainConstants.StreamProviderDomainMessages, options =>
   {

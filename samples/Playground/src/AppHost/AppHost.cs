@@ -31,8 +31,7 @@ var orleans = builder
   .AddOrleans("Playground")
   .WithServiceId("playground")
   .WithClusterId("default")
-  .WithClustering(redis)
-  .WithMemoryGrainStorage("PubSubStore");
+  .WithClustering(redis);
 
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
