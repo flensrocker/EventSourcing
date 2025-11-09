@@ -5,31 +5,31 @@ var redis = builder
   .WithImageRegistry("ghcr.io")
   .WithImage("microsoft/garnet", "1")
   .WithEntrypoint("/app/GarnetServer")
-  .WithDataVolume("redis-data");
+  .WithDataVolume("playground-redis-data");
 
 var nats = builder
   .AddNats("nats")
   .WithJetStream()
-  .WithDataVolume("nats-data");
+  .WithDataVolume("playground-nats-data");
 
 var postgres = builder
   .AddPostgres("postgres")
   .WithImageTag("18-alpine")
   .WithArgs("-c", "wal_level=logical")
-  .WithDataVolume("postgres-data")
+  .WithDataVolume("playground-postgres-data")
   .WithPgAdmin();
 
-var tododb = postgres.AddDatabase("todo");
+var domainDb = postgres.AddDatabase("domain");
 
 var migrate = builder
   .AddProject<Projects.Playground_Migrate>("migrate")
-  .WithReference(tododb)
-  .WithParentRelationship(tododb)
-  .WaitFor(tododb);
+  .WithReference(domainDb)
+  .WithParentRelationship(domainDb)
+  .WaitFor(domainDb);
 
 var orleans = builder
-  .AddOrleans("ToDo")
-  .WithServiceId("ToDo")
+  .AddOrleans("Playground")
+  .WithServiceId("playground")
   .WithClusterId("default")
   .WithClustering(redis)
   .WithMemoryGrainStorage("PubSubStore");
@@ -37,7 +37,7 @@ var orleans = builder
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
   .WithReference(nats)
-  .WithReference(tododb)
+  .WithReference(domainDb)
   .WithReference(orleans)
   //.WithReplicas(3)
   .WaitFor(nats)

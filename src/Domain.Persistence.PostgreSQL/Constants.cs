@@ -3,6 +3,6 @@
 internal static class Constants
 {
   internal const string SchemaName = "Domain";
-  internal const string DomainEventTableName = "DomainEvent";
-  internal const string GlobalIndexSequenceName = "GlobalIndex";
+  internal const string MessageTableName = "Message";
+  internal const string GlobalMessageIndexSequenceName = "GlobalMessageIndex";
 }

@@ -41,12 +41,12 @@ public static class PostgreSQLDomainEventStorageExtensions
     await dbContext.Database.MigrateAsync().ConfigureAwait(false);
   }
 
-  internal static DomainEventEntity ToDomainEvent<TEventBase>(this DomainEvent<TEventBase> @event, JsonSerializerOptions? jsonOptions)
+  internal static MessageEntity ToDomainEvent<TEventBase>(this DomainEvent<TEventBase> @event, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
-    return new DomainEventEntity
+    return new MessageEntity
     {
-      EventId = @event.Metadata.EventId,
+      Id = @event.Metadata.EventId,
       StreamType = @event.Metadata.StreamType,
       StreamId = @event.Metadata.StreamId,
       StreamVersion = @event.Metadata.StreamVersion,
@@ -57,14 +57,14 @@ public static class PostgreSQLDomainEventStorageExtensions
     };
   }
 
-  internal static DomainEvent<TEventBase> ToDomainEvent<TEventBase>(this DomainEventEntity entity, JsonSerializerOptions? jsonOptions)
+  internal static DomainEvent<TEventBase> ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
     return new DomainEvent<TEventBase>
     {
       Metadata = new DomainEventMetadata
       {
-        EventId = entity.EventId,
+        EventId = entity.Id,
         StreamType = entity.StreamType,
         StreamId = entity.StreamId,
         StreamVersion = entity.StreamVersion,

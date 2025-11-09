@@ -16,7 +16,7 @@ builder.Services.AddPostgreSQLDomainEventStorage(() =>
 {
   return new PostgreSQLDomainEventStorageOptions<ToDoEvent>
   {
-    ConnectionName = "todo",
+    ConnectionName = "domain",
     JsonOptions = globalJsonOptions,
   };
 });

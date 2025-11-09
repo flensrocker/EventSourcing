@@ -4,7 +4,7 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL;
 
 internal class DomainDbContext : DbContext
 {
-  public DbSet<DomainEventEntity> DomainEvent { get => Set<DomainEventEntity>(); }
+  public DbSet<MessageEntity> Message { get => Set<MessageEntity>(); }
 
   public DomainDbContext(DbContextOptions<DomainDbContext> options)
     : base(options)
@@ -15,6 +15,6 @@ internal class DomainDbContext : DbContext
   {
     base.OnModelCreating(modelBuilder);
 
-    modelBuilder.ApplyConfiguration(new DomainEventEntiyConfiguration(modelBuilder));
+    modelBuilder.ApplyConfiguration(new MessageEntiyConfiguration(modelBuilder));
   }
 }

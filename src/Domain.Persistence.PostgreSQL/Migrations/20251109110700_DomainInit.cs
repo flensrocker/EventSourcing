@@ -14,16 +14,16 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
         name: "Domain");
 
       migrationBuilder.CreateSequence(
-        name: "GlobalIndex",
+        name: "GlobalMessageIndex",
         schema: "Domain");
 
       migrationBuilder.CreateTable(
-        name: "DomainEvent",
+        name: "Message",
         schema: "Domain",
         columns: table => new
         {
-          EventId = table.Column<Guid>(type: "uuid", nullable: false),
-          GlobalIndex = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"Domain\".\"GlobalIndex\"')"),
+          Id = table.Column<Guid>(type: "uuid", nullable: false),
+          GlobalIndex = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"Domain\".\"GlobalMessageIndex\"')"),
           StreamType = table.Column<string>(type: "text", nullable: false),
           StreamId = table.Column<Guid>(type: "uuid", nullable: false),
           StreamVersion = table.Column<int>(type: "integer", nullable: false),
@@ -34,20 +34,20 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
         },
         constraints: table =>
         {
-          table.PrimaryKey("PK_DomainEvent", x => x.EventId);
+          table.PrimaryKey("PK_Message", x => x.Id);
         });
 
       migrationBuilder.CreateIndex(
-        name: "IX_DomainEvent_GlobalIndex",
+        name: "IX_Message_GlobalIndex",
         schema: "Domain",
-        table: "DomainEvent",
+        table: "Message",
         column: "GlobalIndex",
         unique: true);
 
       migrationBuilder.CreateIndex(
-        name: "IX_DomainEvent_StreamType_StreamId_StreamVersion",
+        name: "IX_Message_StreamType_StreamId_StreamVersion",
         schema: "Domain",
-        table: "DomainEvent",
+        table: "Message",
         columns: new[] { "StreamType", "StreamId", "StreamVersion" },
         unique: true)
         .Annotation("Npgsql:IndexInclude", new[] { "TenantId" });
@@ -57,11 +57,11 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
     protected override void Down(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.DropTable(
-        name: "DomainEvent",
+        name: "Message",
         schema: "Domain");
 
       migrationBuilder.DropSequence(
-        name: "GlobalIndex",
+        name: "GlobalMessageIndex",
         schema: "Domain");
     }
   }

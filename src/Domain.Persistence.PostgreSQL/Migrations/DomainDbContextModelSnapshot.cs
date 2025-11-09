@@ -22,11 +22,11 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.HasSequence("GlobalIndex", "Domain");
+            modelBuilder.HasSequence("GlobalMessageIndex", "Domain");
 
-            modelBuilder.Entity("Flensrocker.Domain.Persistence.PostgreSQL.DomainEventEntity", b =>
+            modelBuilder.Entity("Flensrocker.Domain.Persistence.PostgreSQL.MessageEntity", b =>
                 {
-                    b.Property<Guid>("EventId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -39,7 +39,7 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
                     b.Property<long>("GlobalIndex")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValueSql("nextval('\"Domain\".\"GlobalIndex\"')");
+                        .HasDefaultValueSql("nextval('\"Domain\".\"GlobalMessageIndex\"')");
 
                     b.Property<string>("PayloadJson")
                         .IsRequired()
@@ -58,7 +58,7 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("EventId");
+                    b.HasKey("Id");
 
                     b.HasIndex("GlobalIndex")
                         .IsUnique();
@@ -68,7 +68,7 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
 
                     NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("StreamType", "StreamId", "StreamVersion"), new[] { "TenantId" });
 
-                    b.ToTable("DomainEvent", "Domain");
+                    b.ToTable("Message", "Domain");
                 });
 #pragma warning restore 612, 618
         }

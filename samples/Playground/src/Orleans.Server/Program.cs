@@ -20,7 +20,7 @@ builder.AddKeyedRedisClient("redis");
 
 builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions<ToDoEvent>
 {
-  ConnectionName = "todo",
+  ConnectionName = "domain",
   JsonOptions = globalJsonOptions,
 });
 
