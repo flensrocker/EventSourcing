@@ -31,9 +31,9 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   {
     _nextVersion = Version + 1;
 
-    if (!string.IsNullOrWhiteSpace(DomainConstants.StreamProviderDomainEvents) && !string.IsNullOrWhiteSpace(_streamType))
+    if (!string.IsNullOrWhiteSpace(_streamType))
     {
-      var streamProvider = this.GetStreamProvider(DomainConstants.StreamProviderDomainEvents);
+      var streamProvider = this.GetStreamProvider(DomainConstants.StreamProviderDomainMessages);
       var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
       _domainEventStream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
     }
@@ -48,6 +48,7 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
     var tenantId = user?.TenantId;
     var userId = user?.UserId;
 
+    // TODO Enable adding public messages to domain events.
     var domainEvents = payloads.Select(payload => new DomainEvent<TEventBase>
     {
       Metadata = new DomainEventMetadata
@@ -81,7 +82,10 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
     // TODO Extract publishing to stream into some outbox implementation
 
     if (_domainEventStream is not null)
+    {
       await _domainEventStream.OnNextBatchAsync(domainEvents);
+      // TODO Identify public messages on domain-events and publish them to their own streams.
+    }
 
     return true;
   }

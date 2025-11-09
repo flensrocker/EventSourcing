@@ -29,7 +29,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
 
   public override async Task OnActivateAsync(CancellationToken cancellationToken)
   {
-    var streamProvider = this.GetStreamProvider(DomainConstants.StreamProviderDomainEvents);
+    var streamProvider = this.GetStreamProvider(DomainConstants.StreamProviderDomainMessages);
     var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
     var stream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
 

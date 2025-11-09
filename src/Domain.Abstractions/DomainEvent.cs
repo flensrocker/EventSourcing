@@ -1,6 +1,6 @@
 ﻿namespace Flensrocker.Domain.Abstractions;
 
-public record DomainEventMetadata
+public sealed record DomainEventMetadata
 {
   public required Guid EventId { get; init; }
   public required string StreamType { get; init; }
@@ -15,4 +15,15 @@ public record DomainEvent<TEventBase>
 {
   public required DomainEventMetadata Metadata { get; init; }
   public required TEventBase Payload { get; init; }
+
+  /// <summary>
+  /// DRAFT
+  /// Used to attach "public messages" for external services to domain events.
+  /// All must be stored in the same transaction.
+  /// Public messages are not applied to event-sourced aggregates/projections.
+  /// </summary>
+  public sealed record WithPublicMessages : DomainEvent<TEventBase>
+  {
+    public required IReadOnlyCollection<object> MessageList { get; init; }
+  }
 }
