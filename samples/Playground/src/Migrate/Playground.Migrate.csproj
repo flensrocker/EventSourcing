@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Domain.Orleans.PostgreSQL\Flensrocker.Domain.Orleans.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\..\..\src\Domain.Persistence.PostgreSQL\Flensrocker.Domain.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
     <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />

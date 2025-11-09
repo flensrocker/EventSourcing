@@ -1,4 +1,5 @@
 ﻿using Flensrocker.Domain.Abstractions;
+using Flensrocker.Domain.Orleans.PostgreSQL;
 using Flensrocker.Domain.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,11 +13,19 @@ builder.AddServiceDefaults();
 var globalJsonOptions = DomainJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
+builder.Services.AddOrleansPostgreSQL(() =>
+{
+  return new OrleansPostgreSQLOptions
+  {
+    ConnectionName = "playground",
+  };
+});
+
 builder.Services.AddPostgreSQLDomainEventStorage(() =>
 {
   return new PostgreSQLDomainEventStorageOptions<ToDoEvent>
   {
-    ConnectionName = "domain",
+    ConnectionName = "playground",
     JsonOptions = globalJsonOptions,
   };
 });
@@ -27,10 +36,13 @@ await using (var scope = host.Services.CreateAsyncScope())
 {
   var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-  logger.LogInformation("Migration starting");
+  logger.LogInformation("Starting Migrations");
 
-  logger.LogInformation("Migrate DomainDbContext");
+  logger.LogInformation("Migrate Orleans.PostgreSQL");
+  await scope.ServiceProvider.MigrateOrleansPostgreSQLAsync();
+
+  logger.LogInformation("Migrate Domain-Event-Storage");
   await scope.ServiceProvider.MigratePostgreSQLDomainEventStorageAsync();
 
-  logger.LogInformation("Migration finished");
+  logger.LogInformation("Finished Migrations");
 }

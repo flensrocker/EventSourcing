@@ -19,13 +19,13 @@ var postgres = builder
   .WithDataVolume("playground-postgres-data")
   .WithPgAdmin();
 
-var domainDb = postgres.AddDatabase("domain");
+var playgroundDb = postgres.AddDatabase("playground");
 
 var migrate = builder
   .AddProject<Projects.Playground_Migrate>("migrate")
-  .WithReference(domainDb)
-  .WithParentRelationship(domainDb)
-  .WaitFor(domainDb);
+  .WithReference(playgroundDb)
+  .WithParentRelationship(playgroundDb)
+  .WaitFor(playgroundDb);
 
 var orleans = builder
   .AddOrleans("Playground")
@@ -37,7 +37,7 @@ var orleans = builder
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
   .WithReference(nats)
-  .WithReference(domainDb)
+  .WithReference(playgroundDb)
   .WithReference(orleans)
   //.WithReplicas(3)
   .WaitFor(nats)
