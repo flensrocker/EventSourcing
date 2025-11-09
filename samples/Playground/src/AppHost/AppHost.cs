@@ -38,7 +38,7 @@ var silo = builder
   .WithReference(nats)
   .WithReference(playgroundDb)
   .WithReference(orleans)
-  //.WithReplicas(3)
+  .WithReplicas(3)
   .WaitFor(nats)
   .WaitFor(redis)
   .WaitForCompletion(migrate);

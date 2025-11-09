@@ -1,51 +1,26 @@
-﻿using Flensrocker.Domain.Abstractions;
-using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Abstractions.Views;
+﻿using Flensrocker.ToDo.Abstractions.Views;
 using Flensrocker.ToDo.Orleans.Abstractions;
-using Orleans.Streams;
-using Orleans.Streams.Core;
+using Flensrocker.ToDo.Persistence.PostgreSQL;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flensrocker.ToDo.Orleans.Server;
 
-[ImplicitStreamSubscription(ToDoNames.ToDoListViewStream)]
-public class ToDoListViewGrain : Grain, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent<ToDoEvent>>, IToDoListViewGrain
+public class ToDoListViewGrain(IDbContextFactory<ToDoDbContext> dbContextFactory) : Grain, IToDoListViewGrain
 {
-  private readonly ToDoListView _view;
+  private readonly IDbContextFactory<ToDoDbContext> _dbContextFactory = dbContextFactory;
 
-  public ToDoListViewGrain()
+  public async Task<ToDoListItemView[]> GetList(CancellationToken cancellationToken)
   {
-    // TODO load from persistence etc.
-    _view = new ToDoListView
-    {
-      TenantId = this.GetPrimaryKey(),
-    };
-  }
+    var tenantId = this.GetPrimaryKey() == Guid.Empty ? (Guid?)null : this.GetPrimaryKey();
 
-  public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
-  {
-    var handle = handleFactory.Create<DomainEvent<ToDoEvent>>();
-    await handle.ResumeAsync(this);
-  }
+    using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-  public Task OnNextAsync(DomainEvent<ToDoEvent> item, StreamSequenceToken? token = null)
-  {
-    _view.Apply(item);
-    return Task.CompletedTask;
-  }
+    var listItems = await dbContext.ListItem
+      .Where(e => e.TenantId == tenantId)
+      .OrderBy(e => e.Status)
+      .ThenByDescending(e => e.CreatedAt)
+      .ToArrayAsync(cancellationToken);
 
-  public Task OnErrorAsync(Exception ex)
-  {
-    // TODO add error handling
-    return Task.CompletedTask;
-  }
-
-  public Task<ToDoListItemView[]> GetList()
-  {
-    var items = _view.ToDoItems.Values
-      .OrderBy(item => item.Status)
-      .ThenByDescending(item => item.CreatedAt)
-      .ToArray();
-
-    return Task.FromResult(items);
+    return listItems;
   }
 }

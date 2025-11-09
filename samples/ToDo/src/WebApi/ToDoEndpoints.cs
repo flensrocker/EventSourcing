@@ -86,11 +86,11 @@ public static class ToDoEndpoints
         : Results.NotFound();
     });
 
-    builder.MapGet("/api/todo", static async (IClusterClient client) =>
+    builder.MapGet("/api/todo", static async (IClusterClient client, CancellationToken cancellationToken) =>
     {
       var tenantId = Guid.Empty;
       var toDoList = client.GetGrain<IToDoListViewGrain>(tenantId);
-      var result = await toDoList.GetList();
+      var result = await toDoList.GetList(cancellationToken);
       return Results.Ok(result);
     });
 

@@ -3,6 +3,7 @@ using Flensrocker.Domain.Orleans.Abstractions;
 using Flensrocker.Domain.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Server;
+using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
@@ -22,6 +23,11 @@ builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEvent
 {
   ConnectionName = "playground",
   JsonOptions = globalJsonOptions,
+});
+
+builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
+{
+  ConnectionName = "playground",
 });
 
 builder.UseOrleans(siloBuilder =>

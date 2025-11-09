@@ -15,7 +15,6 @@ namespace Flensrocker.ToDo.Abstractions;
 [JsonSerializable(typeof(DomainEvent<ToDoEvent.ToDoReopened>))]
 [JsonSerializable(typeof(ToDoDetailsView))]
 [JsonSerializable(typeof(ToDoListItemView))]
-[JsonSerializable(typeof(ToDoListView))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
 public partial class ToDoJsonSerializerContext : JsonSerializerContext, ISupportJsonSerialization
 {
@@ -23,6 +22,5 @@ public partial class ToDoJsonSerializerContext : JsonSerializerContext, ISupport
     => type.IsAssignableTo(typeof(ToDoCommand))
     || type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>))
     || type == typeof(ToDoDetailsView)
-    || type == typeof(ToDoListItemView)
-    || type == typeof(ToDoListView);
+    || type == typeof(ToDoListItemView);
 }

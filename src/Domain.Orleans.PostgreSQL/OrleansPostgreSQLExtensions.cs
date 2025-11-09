@@ -12,7 +12,7 @@ public static class OrleansPostgreSQLExtensions
     var storageOptions = configureOptions();
     services.AddSingleton(storageOptions);
 
-    services.AddDbContextFactory<OrleansDbContext>((serviceProvider, dbOptions) =>
+    services.AddPooledDbContextFactory<OrleansDbContext>((serviceProvider, dbOptions) =>
     {
       var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
       var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);

@@ -15,7 +15,7 @@ public static class PostgreSQLDomainEventStorageExtensions
     var storageOptions = configureOptions();
     services.AddSingleton(storageOptions);
 
-    services.AddDbContextFactory<DomainDbContext>((serviceProvider, dbOptions) =>
+    services.AddPooledDbContextFactory<DomainDbContext>((serviceProvider, dbOptions) =>
     {
       var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
       var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);

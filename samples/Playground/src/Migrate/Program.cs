@@ -2,6 +2,7 @@
 using Flensrocker.Domain.Orleans.PostgreSQL;
 using Flensrocker.Domain.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,6 +31,14 @@ builder.Services.AddPostgreSQLDomainEventStorage(() =>
   };
 });
 
+builder.Services.AddToDoPostgreSQLPersistence(() =>
+{
+  return new ToDoPostgreSQLPersistenceOptions
+  {
+    ConnectionName = "playground",
+  };
+});
+
 var host = builder.Build();
 
 await using (var scope = host.Services.CreateAsyncScope())
@@ -43,6 +52,9 @@ await using (var scope = host.Services.CreateAsyncScope())
 
   logger.LogInformation("Migrate Domain-Event-Storage");
   await scope.ServiceProvider.MigratePostgreSQLDomainEventStorageAsync();
+
+  logger.LogInformation("Migrate ToDo-Persistence");
+  await scope.ServiceProvider.MigrateToDoPostgreSQLPersistenceAsync();
 
   logger.LogInformation("Finished Migrations");
 }

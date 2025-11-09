@@ -13,7 +13,7 @@ public abstract partial record ToDoCommand
 
     public static MemorizeToDo? Create(string? title)
     {
-      if (string.IsNullOrWhiteSpace(title))
+      if (string.IsNullOrWhiteSpace(title) || title.Length > ToDoConstants.TitleMaxLength)
         return null;
 
       return new MemorizeToDo

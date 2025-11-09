@@ -4,5 +4,5 @@ namespace Flensrocker.ToDo.Orleans.Abstractions;
 
 public interface IToDoListViewGrain : IGrainWithGuidKey
 {
-  Task<ToDoListItemView[]> GetList();
+  Task<ToDoListItemView[]> GetList(CancellationToken cancellationToken);
 }
