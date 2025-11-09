@@ -13,7 +13,7 @@ internal class DomainDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    base.OnModelCreating(modelBuilder);
+    modelBuilder.HasDefaultSchema(Constants.SchemaName);
 
     modelBuilder.ApplyConfiguration(new MessageEntiyConfiguration(modelBuilder));
   }

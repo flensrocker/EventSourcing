@@ -21,6 +21,7 @@ public static class ToDoPostgreSQLPersistenceExtensions
       {
         npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
         npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+        npgsqlOptions.EnableRetryOnFailure();
       });
     });
 

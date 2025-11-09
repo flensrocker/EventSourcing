@@ -27,8 +27,10 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
-  public override Task OnActivateAsync(CancellationToken cancellationToken)
+  public override async Task OnActivateAsync(CancellationToken cancellationToken)
   {
+    await base.OnActivateAsync(cancellationToken);
+
     _nextVersion = Version + 1;
 
     if (!string.IsNullOrWhiteSpace(_streamType))
@@ -37,8 +39,6 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
       var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
       _domainEventStream = streamProvider.GetStream<DomainEvent<TEventBase>>(streamId);
     }
-
-    return base.OnActivateAsync(cancellationToken);
   }
 
   protected DomainEvent<TEventBase>[] RaiseDomainEvents<TEvent>(params IEnumerable<TEvent> payloads)

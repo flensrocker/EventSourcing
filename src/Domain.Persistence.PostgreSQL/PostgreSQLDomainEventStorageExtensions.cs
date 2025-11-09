@@ -24,6 +24,7 @@ public static class PostgreSQLDomainEventStorageExtensions
       {
         npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
         npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+        npgsqlOptions.EnableRetryOnFailure();
       });
     });
 
