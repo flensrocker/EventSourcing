@@ -11,6 +11,7 @@
   </ItemGroup>
   
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Domain.Orleans.EntityFrameworkCore\Flensrocker.Domain.Orleans.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\..\..\src\Domain.Orleans.Server\Flensrocker.Domain.Orleans.Server.csproj" />
     <ProjectReference Include="..\Domain\Flensrocker.ToDo.Domain.csproj" />
     <ProjectReference Include="..\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />

@@ -1,9 +1,10 @@
-﻿using Flensrocker.Domain.Abstractions;
+﻿using System.Linq.Expressions;
+using Flensrocker.Domain.Abstractions;
 
 namespace Flensrocker.ToDo.Abstractions.Views;
 
 [GenerateSerializer]
-public class ToDoListItemView : IDomainEventVersionable, IToDoEventProjectable
+public class ToDoListItemView : IDomainEventVersionable, IToDoEventProjectable, IDomainWhereId<ToDoListItemView>
 {
   [Id(0)]
   public Guid ToDoId { get; private set; }
@@ -17,6 +18,9 @@ public class ToDoListItemView : IDomainEventVersionable, IToDoEventProjectable
   public string Title { get; private set; } = "";
   [Id(5)]
   public ToDoStatus Status { get; private set; }
+
+  static Expression<Func<ToDoListItemView, bool>> IDomainWhereId<ToDoListItemView>.GetWhereId(Guid id)
+    => item => item.ToDoId == id;
 
   void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
   {
