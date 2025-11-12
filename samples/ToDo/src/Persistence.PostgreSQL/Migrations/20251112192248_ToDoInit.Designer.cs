@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
-    [Migration("20251109151835_ToDoInit")]
+    [Migration("20251112192248_ToDoInit")]
     partial class ToDoInit
     {
         /// <inheritdoc />
@@ -26,7 +26,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.Views.ToDoListItemView", b =>
+            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.ToDoView+ToDoListItem", b =>
                 {
                     b.Property<Guid>("ToDoId")
                         .ValueGeneratedOnAdd()

@@ -1,6 +1,7 @@
 using Flensrocker.Domain.Abstractions;
 using Flensrocker.Domain.Orleans.Abstractions;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
 using NATS.Client.Core;
 using Orleans.Serialization;
@@ -14,6 +15,11 @@ var globalJsonOptions = DomainJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
+
+builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
+{
+  ConnectionName = "playground",
+});
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {

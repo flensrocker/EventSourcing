@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Flensrocker.Domain.Abstractions;
 
@@ -33,5 +34,14 @@ public static class DomainExtensions
       return null;
 
     return Type.GetType(typeName.Replace("_-_", ", ").Replace("-", "."), false);
+  }
+
+  public static IServiceCollection AddViewQuery<TViewQuery, TQueryRequest, TQueryResponse>(this IServiceCollection services)
+    where TViewQuery : class, IViewQuery<TQueryRequest, TQueryResponse>
+  {
+    services.AddScoped<TViewQuery>();
+    services.AddScoped<IViewQuery<TQueryRequest, TQueryResponse>>(sp => sp.GetRequiredService<TViewQuery>());
+
+    return services;
   }
 }

@@ -1,4 +1,7 @@
 ﻿using System.Reflection;
+using Flensrocker.Domain.Abstractions;
+using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Persistence.PostgreSQL.Queries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +27,8 @@ public static class ToDoPostgreSQLPersistenceExtensions
         npgsqlOptions.EnableRetryOnFailure();
       });
     });
+
+    services.AddViewQuery<ListToDosViewQuery, ToDoQuery.ListToDosRequest, ToDoQuery.ListToDosResponse>();
 
     return services;
   }

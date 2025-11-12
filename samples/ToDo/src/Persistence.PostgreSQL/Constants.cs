@@ -2,6 +2,6 @@
 
 internal static class Constants
 {
-  public const string SchemaName = "ToDo";
-  public const string ListItemTableName = "ListItem";
+  internal const string SchemaName = "ToDo";
+  internal const string ListItemTableName = "ListItem";
 }

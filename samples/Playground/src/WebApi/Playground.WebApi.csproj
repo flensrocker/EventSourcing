@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\ToDo\src\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\ToDo\src\Persistence.PostgreSQL\Flensrocker.ToDo.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\WebApi\Flensrocker.ToDo.WebApi.csproj" />
     <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>

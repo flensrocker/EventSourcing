@@ -1,4 +1,5 @@
-﻿using Flensrocker.ToDo.Abstractions;
+﻿using Flensrocker.Domain.Abstractions;
+using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -28,9 +29,11 @@ public static class ToDoEndpoints
 
   public static IEndpointRouteBuilder MapToDo(this IEndpointRouteBuilder builder)
   {
-    builder.MapPost("/api/todo/memorize", static async ([FromBody] MemorizeToDoDto dto, IClusterClient client) =>
+    builder.MapPost("/api/todo/memorize", static async (
+      [FromBody] MemorizeToDoDto dto,
+      [FromServices] IClusterClient client) =>
     {
-      var command = ToDoCommand.MemorizeToDo.Create(dto.Title);
+      var command = ToDoCommand.MemorizeToDo.Create(title: dto.Title);
       if (command is null)
         return Results.BadRequest();
 
@@ -41,7 +44,9 @@ public static class ToDoEndpoints
         : Results.BadRequest();
     });
 
-    builder.MapPut("/api/todo/{toDoId}/complete", static async (Guid toDoId, IClusterClient client) =>
+    builder.MapPut("/api/todo/{toDoId}/complete", static async (
+      Guid toDoId,
+      [FromServices] IClusterClient client) =>
     {
       var command = ToDoCommand.CompleteToDo.Create();
       if (command is null)
@@ -53,9 +58,12 @@ public static class ToDoEndpoints
         : Results.BadRequest();
     });
 
-    builder.MapPut("/api/todo/{toDoId}/dismiss", static async (Guid toDoId, [FromBody] DismissToDoDto dto, IClusterClient client) =>
+    builder.MapPut("/api/todo/{toDoId}/dismiss", static async (
+      Guid toDoId,
+      [FromBody] DismissToDoDto dto,
+      [FromServices] IClusterClient client) =>
     {
-      var command = ToDoCommand.DismissToDo.Create(dto.Reason);
+      var command = ToDoCommand.DismissToDo.Create(reason: dto.Reason);
       if (command is null)
         return Results.BadRequest();
 
@@ -65,7 +73,9 @@ public static class ToDoEndpoints
         : Results.BadRequest();
     });
 
-    builder.MapPut("/api/todo/{toDoId}/reopen", static async (Guid toDoId, IClusterClient client) =>
+    builder.MapPut("/api/todo/{toDoId}/reopen", static async (
+      Guid toDoId,
+      [FromServices] IClusterClient client) =>
     {
       var command = ToDoCommand.ReopenToDo.Create();
       if (command is null)
@@ -77,7 +87,10 @@ public static class ToDoEndpoints
         : Results.BadRequest();
     });
 
-    builder.MapGet("/api/todo/{toDoId}", static async (Guid toDoId, IClusterClient client, CancellationToken cancellationToken) =>
+    builder.MapGet("/api/todo/{toDoId}", static async (
+      Guid toDoId,
+      [FromServices] IClusterClient client,
+      CancellationToken cancellationToken) =>
     {
       var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
       var result = await toDoDetails.GetProjection(cancellationToken);
@@ -86,12 +99,16 @@ public static class ToDoEndpoints
         : Results.NotFound();
     });
 
-    builder.MapGet("/api/todo", static async (IClusterClient client, CancellationToken cancellationToken) =>
+    builder.MapGet("/api/todo", static async (
+      [FromServices] IViewQuery<ToDoQuery.ListToDosRequest, ToDoQuery.ListToDosResponse> query,
+      CancellationToken cancellationToken) =>
     {
-      var tenantId = Guid.Empty;
-      var toDoList = client.GetGrain<IToDoListViewGrain>(tenantId);
-      var result = await toDoList.GetList(cancellationToken);
-      return Results.Ok(result);
+      var request = ToDoQuery.ListToDosRequest.Create(tenantId: null);
+      if (request is null)
+        return Results.BadRequest();
+
+      var response = await query.ExecuteQueryAsync(request, cancellationToken);
+      return Results.Ok(response);
     });
 
     return builder;

@@ -23,7 +23,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.Views.ToDoListItemView", b =>
+            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.ToDoView+ToDoListItem", b =>
                 {
                     b.Property<Guid>("ToDoId")
                         .ValueGeneratedOnAdd()

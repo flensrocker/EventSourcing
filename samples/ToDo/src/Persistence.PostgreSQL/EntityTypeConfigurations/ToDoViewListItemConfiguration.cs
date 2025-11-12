@@ -1,13 +1,12 @@
 ﻿using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Abstractions.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Flensrocker.ToDo.Persistence.PostgreSQL;
+namespace Flensrocker.ToDo.Persistence.PostgreSQL.EntityTypeConfigurations;
 
-internal class ToDoListItemViewConfiguration : IEntityTypeConfiguration<ToDoListItemView>
+internal class ToDoViewListItemConfiguration : IEntityTypeConfiguration<ToDoView.ToDoListItem>
 {
-  public void Configure(EntityTypeBuilder<ToDoListItemView> builder)
+  public void Configure(EntityTypeBuilder<ToDoView.ToDoListItem> builder)
   {
     builder.ToTable(Constants.ListItemTableName, Constants.SchemaName);
 

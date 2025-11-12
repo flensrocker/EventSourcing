@@ -1,11 +1,12 @@
-﻿using Flensrocker.ToDo.Abstractions.Views;
+﻿using Flensrocker.ToDo.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Flensrocker.ToDo.Persistence.PostgreSQL.EntityTypeConfigurations;
 
 namespace Flensrocker.ToDo.Persistence.PostgreSQL;
 
 public class ToDoDbContext : DbContext
 {
-  public DbSet<ToDoListItemView> ListItem { get => Set<ToDoListItemView>(); }
+  public DbSet<ToDoView.ToDoListItem> ListItem { get => Set<ToDoView.ToDoListItem>(); }
 
   public ToDoDbContext(DbContextOptions<ToDoDbContext> options)
     : base(options)
@@ -16,6 +17,6 @@ public class ToDoDbContext : DbContext
   {
     modelBuilder.HasDefaultSchema(Constants.SchemaName);
 
-    modelBuilder.ApplyConfiguration(new ToDoListItemViewConfiguration());
+    modelBuilder.ApplyConfiguration(new ToDoViewListItemConfiguration());
   }
 }

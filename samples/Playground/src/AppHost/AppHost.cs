@@ -38,7 +38,6 @@ var silo = builder
   .WithReference(nats)
   .WithReference(playgroundDb)
   .WithReference(orleans)
-  .WithReplicas(3)
   .WaitFor(nats)
   .WaitFor(redis)
   .WaitForCompletion(migrate);
@@ -46,6 +45,7 @@ var silo = builder
 builder
   .AddProject<Projects.Playground_WebApi>("playground-webapi")
   .WithReference(nats)
+  .WithReference(playgroundDb)
   .WithReference(orleans.AsClient())
   .WithExternalHttpEndpoints()
   .WaitFor(nats)
