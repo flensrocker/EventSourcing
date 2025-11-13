@@ -17,6 +17,14 @@ internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
       .Where(e => e.TenantId == request.TenantId)
       .OrderBy(e => e.Status)
       .ThenByDescending(e => e.CreatedAt)
+      .Select(e => new ToDoQueryResponse.ListToDos.ToDoItem
+      {
+        ToDoId = e.ToDoId,
+        Version = e.Version,
+        CreatedAt = e.CreatedAt,
+        Title = e.Title,
+        Status = e.Status,
+      })
       .ToArrayAsync(cancellationToken);
 
     return new ToDoQueryResponse.ListToDos

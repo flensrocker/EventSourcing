@@ -29,7 +29,15 @@ public abstract partial record ToDoQueryResponse
 {
   public sealed record ListToDos : ToDoQueryResponse
   {
-    // TODO Make own type for items without TenantId
-    public required IReadOnlyCollection<ToDoView.ToDoListItem> ToDoItemList { get; init; }
+    public sealed record ToDoItem
+    {
+      public required Guid ToDoId { get; init; }
+      public required int Version { get; init; }
+      public required DateTimeOffset CreatedAt { get; init; }
+      public required string Title { get; init; }
+      public required ToDoStatus Status { get; init; }
+    }
+
+    public required IReadOnlyCollection<ToDoItem> ToDoItemList { get; init; }
   }
 }
