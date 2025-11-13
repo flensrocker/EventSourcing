@@ -100,10 +100,10 @@ public static class ToDoEndpoints
     });
 
     builder.MapGet("/api/todo", static async (
-      [FromServices] IViewQuery<ToDoQuery.ListToDosRequest, ToDoQuery.ListToDosResponse> query,
+      [FromServices] IViewQuery<ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos> query,
       CancellationToken cancellationToken) =>
     {
-      var request = ToDoQuery.ListToDosRequest.Create(tenantId: null);
+      var request = ToDoQueryRequest.ListToDos.Create(tenantId: null);
       if (request is null)
         return Results.BadRequest();
 

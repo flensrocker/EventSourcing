@@ -28,7 +28,7 @@ public static class ToDoPostgreSQLPersistenceExtensions
       });
     });
 
-    services.AddViewQuery<ListToDosViewQuery, ToDoQuery.ListToDosRequest, ToDoQuery.ListToDosResponse>();
+    services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>();
 
     return services;
   }
