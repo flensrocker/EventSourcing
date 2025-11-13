@@ -1,5 +1,6 @@
 {
   "msbuild-sdks": {
-    "MSTest.Sdk": "4.0.1"
+    "Aspire.AppHost.Sdk": "13.0.0",
+    "MSTest.Sdk": "4.0.2"
   }
 }

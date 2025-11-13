@@ -50,6 +50,7 @@ builder
   .WithExternalHttpEndpoints()
   .WaitFor(nats)
   .WaitFor(redis)
+  .WaitForCompletion(migrate)
   .WaitFor(silo);
 
 builder.Build().Run();
