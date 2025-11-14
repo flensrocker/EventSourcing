@@ -10,7 +10,7 @@ namespace Flensrocker.Domain.Orleans.EntityFrameworkCore;
 public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TEventBase>
   : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent<TEventBase>>
   where TDbContext : DbContext
-  where TEntity : class, IDomainEventProjectable<TEventBase>, IDomainWhereId<TEntity>, new()
+  where TEntity : class, IDomainEventProjectable<TEventBase>, IWhereId<TEntity>, new()
   where TEventBase : class
 {
   private readonly IDomainEventStorage<TEventBase> _eventStore;

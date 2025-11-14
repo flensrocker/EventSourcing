@@ -5,7 +5,7 @@ namespace Flensrocker.ToDo.Abstractions;
 
 public abstract partial record ToDoView
 {
-  public sealed record ToDoListItem : ToDoView, IDomainEventVersionable, IToDoEventProjectable, IDomainWhereId<ToDoListItem>
+  public sealed record ToDoListItem : ToDoView, IDomainEventVersionable, IToDoEventProjectable, IWhereId<ToDoListItem>
   {
     public Guid ToDoId { get; private set; }
     public int Version { get; private set; }
@@ -14,7 +14,7 @@ public abstract partial record ToDoView
     public string Title { get; private set; } = "";
     public ToDoStatus Status { get; private set; }
 
-    static Expression<Func<ToDoListItem, bool>> IDomainWhereId<ToDoListItem>.GetWhereId(Guid id)
+    static Expression<Func<ToDoListItem, bool>> IWhereId<ToDoListItem>.GetWhereId(Guid id)
       => item => item.ToDoId == id;
 
     void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)

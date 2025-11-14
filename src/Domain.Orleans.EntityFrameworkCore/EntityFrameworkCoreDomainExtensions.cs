@@ -13,7 +13,7 @@ public static class EntityFrameworkCoreDomainExtensions
     TEntity? projection,
     ILogger logger)
     where TDbContext : DbContext
-    where TEntity : class, IDomainEventProjectable<TEventBase>, IDomainWhereId<TEntity>, new()
+    where TEntity : class, IDomainEventProjectable<TEventBase>, IWhereId<TEntity>, new()
     where TEventBase : class
   {
     var entityTypeName = typeof(TEntity).GetTypeName();
