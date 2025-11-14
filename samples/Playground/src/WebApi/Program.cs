@@ -1,5 +1,6 @@
 using Flensrocker.Domain.Abstractions;
 using Flensrocker.Domain.Orleans.Abstractions;
+using Flensrocker.Domain.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
@@ -15,6 +16,12 @@ var globalJsonOptions = DomainJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
+
+builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions<ToDoEvent>
+{
+  ConnectionName = "playground",
+  JsonOptions = globalJsonOptions,
+});
 
 builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
 {

@@ -37,3 +37,6 @@ GET http://{{host}}:{{port}}/api/todo
 
 ###
 GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}
+
+###
+GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/events

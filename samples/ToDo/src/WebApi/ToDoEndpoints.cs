@@ -94,9 +94,34 @@ public static class ToDoEndpoints
     {
       var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
       var result = await toDoDetails.GetProjection(cancellationToken);
-      return result is not null
-        ? Results.Ok(result)
-        : Results.NotFound();
+      return result is null
+        ? Results.NotFound()
+        : Results.Ok(result);
+    });
+
+    builder.MapGet("/api/todo/{toDoId}/events", static async (
+      Guid toDoId,
+      [FromQuery] string? mode,
+      [FromQuery] int? from,
+      [FromQuery] int? to,
+      [FromServices] IDomainEventStorage<ToDoEvent> eventStore,
+      CancellationToken cancellationToken) =>
+    {
+      from ??= 1;
+      to ??= 0;
+
+      if (from.Value <= 0 || to.Value < 0 || (to.Value > 0 && to.Value <= from.Value))
+        return Results.BadRequest();
+
+      var toDoEvents = await eventStore.ReadEventsFromStorage(toDoId, from.Value, to.Value, cancellationToken);
+      if (toDoEvents is null)
+        return Results.NotFound();
+
+      return Results.Ok(mode switch
+      {
+        "payload" => toDoEvents.Select(ev => ev.Payload).ToArray(),
+        _ => toDoEvents,
+      });
     });
 
     builder.MapGet("/api/todo", static async (
