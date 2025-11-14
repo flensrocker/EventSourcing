@@ -5,13 +5,13 @@ using Microsoft.Extensions.Logging;
 namespace Flensrocker.Domain.Persistence.PostgreSQL;
 
 internal class PostgreSQLDomainEventStorage<TEventBase>(
-  PostgreSQLDomainEventStorageOptions<TEventBase> options,
+  PostgreSQLDomainEventStorageOptions options,
   IDbContextFactory<DomainDbContext> dbContextFactory,
   ILogger<PostgreSQLDomainEventStorage<TEventBase>> logger)
   : IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
-  private readonly PostgreSQLDomainEventStorageOptions<TEventBase> _options = options;
+  private readonly PostgreSQLDomainEventStorageOptions _options = options;
   private readonly IDbContextFactory<DomainDbContext> _dbContextFactory = dbContextFactory;
   private readonly ILogger<PostgreSQLDomainEventStorage<TEventBase>> _logger = logger;
 

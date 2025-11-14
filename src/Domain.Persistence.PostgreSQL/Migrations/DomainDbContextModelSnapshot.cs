@@ -17,7 +17,8 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasDefaultSchema("Domain")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -50,7 +51,8 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
 
                     b.Property<string>("StreamType")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<int>("StreamVersion")
                         .HasColumnType("integer");

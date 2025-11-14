@@ -24,12 +24,12 @@ builder.Services.AddOrleansPostgreSQL(() =>
 
 builder.Services.AddPostgreSQLDomainEventStorage(() =>
 {
-  return new PostgreSQLDomainEventStorageOptions<ToDoEvent>
+  return new PostgreSQLDomainEventStorageOptions
   {
     ConnectionName = "playground",
     JsonOptions = globalJsonOptions,
   };
-});
+}).ForDomainEvents<ToDoEvent>();
 
 builder.Services.AddToDoPostgreSQLPersistence(() =>
 {

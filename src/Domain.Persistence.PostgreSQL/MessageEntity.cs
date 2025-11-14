@@ -45,6 +45,10 @@ internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTyp
       .Property(e => e.GlobalIndex)
       .HasDefaultValueSql($"nextval('\"{Constants.SchemaName}\".\"{Constants.GlobalMessageIndexSequenceName}\"')");
 
+    builder
+      .Property(e => e.StreamType)
+      .HasMaxLength(Constants.MaxLengthStreamType);
+
     builder.Property(e => e.TenantId);
     builder.Property(e => e.CreatedAt);
     builder.Property(e => e.CreatedByUserId);

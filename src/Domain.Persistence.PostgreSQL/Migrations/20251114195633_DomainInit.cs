@@ -24,7 +24,7 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
         {
           Id = table.Column<Guid>(type: "uuid", nullable: false),
           GlobalIndex = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "nextval('\"Domain\".\"GlobalMessageIndex\"')"),
-          StreamType = table.Column<string>(type: "text", nullable: false),
+          StreamType = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
           StreamId = table.Column<Guid>(type: "uuid", nullable: false),
           StreamVersion = table.Column<int>(type: "integer", nullable: false),
           TenantId = table.Column<Guid>(type: "uuid", nullable: true),
@@ -51,11 +51,19 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL.Migrations
         columns: new[] { "StreamType", "StreamId", "StreamVersion" },
         unique: true)
         .Annotation("Npgsql:IndexInclude", new[] { "TenantId" });
+
+      migrationBuilder.Sql($"""
+        CREATE PUBLICATION {Constants.PublicationName} FOR TABLE "{Constants.SchemaName}"."{Constants.MessageTableName}" WITH (publish = 'insert');
+        """);
     }
 
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
+      migrationBuilder.Sql($"""
+        DROP PUBLICATION {Constants.PublicationName};
+        """);
+
       migrationBuilder.DropTable(
         name: "Message",
         schema: "Domain");

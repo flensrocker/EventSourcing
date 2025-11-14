@@ -19,11 +19,11 @@ var globalJsonOptions = DomainJsonSerializerOptions.Default
 
 builder.AddKeyedRedisClient("redis");
 
-builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions<ToDoEvent>
+builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
 {
   ConnectionName = "playground",
   JsonOptions = globalJsonOptions,
-});
+}).ForDomainEvents<ToDoEvent>();
 
 builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
 {

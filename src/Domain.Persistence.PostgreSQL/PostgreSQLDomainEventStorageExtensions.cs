@@ -2,18 +2,39 @@
 using System.Text.Json;
 using Flensrocker.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Npgsql;
 
 namespace Flensrocker.Domain.Persistence.PostgreSQL;
 
 public static class PostgreSQLDomainEventStorageExtensions
 {
-  public static IServiceCollection AddPostgreSQLDomainEventStorage<TEventBase>(this IServiceCollection services, Func<PostgreSQLDomainEventStorageOptions<TEventBase>> configureOptions)
-    where TEventBase : class
+  public class PostgreSQLDomainEventStorageBuilder
+  {
+    private readonly IServiceCollection _services;
+
+    internal PostgreSQLDomainEventStorageBuilder(IServiceCollection services)
+    {
+      _services = services;
+    }
+
+    public PostgreSQLDomainEventStorageBuilder ForDomainEvents<TEventBase>()
+      where TEventBase : class
+    {
+      _services.AddScoped<PostgreSQLDomainEventStorage<TEventBase>>();
+      _services.AddScoped<IDomainEventStorage<TEventBase>>(sp => sp.GetRequiredService<PostgreSQLDomainEventStorage<TEventBase>>());
+
+      return this;
+    }
+  }
+
+  public static PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(this IServiceCollection services, Func<PostgreSQLDomainEventStorageOptions> configureOptions)
   {
     var storageOptions = configureOptions();
-    services.AddSingleton(storageOptions);
+    services.TryAddSingleton(storageOptions);
 
     services.AddPooledDbContextFactory<DomainDbContext>((serviceProvider, dbOptions) =>
     {
@@ -28,8 +49,12 @@ public static class PostgreSQLDomainEventStorageExtensions
       });
     });
 
-    services.AddScoped<PostgreSQLDomainEventStorage<TEventBase>>();
-    services.AddScoped<IDomainEventStorage<TEventBase>>(sp => sp.GetRequiredService<PostgreSQLDomainEventStorage<TEventBase>>());
+    return new PostgreSQLDomainEventStorageBuilder(services);
+  }
+
+  public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services)
+  {
+    services.AddHostedService<PostgreSQLDomainMessageSubscriber>();
 
     return services;
   }
@@ -38,8 +63,21 @@ public static class PostgreSQLDomainEventStorageExtensions
   {
     var dbContextFactory = services.GetRequiredService<IDbContextFactory<DomainDbContext>>();
 
-    using var dbContext = dbContextFactory.CreateDbContext();
-    await dbContext.Database.MigrateAsync().ConfigureAwait(false);
+    using (var migrationDbContext = dbContextFactory.CreateDbContext())
+      await migrationDbContext.Database.MigrateAsync().ConfigureAwait(false);
+
+    using (var slotDbContext = dbContextFactory.CreateDbContext())
+    {
+      var createSlot = $"""
+        DO $$
+        BEGIN
+          SELECT * FROM pg_create_logical_replication_slot('{Constants.PublicationSlotName}', 'pgoutput');
+          EXCEPTION WHEN OTHERS THEN NULL;
+        END$$;
+        """;
+
+      await slotDbContext.Database.ExecuteSqlRawAsync(createSlot).ConfigureAwait(false);
+    }
   }
 
   internal static MessageEntity ToDomainEvent<TEventBase>(this DomainEvent<TEventBase> @event, JsonSerializerOptions? jsonOptions)
