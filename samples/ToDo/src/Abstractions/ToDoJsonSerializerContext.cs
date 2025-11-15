@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Flensrocker.EventSourcing.Abstractions;
 
 namespace Flensrocker.ToDo.Abstractions;
 
@@ -18,12 +17,6 @@ namespace Flensrocker.ToDo.Abstractions;
 [JsonSerializable(typeof(ToDoView.ToDoDetails))]
 [JsonSerializable(typeof(ToDoView.ToDoListItem))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
-public partial class ToDoJsonSerializerContext : JsonSerializerContext, ISupportJsonSerialization
+public partial class ToDoJsonSerializerContext : JsonSerializerContext
 {
-  public bool Supports(Type type)
-    => type.IsAssignableTo(typeof(ToDoCommand))
-    || type.IsAssignableTo(typeof(ToDoEvent))
-    || type.IsAssignableTo(typeof(ToDoQueryRequest))
-    || type.IsAssignableTo(typeof(ToDoQueryResponse))
-    || type.IsAssignableTo(typeof(ToDoView));
 }

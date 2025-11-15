@@ -7,7 +7,6 @@ using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
-using Orleans.Serialization;
 using Orleans.Streaming.NATS.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -32,11 +31,6 @@ builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenc
 
 builder.UseOrleans(siloBuilder =>
 {
-  siloBuilder.Services.AddSerializer(serializerBuilder =>
-  {
-    serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions);
-  });
-
   var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
   siloBuilder.AddAdoNetGrainStorage("Default", options =>
   {

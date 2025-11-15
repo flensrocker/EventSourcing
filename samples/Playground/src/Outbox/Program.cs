@@ -5,7 +5,6 @@ using Flensrocker.ToDo.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
-using Orleans.Serialization;
 using Orleans.Streaming.NATS.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -28,11 +27,6 @@ builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 
 builder.UseOrleansClient(clientBuilder =>
 {
-  clientBuilder.Services.AddSerializer(serializerBuilder =>
-  {
-    serializerBuilder.AddJsonSerializer(globalJsonOptions.Supports, globalJsonOptions);
-  });
-
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
   clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
   {

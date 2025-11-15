@@ -4,8 +4,10 @@ namespace Flensrocker.ToDo.Abstractions;
 
 public abstract partial record ToDoCommand
 {
+  [GenerateSerializer]
   public sealed record MemorizeToDo : ToDoCommand
   {
+    [Id(0)]
     public required string Title { get; init; }
 
     [JsonConstructor]
