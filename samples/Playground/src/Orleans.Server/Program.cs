@@ -2,7 +2,6 @@
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -42,6 +41,7 @@ builder.UseOrleans(siloBuilder =>
     options.Invariant = "Npgsql";
     options.ConnectionString = npgsqlConnectionString;
   });
+  siloBuilder.AddCustomStorageBasedLogConsistencyProvider(OrleansConstants.LogStorageProviderName);
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
   siloBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
@@ -53,8 +53,6 @@ builder.UseOrleans(siloBuilder =>
       Url = natsConnectionString,
     };
   });
-
-  siloBuilder.AddToDo();
 });
 
 await builder.Build().RunAsync();
