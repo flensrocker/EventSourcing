@@ -22,7 +22,7 @@
   <Folder Name="/samples/Playground/" />
   <Folder Name="/samples/Playground/src/">
     <Project Path="samples/Playground/src/AppHost/Playground.AppHost.csproj" Id="a604399f-633b-4d71-a7c7-9908c20811d4" DefaultStartup="true" />
-    <Project Path="samples/Playground/src/Migrate/Playground.Migrate.csproj" />
+    <Project Path="samples/Playground/src/Migration/Playground.Migration.csproj" />
     <Project Path="samples/Playground/src/Orleans.Server/Playground.Orleans.Server.csproj" />
     <Project Path="samples/Playground/src/Outbox/Playground.Outbox.csproj" />
     <Project Path="samples/Playground/src/ServiceDefaults/Playground.ServiceDefaults.csproj" />

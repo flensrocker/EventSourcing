@@ -21,8 +21,8 @@ var postgres = builder
 
 var playgroundDb = postgres.AddDatabase("playground");
 
-var migrate = builder
-  .AddProject<Projects.Playground_Migrate>("migrate")
+var migration = builder
+  .AddProject<Projects.Playground_Migration>("migration")
   .WithReference(playgroundDb)
   .WithParentRelationship(playgroundDb)
   .WaitFor(playgroundDb);
@@ -40,14 +40,14 @@ var silo = builder
   .WithReference(orleans)
   .WaitFor(nats)
   .WaitFor(redis)
-  .WaitForCompletion(migrate);
+  .WaitForCompletion(migration);
 
 var outbox = builder
   .AddProject<Projects.Playground_Outbox>("playground-outbox")
   .WithReference(playgroundDb)
   .WithReference(orleans.AsClient())
   .WaitFor(redis)
-  .WaitForCompletion(migrate)
+  .WaitForCompletion(migration)
   .WaitFor(silo);
 
 var webApi = builder
@@ -58,7 +58,7 @@ var webApi = builder
   .WithExternalHttpEndpoints()
   .WaitFor(nats)
   .WaitFor(redis)
-  .WaitForCompletion(migrate)
+  .WaitForCompletion(migration)
   .WaitFor(silo);
 
 builder.Build().Run();
