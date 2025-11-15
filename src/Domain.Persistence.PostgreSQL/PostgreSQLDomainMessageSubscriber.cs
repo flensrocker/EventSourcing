@@ -31,8 +31,6 @@ internal class PostgreSQLDomainMessageSubscriber(
 
     await foreach (var message in conn.StartReplication(slot, new PgOutputReplicationOptions(Constants.PublicationName, PgOutputProtocolVersion.V4, binary: true), stoppingToken).ConfigureAwait(false))
     {
-      Console.WriteLine($"Received message type: {message.GetType().Name}");
-
       if (message is InsertMessage insertMessage)
       {
         Guid eventId = default;
@@ -94,14 +92,25 @@ internal class PostgreSQLDomainMessageSubscriber(
             case nameof(MessageEntity.PayloadJson):
               {
                 var payloadType = DomainExtensions.GetTypeFromName(streamType);
-                var payloadJson = await column.GetTextReader().ReadToEndAsync(stoppingToken).ConfigureAwait(false);
-                payload = JsonSerializer.Deserialize(payloadJson, payloadType!, _options.JsonOptions);
+                if (payloadType is not null)
+                {
+                  var payloadJson = await column.GetTextReader().ReadToEndAsync(stoppingToken).ConfigureAwait(false);
+                  payload = JsonSerializer.Deserialize(payloadJson, payloadType, _options.JsonOptions);
+                }
                 break;
               }
           }
         }
 
-        if (streamVersion > 0)
+        if (string.IsNullOrEmpty(streamType))
+        {
+          _logger.LogError("Missing stream-type on event-id {EventId}, global-index {GlobalIndex}", eventId, globalIndex);
+        }
+        else if (payload is null)
+        {
+          _logger.LogError("Missing payload on event-id {EventId}, global-index {GlobalIndex}, stream {StreamType}/{StreamId}/{StreamVersion}", eventId, globalIndex, streamType, streamId, streamVersion);
+        }
+        else
         {
           var metadata = new DomainEventMetadata
           {
@@ -114,18 +123,13 @@ internal class PostgreSQLDomainMessageSubscriber(
             CreatedByUserId = createdByUserId,
           };
 
-          var messageType = typeof(DomainEvent<>).MakeGenericType(payload!.GetType());
+          var messageType = typeof(DomainEvent<>).MakeGenericType(payload.GetType());
           var domainEvent = Activator.CreateInstance(messageType);
           messageType.GetProperty(nameof(DomainEvent<>.Metadata))?.SetValue(domainEvent, metadata);
           messageType.GetProperty(nameof(DomainEvent<>.Payload))?.SetValue(domainEvent, payload);
 
-          _logger.LogInformation("Received domain event {DomainEvent}", domainEvent);
-          // TODO push to Orleans stream
-        }
-        else if (streamVersion == 0)
-        {
-          _logger.LogInformation("Received public message {Message}", payload);
-          // TODO push to Orleans stream
+          _logger.LogInformation("Publishing domain-event {DomainEvent}", domainEvent);
+          // TODO publish
         }
       }
 
