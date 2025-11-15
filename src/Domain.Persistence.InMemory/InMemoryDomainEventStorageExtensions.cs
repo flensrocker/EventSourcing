@@ -8,7 +8,7 @@ public static class InMemoryDomainEventStorageExtensions
 {
   internal static long GlobalIndex = 0L;
 
-  internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent<TEventBase> @event, JsonSerializerOptions? jsonOptions)
+  internal static DomainEventEntity SetDomainEvent<TEventBase>(this DomainEventEntity entity, DomainEvent @event, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
     entity.Id = @event.Metadata.EventId;
@@ -23,10 +23,10 @@ public static class InMemoryDomainEventStorageExtensions
     return entity;
   }
 
-  internal static DomainEvent<TEventBase> GetDomainEvent<TEventBase>(this DomainEventEntity entity, JsonSerializerOptions? jsonOptions)
+  internal static DomainEvent GetDomainEvent<TEventBase>(this DomainEventEntity entity, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
-    return JsonSerializer.Deserialize(entity.EventJson, typeof(DomainEvent<TEventBase>), jsonOptions) is DomainEvent<TEventBase> @event
+    return JsonSerializer.Deserialize(entity.EventJson, typeof(DomainEvent), jsonOptions) is DomainEvent @event
       ? @event
       : default!;
   }

@@ -28,7 +28,7 @@ public partial class ToDoAggregate : IDomainAggregate<ToDoCommand, ToDoEvent>, I
     Status = ToDoStatus.Open;
   }
 
-  public void Apply(DomainEvent<ToDoEvent> @event)
+  public void Apply(DomainEvent @event)
   {
     Version = @event.Metadata.StreamVersion;
 

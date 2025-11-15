@@ -41,7 +41,7 @@ public abstract partial record ToDoView
       DismissReason = null;
     }
 
-    public void Apply(DomainEvent<ToDoEvent> @event)
+    public void Apply(DomainEvent @event)
     {
       Version = @event.Metadata.StreamVersion;
 

@@ -8,11 +8,11 @@ namespace Flensrocker.ToDo.Abstractions;
 [JsonSerializable(typeof(ToDoCommand.DismissToDo))]
 [JsonSerializable(typeof(ToDoCommand.MemorizeToDo))]
 [JsonSerializable(typeof(ToDoCommand.ReopenToDo))]
-[JsonSerializable(typeof(DomainEvent<ToDoEvent>))]
-[JsonSerializable(typeof(DomainEvent<ToDoEvent.ToDoCompleted>))]
-[JsonSerializable(typeof(DomainEvent<ToDoEvent.ToDoDismissed>))]
-[JsonSerializable(typeof(DomainEvent<ToDoEvent.ToDoMemorized>))]
-[JsonSerializable(typeof(DomainEvent<ToDoEvent.ToDoReopened>))]
+[JsonSerializable(typeof(ToDoEvent))]
+[JsonSerializable(typeof(ToDoEvent.ToDoCompleted))]
+[JsonSerializable(typeof(ToDoEvent.ToDoDismissed))]
+[JsonSerializable(typeof(ToDoEvent.ToDoMemorized))]
+[JsonSerializable(typeof(ToDoEvent.ToDoReopened))]
 [JsonSerializable(typeof(ToDoQueryRequest.ListToDos), TypeInfoPropertyName = $"{nameof(ToDoQueryRequest)}{nameof(ToDoQueryRequest.ListToDos)}")]
 [JsonSerializable(typeof(ToDoQueryResponse.ListToDos), TypeInfoPropertyName = $"{nameof(ToDoQueryResponse)}{nameof(ToDoQueryResponse.ListToDos)}")]
 [JsonSerializable(typeof(ToDoView.ToDoDetails))]
@@ -23,7 +23,6 @@ public partial class ToDoJsonSerializerContext : JsonSerializerContext, ISupport
   public bool Supports(Type type)
     => type.IsAssignableTo(typeof(ToDoCommand))
     || type.IsAssignableTo(typeof(ToDoEvent))
-    || type.IsAssignableTo(typeof(DomainEvent<ToDoEvent>))
     || type.IsAssignableTo(typeof(ToDoQueryRequest))
     || type.IsAssignableTo(typeof(ToDoQueryResponse))
     || type.IsAssignableTo(typeof(ToDoView));

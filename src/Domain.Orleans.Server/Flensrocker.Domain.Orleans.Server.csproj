@@ -9,7 +9,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.EventSourcing" />
     <PackageReference Include="Microsoft.Orleans.Sdk" />
-    <PackageReference Include="Microsoft.Orleans.Streaming" />
   </ItemGroup>
 
   <ItemGroup>

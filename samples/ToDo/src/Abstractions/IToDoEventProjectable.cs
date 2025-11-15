@@ -9,7 +9,7 @@ public interface IToDoEventProjectable : IDomainEventProjectable<ToDoEvent>
   void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload);
   void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload);
 
-  void ApplyToDoEvent(DomainEvent<ToDoEvent> @event)
+  void ApplyToDoEvent(DomainEvent @event)
   {
     switch (@event.Payload)
     {

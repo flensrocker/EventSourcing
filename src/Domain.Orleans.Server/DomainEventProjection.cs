@@ -3,7 +3,7 @@ using Orleans.Streams;
 
 namespace Flensrocker.Domain.Orleans.Server;
 
-public class DomainEventProjection<TEventBase, TProjection> : IAsyncObserver<DomainEvent<TEventBase>>
+public class DomainEventProjection<TEventBase, TProjection> : IAsyncObserver<DomainEvent>
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable<TEventBase>, new()
 {
@@ -29,7 +29,7 @@ public class DomainEventProjection<TEventBase, TProjection> : IAsyncObserver<Dom
       : observer;
   }
 
-  public async Task OnNextAsync(DomainEvent<TEventBase> item, StreamSequenceToken? token = null)
+  public async Task OnNextAsync(DomainEvent item, StreamSequenceToken? token = null)
   {
     if (Projection is IDomainEventVersionable withVersion)
     {

@@ -46,7 +46,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     return new KeyValuePair<int, TState>(0, state);
   }
 
-  async Task<bool> IDomainEventStorage<TEventBase>.ApplyUpdatesToStorage(Guid streamId, IReadOnlyList<DomainEvent<TEventBase>> updates, int expectedVersion)
+  async Task<bool> IDomainEventStorage<TEventBase>.ApplyUpdatesToStorage(Guid streamId, IReadOnlyList<DomainEvent> updates, int expectedVersion)
   {
     try
     {
@@ -57,7 +57,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
         using var dbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
         var messageList = updates
-          .Select(ev => ev.ToDomainEvent(_options.JsonOptions))
+          .Select(ev => ev.ToMessageEntity(_options.JsonOptions))
           .ToArray();
 
         await dbContext.Message.AddRangeAsync(messageList).ConfigureAwait(false);
@@ -74,7 +74,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     }
   }
 
-  async Task<IReadOnlyList<DomainEvent<TEventBase>>?> IDomainEventStorage<TEventBase>.ReadEventsFromStorage(Guid streamId, int fromVersionIncl, int toVersionExcl, CancellationToken cancellationToken)
+  async Task<IReadOnlyList<DomainEvent>?> IDomainEventStorage<TEventBase>.ReadEventsFromStorage(Guid streamId, int fromVersionIncl, int toVersionExcl, CancellationToken cancellationToken)
   {
     if (fromVersionIncl > 0 && (toVersionExcl <= 0 || toVersionExcl > fromVersionIncl))
     {

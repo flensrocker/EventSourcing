@@ -81,8 +81,7 @@ public static class PostgreSQLDomainEventStorageExtensions
     }
   }
 
-  internal static MessageEntity ToDomainEvent<TEventBase>(this DomainEvent<TEventBase> @event, JsonSerializerOptions? jsonOptions)
-    where TEventBase : class
+  internal static MessageEntity ToMessageEntity(this DomainEvent @event, JsonSerializerOptions? jsonOptions)
   {
     return new MessageEntity
     {
@@ -97,10 +96,10 @@ public static class PostgreSQLDomainEventStorageExtensions
     };
   }
 
-  internal static DomainEvent<TEventBase> ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
+  internal static DomainEvent ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
-    return new DomainEvent<TEventBase>
+    return new DomainEvent
     {
       Metadata = new DomainEventMetadata
       {

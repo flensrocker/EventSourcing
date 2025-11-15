@@ -2,9 +2,9 @@
 
 public interface IDomainEventProjectable<TEventBase>
 {
-  void Apply(DomainEvent<TEventBase> @event);
+  void Apply(DomainEvent @event);
 
-  void ApplyEvents(params IEnumerable<DomainEvent<TEventBase>> events)
+  void ApplyEvents(params IEnumerable<DomainEvent> events)
   {
     foreach (var @event in events)
       Apply(@event);

@@ -1,4 +1,6 @@
-﻿namespace Flensrocker.Domain.Abstractions;
+﻿using System.Text.Json.Serialization;
+
+namespace Flensrocker.Domain.Abstractions;
 
 public sealed record DomainEventMetadata
 {
@@ -11,10 +13,10 @@ public sealed record DomainEventMetadata
   public required Guid? CreatedByUserId { get; init; }
 }
 
-public record DomainEvent<TEventBase>
+public record DomainEvent
 {
   public required DomainEventMetadata Metadata { get; init; }
-  public required TEventBase Payload { get; init; }
+  public required object Payload { get; init; }
 
   /// <summary>
   /// DRAFT
@@ -22,7 +24,7 @@ public record DomainEvent<TEventBase>
   /// All must be stored in the same transaction.
   /// Public messages are not applied to event-sourced aggregates/projections.
   /// </summary>
-  public sealed record WithPublicMessages : DomainEvent<TEventBase>
+  public sealed record WithPublicMessages : DomainEvent
   {
     public required IReadOnlyCollection<object> MessageList { get; init; }
   }

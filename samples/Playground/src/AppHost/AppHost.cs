@@ -44,8 +44,10 @@ var silo = builder
 
 var outbox = builder
   .AddProject<Projects.Playground_Outbox>("playground-outbox")
+  .WithReference(nats)
   .WithReference(playgroundDb)
   .WithReference(orleans.AsClient())
+  .WaitFor(nats)
   .WaitFor(redis)
   .WaitForCompletion(migration)
   .WaitFor(silo);

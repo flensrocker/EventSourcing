@@ -6,15 +6,6 @@ namespace Flensrocker.Domain.Abstractions;
 
 public static class DomainExtensions
 {
-  public static JsonSerializerOptions CreateBaseJsonSerializerOptions()
-  {
-    return new JsonSerializerOptions
-    {
-      AllowOutOfOrderMetadataProperties = true,
-      PropertyNamingPolicy = null,
-    };
-  }
-
   public static JsonSerializerOptions WithTypeResolversOf(this JsonSerializerOptions options, JsonSerializerContext context)
   {
     options.TypeInfoResolverChain.Add(context);
@@ -34,20 +25,6 @@ public static class DomainExtensions
       return null;
 
     return Type.GetType(typeName.Replace("_-_", ", ").Replace("-", "."), false);
-  }
-
-  public static object? CreateDomainEvent(DomainEventMetadata metadata, object payload)
-  {
-    var domainEventType = typeof(DomainEvent<>).MakeGenericType(payload.GetType());
-
-    var domainEvent = Activator.CreateInstance(domainEventType);
-    if (domainEvent is not null)
-    {
-      domainEventType.GetProperty(nameof(DomainEvent<>.Metadata))?.SetValue(domainEvent, metadata);
-      domainEventType.GetProperty(nameof(DomainEvent<>.Payload))?.SetValue(domainEvent, payload);
-    }
-
-    return domainEvent;
   }
 
   public static IServiceCollection AddViewQuery<TViewQuery, TQueryRequest, TQueryResponse>(this IServiceCollection services)

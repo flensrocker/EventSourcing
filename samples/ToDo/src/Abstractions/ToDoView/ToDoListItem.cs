@@ -45,7 +45,7 @@ public abstract partial record ToDoView
       Status = ToDoStatus.Open;
     }
 
-    public void Apply(DomainEvent<ToDoEvent> @event)
+    public void Apply(DomainEvent @event)
     {
       Version = @event.Metadata.StreamVersion;
 

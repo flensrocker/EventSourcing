@@ -8,7 +8,7 @@ using Orleans.Streams.Core;
 namespace Flensrocker.Domain.Orleans.EntityFrameworkCore;
 
 public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TEventBase>
-  : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent<TEventBase>>
+  : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent>
   where TDbContext : DbContext
   where TEntity : class, IDomainEventProjectable<TEventBase>, IWhereId<TEntity>, new()
   where TEventBase : class
@@ -28,11 +28,11 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
 
   public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
   {
-    var handle = handleFactory.Create<DomainEvent<TEventBase>>();
+    var handle = handleFactory.Create<DomainEvent>();
     await handle.ResumeAsync(this);
   }
 
-  public async Task OnNextAsync(DomainEvent<TEventBase> domainEvent, StreamSequenceToken? token = null)
+  public async Task OnNextAsync(DomainEvent domainEvent, StreamSequenceToken? token = null)
   {
     _projection = await _dbContextFactory.UpdateProjectionAsync(_eventStore, domainEvent, _projection, _logger);
   }

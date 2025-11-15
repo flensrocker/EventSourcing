@@ -2,5 +2,6 @@
 
 public static class DomainConstants
 {
-  public const string StreamProviderDomainMessages = "DomainMessages";
+  public const string DomainEventStreamProviderName = "DomainEvent";
+  public const string PublicMessageStreamNamespace = "PublicMessage";
 }

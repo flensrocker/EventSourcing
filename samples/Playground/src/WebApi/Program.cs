@@ -36,9 +36,9 @@ builder.Host.UseOrleansClient(clientBuilder =>
   });
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  clientBuilder.AddNatsStreams(DomainConstants.StreamProviderDomainMessages, options =>
+  clientBuilder.AddNatsStreams(DomainConstants.DomainEventStreamProviderName, options =>
   {
-    options.StreamName = DomainConstants.StreamProviderDomainMessages;
+    options.StreamName = DomainConstants.DomainEventStreamProviderName;
     options.JsonSerializerOptions = globalJsonOptions;
     options.NatsClientOptions = NatsOpts.Default with
     {

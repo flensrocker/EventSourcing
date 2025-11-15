@@ -9,7 +9,7 @@ public static class EntityFrameworkCoreDomainExtensions
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
     this IDbContextFactory<TDbContext> dbContextFactory,
     IDomainEventStorage<TEventBase> eventStore,
-    DomainEvent<TEventBase> domainEvent,
+    DomainEvent domainEvent,
     TEntity? projection,
     ILogger logger)
     where TDbContext : DbContext

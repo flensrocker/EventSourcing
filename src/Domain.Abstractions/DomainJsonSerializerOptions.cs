@@ -8,13 +8,30 @@ public interface ISupportJsonSerialization
   bool Supports(Type type);
 }
 
+[JsonSerializable(typeof(DomainEvent))]
+[JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
+internal partial class DomainJsonSerializerContext : JsonSerializerContext, ISupportJsonSerialization
+{
+  public bool Supports(Type type)
+    => type == typeof(DomainEvent);
+}
+
 public class DomainJsonSerializerOptions
 {
   public static DomainJsonSerializerOptions Default { get; } = new();
 
   private readonly List<Func<Type, bool>> _supports = new();
 
-  public JsonSerializerOptions Options { get; } = DomainExtensions.CreateBaseJsonSerializerOptions();
+  public JsonSerializerOptions Options { get; } = new JsonSerializerOptions
+  {
+    AllowOutOfOrderMetadataProperties = true,
+    PropertyNamingPolicy = null,
+  };
+
+  public DomainJsonSerializerOptions()
+  {
+    Add(DomainJsonSerializerContext.Default);
+  }
 
   public DomainJsonSerializerOptions Add<T>(T context)
     where T : JsonSerializerContext, ISupportJsonSerialization
