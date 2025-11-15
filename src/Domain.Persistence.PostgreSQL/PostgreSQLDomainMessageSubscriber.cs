@@ -11,12 +11,12 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL;
 
 internal class PostgreSQLDomainMessageSubscriber(
   IConfiguration configuration,
-  PostgreSQLDomainEventStorageOptions options,
+  PostgreSQLDomainMessageSubscriberOptions options,
   ILogger<PostgreSQLDomainMessageSubscriber> logger)
   : BackgroundService
 {
   private readonly IConfiguration _configuration = configuration;
-  private readonly PostgreSQLDomainEventStorageOptions _options = options;
+  private readonly PostgreSQLDomainMessageSubscriberOptions _options = options;
   private readonly ILogger<PostgreSQLDomainMessageSubscriber> _logger = logger;
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,8 +35,6 @@ internal class PostgreSQLDomainMessageSubscriber(
 
       if (message is InsertMessage insertMessage)
       {
-        var columnIndex = 0;
-
         Guid eventId = default;
         long globalIndex = default;
         string streamType = "";
@@ -51,49 +49,49 @@ internal class PostgreSQLDomainMessageSubscriber(
         {
           // TODO add error handling
 
-          switch (columnIndex)
+          switch (column.GetFieldName())
           {
-            case 0:
+            case nameof(MessageEntity.Id):
               {
                 eventId = await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 1:
+            case nameof(MessageEntity.GlobalIndex):
               {
                 globalIndex = await column.Get<long>(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 2:
+            case nameof(MessageEntity.StreamType):
               {
                 streamType = await column.GetTextReader().ReadToEndAsync(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 3:
+            case nameof(MessageEntity.StreamId):
               {
                 streamId = await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 4:
+            case nameof(MessageEntity.StreamVersion):
               {
                 streamVersion = await column.Get<int>(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 5:
+            case nameof(MessageEntity.TenantId):
               {
                 tenantId = column.IsDBNull ? null : await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 6:
+            case nameof(MessageEntity.CreatedAt):
               {
                 createdAt = await column.Get<DateTimeOffset>(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 7:
+            case nameof(MessageEntity.CreatedByUserId):
               {
                 createdByUserId = column.IsDBNull ? null : await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
                 break;
               }
-            case 8:
+            case nameof(MessageEntity.PayloadJson):
               {
                 var payloadType = DomainExtensions.GetTypeFromName(streamType);
                 var payloadJson = await column.GetTextReader().ReadToEndAsync(stoppingToken).ConfigureAwait(false);
@@ -101,8 +99,6 @@ internal class PostgreSQLDomainMessageSubscriber(
                 break;
               }
           }
-
-          columnIndex++;
         }
 
         if (streamVersion > 0)

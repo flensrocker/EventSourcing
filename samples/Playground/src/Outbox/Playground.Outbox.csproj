@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\Domain.Persistence.PostgreSQL\Flensrocker.Domain.Persistence.PostgreSQL.csproj" />
+    <ProjectReference Include="..\..\..\ToDo\src\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
+    <ProjectReference Include="..\..\..\ToDo\src\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />
+    <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>

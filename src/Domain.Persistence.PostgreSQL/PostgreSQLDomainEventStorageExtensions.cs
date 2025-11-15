@@ -2,11 +2,9 @@
 using System.Text.Json;
 using Flensrocker.Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Npgsql;
 
 namespace Flensrocker.Domain.Persistence.PostgreSQL;
 
@@ -52,8 +50,11 @@ public static class PostgreSQLDomainEventStorageExtensions
     return new PostgreSQLDomainEventStorageBuilder(services);
   }
 
-  public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services)
+  public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services, Func<PostgreSQLDomainMessageSubscriberOptions> configureOptions)
   {
+    var storageOptions = configureOptions();
+    services.TryAddSingleton(storageOptions);
+
     services.AddHostedService<PostgreSQLDomainMessageSubscriber>();
 
     return services;

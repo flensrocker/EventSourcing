@@ -42,7 +42,15 @@ var silo = builder
   .WaitFor(redis)
   .WaitForCompletion(migrate);
 
-builder
+var outbox = builder
+  .AddProject<Projects.Playground_Outbox>("playground-outbox")
+  .WithReference(playgroundDb)
+  .WithReference(orleans.AsClient())
+  .WaitFor(redis)
+  .WaitForCompletion(migrate)
+  .WaitFor(silo);
+
+var webApi = builder
   .AddProject<Projects.Playground_WebApi>("playground-webapi")
   .WithReference(nats)
   .WithReference(playgroundDb)

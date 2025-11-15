@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\..\..\src\Domain.Orleans.Abstractions\Flensrocker.Domain.Orleans.Abstractions.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\Orleans.Server\Playground.Orleans.Server.csproj" />
     <ProjectReference Include="..\Migrate\Playground.Migrate.csproj" />
+    <ProjectReference Include="..\Outbox\Playground.Outbox.csproj" />
     <ProjectReference Include="..\WebApi\Playground.WebApi.csproj" />
   </ItemGroup>
 
