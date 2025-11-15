@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path=".gitignore" />
     <File Path="Directory.packages.props" />
     <File Path="global.json" />
     <File Path="NuGet.config" />

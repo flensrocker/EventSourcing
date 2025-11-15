@@ -1,5 +1,7 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+builder.AddDockerComposeEnvironment("compose");
+
 var redis = builder
   .AddRedis("redis")
   .WithImageRegistry("ghcr.io")
@@ -22,7 +24,7 @@ var postgres = builder
 var playgroundDb = postgres.AddDatabase("playground");
 
 var migration = builder
-  .AddProject<Projects.Playground_Migration>("migration")
+  .AddProject<Projects.Playground_Migration>("playground-migration")
   .WithReference(playgroundDb)
   .WithParentRelationship(playgroundDb)
   .WaitFor(playgroundDb);
