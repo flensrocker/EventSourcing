@@ -1,4 +1,4 @@
-﻿using Flensrocker.Domain.Orleans.EntityFrameworkCore;
+﻿using Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL;

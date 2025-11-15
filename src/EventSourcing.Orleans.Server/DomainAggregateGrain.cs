@@ -1,0 +1,80 @@
+﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Orleans.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using Orleans.EventSourcing;
+using Orleans.EventSourcing.CustomStorage;
+
+namespace Flensrocker.EventSourcing.Orleans.Server;
+
+public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
+  : JournaledGrain<TState, DomainEvent>, ICustomStorageInterface<TState, DomainEvent>
+  , IDomainAggegrateGrain<TCommandBase>
+  where TState : class, IDomainAggregate<TCommandBase, TEventBase>, IDomainEventProjectable<TEventBase>, new()
+  where TCommandBase : class
+  where TEventBase : class
+{
+  private readonly string _streamType = typeof(TEventBase).GetTypeName();
+  private readonly TimeProvider _timeProvider;
+  private readonly IDomainEventStorage<TEventBase> _eventStore;
+
+  private int _nextVersion;
+
+  protected DomainAggregateGrain()
+  {
+    _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
+    _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+  }
+
+  public override async Task OnActivateAsync(CancellationToken cancellationToken)
+  {
+    await base.OnActivateAsync(cancellationToken);
+
+    _nextVersion = Version + 1;
+  }
+
+  protected DomainEvent[] RaiseDomainEvents<TEvent>(params IEnumerable<TEvent> payloads)
+    where TEvent : TEventBase
+  {
+    var user = DomainRequestContextExtensions.GetUser();
+    var tenantId = user?.TenantId;
+    var userId = user?.UserId;
+
+    // TODO Enable adding public messages to domain events.
+    var domainEvents = payloads.Select(payload => new DomainEvent
+    {
+      Metadata = new DomainEventMetadata
+      {
+        EventId = Guid.CreateVersion7(),
+        StreamType = _streamType,
+        StreamId = this.GetPrimaryKey(),
+        StreamVersion = _nextVersion++,
+        TenantId = tenantId,
+        CreatedAt = _timeProvider.GetUtcNow(), // ignoring the clock skew in a cluster, the exact time stamp is not important
+        CreatedByUserId = userId,
+      },
+      Payload = payload,
+    }).ToArray();
+
+    RaiseEvents(domainEvents);
+
+    return domainEvents;
+  }
+
+  public async Task<bool> ExecuteCommand(TCommandBase command)
+  {
+    var payloads = await State.ExecuteCommandAsync(command);
+    if (payloads is not { Length: > 0 })
+      return false;
+
+    var domainEvents = RaiseDomainEvents(payloads);
+    await ConfirmEvents();
+
+    return true;
+  }
+
+  Task<bool> ICustomStorageInterface<TState, DomainEvent>.ApplyUpdatesToStorage(IReadOnlyList<DomainEvent> updates, int expectedVersion)
+    => _eventStore.ApplyUpdatesToStorage(this.GetPrimaryKey(), updates, expectedVersion);
+
+  Task<KeyValuePair<int, TState>> ICustomStorageInterface<TState, DomainEvent>.ReadStateFromStorage()
+    => _eventStore.ReadStateFromStorage<TState>(this.GetPrimaryKey(), default);
+}

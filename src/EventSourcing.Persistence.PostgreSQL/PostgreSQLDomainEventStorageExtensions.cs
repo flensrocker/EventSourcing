@@ -1,0 +1,241 @@
+﻿using System.Reflection;
+using System.Text.Json;
+using Flensrocker.EventSourcing.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Npgsql.Replication.PgOutput.Messages;
+
+namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
+
+public static class PostgreSQLDomainEventStorageExtensions
+{
+  public class PostgreSQLDomainEventStorageBuilder
+  {
+    private readonly IServiceCollection _services;
+
+    internal PostgreSQLDomainEventStorageBuilder(IServiceCollection services)
+    {
+      _services = services;
+    }
+
+    public PostgreSQLDomainEventStorageBuilder ForDomainEvents<TEventBase>()
+      where TEventBase : class
+    {
+      _services.AddScoped<PostgreSQLDomainEventStorage<TEventBase>>();
+      _services.AddScoped<IDomainEventStorage<TEventBase>>(sp => sp.GetRequiredService<PostgreSQLDomainEventStorage<TEventBase>>());
+
+      return this;
+    }
+  }
+
+  public static PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(this IServiceCollection services, Func<PostgreSQLDomainEventStorageOptions> configureOptions)
+  {
+    var storageOptions = configureOptions();
+    services.TryAddSingleton(storageOptions);
+
+    services.AddPooledDbContextFactory<EventSourcingDbContext>((serviceProvider, dbOptions) =>
+    {
+      var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+      var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
+
+      dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+      {
+        npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+        npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+        npgsqlOptions.EnableRetryOnFailure();
+      });
+    });
+
+    return new PostgreSQLDomainEventStorageBuilder(services);
+  }
+
+  public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services, Func<PostgreSQLDomainMessageSubscriberOptions> configureOptions)
+  {
+    var storageOptions = configureOptions();
+    services.TryAddSingleton(storageOptions);
+
+    services.AddHostedService<PostgreSQLDomainMessageSubscriber>();
+
+    return services;
+  }
+
+  internal static void CreatePublication(this MigrationBuilder migrationBuilder)
+  {
+    migrationBuilder.Sql($"CREATE PUBLICATION {Constants.PublicationName} FOR TABLE \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" WITH (publish = 'insert');");
+  }
+
+  internal static void DropPublication(this MigrationBuilder migrationBuilder)
+  {
+    migrationBuilder.Sql($"DROP PUBLICATION {Constants.PublicationName};");
+  }
+
+  public static async Task MigratePostgreSQLDomainEventStorageAsync(this IServiceProvider services)
+  {
+    var dbContextFactory = services.GetRequiredService<IDbContextFactory<EventSourcingDbContext>>();
+
+    using (var migrationDbContext = dbContextFactory.CreateDbContext())
+      await migrationDbContext.Database.MigrateAsync().ConfigureAwait(false);
+
+    using (var slotDbContext = dbContextFactory.CreateDbContext())
+    {
+      var createSlot = $"""
+        DO $$
+        BEGIN
+          SELECT * FROM pg_create_logical_replication_slot('{Constants.PublicationSlotName}', 'pgoutput');
+          EXCEPTION WHEN OTHERS THEN NULL;
+        END$$;
+        """;
+
+      await slotDbContext.Database.ExecuteSqlRawAsync(createSlot).ConfigureAwait(false);
+    }
+  }
+
+  internal static MessageEntity ToMessageEntity(this DomainEvent @event, JsonSerializerOptions? jsonOptions)
+  {
+    return new MessageEntity
+    {
+      Id = @event.Metadata.EventId,
+      StreamType = @event.Metadata.StreamType,
+      StreamId = @event.Metadata.StreamId,
+      StreamVersion = @event.Metadata.StreamVersion,
+      TenantId = @event.Metadata.TenantId,
+      CreatedAt = @event.Metadata.CreatedAt,
+      CreatedByUserId = @event.Metadata.CreatedByUserId,
+      PayloadJson = JsonSerializer.Serialize(@event.Payload, jsonOptions),
+    };
+  }
+
+  internal static DomainEvent ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
+    where TEventBase : class
+  {
+    return new DomainEvent
+    {
+      Metadata = new DomainEventMetadata
+      {
+        EventId = entity.Id,
+        StreamType = entity.StreamType,
+        StreamId = entity.StreamId,
+        StreamVersion = entity.StreamVersion,
+        TenantId = entity.TenantId,
+        CreatedAt = entity.CreatedAt,
+        CreatedByUserId = entity.CreatedByUserId,
+      },
+      Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions) is TEventBase p ? p : default!,
+    };
+  }
+
+  internal static async Task<(DomainEventMetadata Metadata, object Payload)?> ToDomainEventAsync(this InsertMessage insertMessage, JsonSerializerOptions? jsonOptions, ILogger? logger, CancellationToken cancellationToken)
+  {
+    Guid? eventId = default;
+    string? streamType = default;
+    Guid? streamId = default;
+    int? streamVersion = default;
+    Guid? tenantId = default;
+    DateTimeOffset? createdAt = default;
+    Guid? createdByUserId = default;
+    string? payloadJson = default;
+
+    await foreach (var column in insertMessage.NewRow.ConfigureAwait(false))
+    {
+      switch (column.GetFieldName())
+      {
+        case nameof(MessageEntity.Id):
+          {
+            eventId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.GlobalIndex):
+          {
+            break;
+          }
+        case nameof(MessageEntity.StreamType):
+          {
+            streamType = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.StreamId):
+          {
+            streamId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.StreamVersion):
+          {
+            streamVersion = await column.Get<int>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.TenantId):
+          {
+            tenantId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.CreatedAt):
+          {
+            createdAt = await column.Get<DateTimeOffset>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.CreatedByUserId):
+          {
+            createdByUserId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.PayloadJson):
+          {
+            payloadJson = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+      }
+    }
+
+    if (eventId.HasValue is false
+      || string.IsNullOrEmpty(streamType)
+      || streamId.HasValue is false
+      || streamVersion.HasValue is false
+      || createdAt.HasValue is false
+      || payloadJson is null)
+    {
+      logger?.LogError("""
+            Some properties are missing:
+            EventId: {EventId}
+            StreamType: {StreamType}
+            StreamId: {StreamId}
+            StreamVersion: {StreamVersion}
+            CreatedAt: {CreatedAt}
+            """,
+        eventId,
+        streamType,
+        streamId,
+        streamVersion,
+        createdAt);
+      return null;
+    }
+
+    if (DomainExtensions.GetTypeFromName(streamType) is not Type payloadType)
+    {
+      logger?.LogError("Missing type of payload in event-id {EventId}: {PayloadType}", eventId, streamType);
+      return null;
+    }
+
+    if (JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions) is not object payload)
+    {
+      logger?.LogError("Payload can not be deserialized on event-id {EventId}, stream {StreamType}/{StreamId}/{StreamVersion}", eventId, streamType, streamId, streamVersion);
+      return null;
+    }
+
+    var metadata = new DomainEventMetadata
+    {
+      EventId = eventId.Value,
+      StreamType = streamType,
+      StreamId = streamId.Value,
+      StreamVersion = streamVersion.Value,
+      TenantId = tenantId,
+      CreatedAt = createdAt.Value,
+      CreatedByUserId = createdByUserId,
+    };
+
+    return (metadata, payload);
+  }
+}

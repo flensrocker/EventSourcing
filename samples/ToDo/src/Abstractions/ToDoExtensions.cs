@@ -1,4 +1,4 @@
-﻿using Flensrocker.Domain.Abstractions;
+﻿using Flensrocker.EventSourcing.Abstractions;
 
 namespace Flensrocker.ToDo.Abstractions;
 

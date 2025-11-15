@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\Domain.Orleans.Abstractions\Flensrocker.Domain.Orleans.Abstractions.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.Abstractions\Flensrocker.EventSourcing.Orleans.Abstractions.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\Orleans.Server\Playground.Orleans.Server.csproj" />
     <ProjectReference Include="..\Migration\Playground.Migration.csproj" />
     <ProjectReference Include="..\Outbox\Playground.Outbox.csproj" />

@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Flensrocker.Domain.Abstractions;
+using Flensrocker.EventSourcing.Abstractions;
 
 namespace Flensrocker.ToDo.Abstractions;
 

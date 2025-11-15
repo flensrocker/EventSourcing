@@ -1,6 +1,6 @@
-﻿using Flensrocker.Domain.Abstractions;
-using Flensrocker.Domain.Orleans.PostgreSQL;
-using Flensrocker.Domain.Persistence.PostgreSQL;
+﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Orleans.PostgreSQL;
+using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.DependencyInjection;

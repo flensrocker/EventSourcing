@@ -1,6 +1,6 @@
-﻿using Flensrocker.Domain.Abstractions;
-using Flensrocker.Domain.Orleans.Abstractions;
-using Flensrocker.Domain.Persistence.PostgreSQL;
+﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Orleans.Abstractions;
+using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
