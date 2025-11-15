@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using System.Text.Json;
 using Flensrocker.Domain.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -36,104 +35,17 @@ internal class PostgreSQLDomainMessageSubscriber(
     {
       if (message is InsertMessage insertMessage)
       {
-        Guid eventId = default;
-        long globalIndex = default;
-        string streamType = "";
-        Guid streamId = default;
-        int streamVersion = default;
-        Guid? tenantId = default;
-        DateTimeOffset createdAt = default;
-        Guid? createdByUserId = default;
-        object? payload = default;
-
-        await foreach (var column in insertMessage.NewRow.ConfigureAwait(false))
+        var domainEvent = await insertMessage.ToDomainEventAsync(_options.JsonOptions, _logger, stoppingToken).ConfigureAwait(false);
+        if (domainEvent.HasValue)
         {
-          // TODO add error handling
-
-          switch (column.GetFieldName())
-          {
-            case nameof(MessageEntity.Id):
-              {
-                eventId = await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.GlobalIndex):
-              {
-                globalIndex = await column.Get<long>(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.StreamType):
-              {
-                streamType = await column.GetTextReader().ReadToEndAsync(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.StreamId):
-              {
-                streamId = await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.StreamVersion):
-              {
-                streamVersion = await column.Get<int>(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.TenantId):
-              {
-                tenantId = column.IsDBNull ? null : await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.CreatedAt):
-              {
-                createdAt = await column.Get<DateTimeOffset>(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.CreatedByUserId):
-              {
-                createdByUserId = column.IsDBNull ? null : await column.Get<Guid>(stoppingToken).ConfigureAwait(false);
-                break;
-              }
-            case nameof(MessageEntity.PayloadJson):
-              {
-                var payloadType = DomainExtensions.GetTypeFromName(streamType);
-                if (payloadType is not null)
-                {
-                  var payloadJson = await column.GetTextReader().ReadToEndAsync(stoppingToken).ConfigureAwait(false);
-                  payload = JsonSerializer.Deserialize(payloadJson, payloadType, _options.JsonOptions);
-                }
-                break;
-              }
-          }
-        }
-
-        if (string.IsNullOrEmpty(streamType))
-        {
-          _logger.LogError("Missing stream-type on event-id {EventId}, global-index {GlobalIndex}", eventId, globalIndex);
-        }
-        else if (payload is null)
-        {
-          _logger.LogError("Missing payload on event-id {EventId}, global-index {GlobalIndex}, stream {StreamType}/{StreamId}/{StreamVersion}", eventId, globalIndex, streamType, streamId, streamVersion);
-        }
-        else
-        {
-          var metadata = new DomainEventMetadata
-          {
-            EventId = eventId,
-            StreamType = streamType,
-            StreamId = streamId,
-            StreamVersion = streamVersion,
-            TenantId = tenantId,
-            CreatedAt = createdAt,
-            CreatedByUserId = createdByUserId,
-          };
-
           _logger.LogInformation("""
             Publishing domain-event with
             {Metadata}
             {Payload}
-            """, metadata, payload);
+            """, domainEvent.Value.Metadata, domainEvent.Value.Payload);
 
           foreach (var publisher in _publisherList)
-            await publisher.PublishAsync(metadata, payload, stoppingToken).ConfigureAwait(false);
+            await publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, stoppingToken).ConfigureAwait(false);
         }
       }
 

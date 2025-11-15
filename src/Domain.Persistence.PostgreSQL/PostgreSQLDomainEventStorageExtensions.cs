@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Npgsql.Replication.PgOutput.Messages;
 
 namespace Flensrocker.Domain.Persistence.PostgreSQL;
 
@@ -113,5 +115,116 @@ public static class PostgreSQLDomainEventStorageExtensions
       },
       Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions) is TEventBase p ? p : default!,
     };
+  }
+
+  internal static async Task<(DomainEventMetadata Metadata, object Payload)?> ToDomainEventAsync(this InsertMessage insertMessage, JsonSerializerOptions? jsonOptions, ILogger? logger, CancellationToken cancellationToken)
+  {
+    Guid? eventId = default;
+    string? streamType = default;
+    Guid? streamId = default;
+    int? streamVersion = default;
+    Guid? tenantId = default;
+    DateTimeOffset? createdAt = default;
+    Guid? createdByUserId = default;
+    string? payloadJson = default;
+
+    await foreach (var column in insertMessage.NewRow.ConfigureAwait(false))
+    {
+      switch (column.GetFieldName())
+      {
+        case nameof(MessageEntity.Id):
+          {
+            eventId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.GlobalIndex):
+          {
+            break;
+          }
+        case nameof(MessageEntity.StreamType):
+          {
+            streamType = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.StreamId):
+          {
+            streamId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.StreamVersion):
+          {
+            streamVersion = await column.Get<int>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.TenantId):
+          {
+            tenantId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.CreatedAt):
+          {
+            createdAt = await column.Get<DateTimeOffset>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.CreatedByUserId):
+          {
+            createdByUserId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.PayloadJson):
+          {
+            payloadJson = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+      }
+    }
+
+    if (eventId.HasValue is false
+      || string.IsNullOrEmpty(streamType)
+      || streamId.HasValue is false
+      || streamVersion.HasValue is false
+      || createdAt.HasValue is false
+      || payloadJson is null)
+    {
+      logger?.LogError("""
+            Some properties are missing:
+            EventId: {EventId}
+            StreamType: {StreamType}
+            StreamId: {StreamId}
+            StreamVersion: {StreamVersion}
+            CreatedAt: {CreatedAt}
+            """,
+        eventId,
+        streamType,
+        streamId,
+        streamVersion,
+        createdAt);
+      return null;
+    }
+
+    if (DomainExtensions.GetTypeFromName(streamType) is not Type payloadType)
+    {
+      logger?.LogError("Missing type of payload in event-id {EventId}: {PayloadType}", eventId, streamType);
+      return null;
+    }
+
+    if (JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions) is not object payload)
+    {
+      logger?.LogError("Payload can not be deserialized on event-id {EventId}, stream {StreamType}/{StreamId}/{StreamVersion}", eventId, streamType, streamId, streamVersion);
+      return null;
+    }
+
+    var metadata = new DomainEventMetadata
+    {
+      EventId = eventId.Value,
+      StreamType = streamType,
+      StreamId = streamId.Value,
+      StreamVersion = streamVersion.Value,
+      TenantId = tenantId,
+      CreatedAt = createdAt.Value,
+      CreatedByUserId = createdByUserId,
+    };
+
+    return (metadata, payload);
   }
 }
