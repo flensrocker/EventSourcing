@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Immutable;
+using System.Text.Json;
 using Flensrocker.Domain.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -12,11 +13,13 @@ namespace Flensrocker.Domain.Persistence.PostgreSQL;
 internal class PostgreSQLDomainMessageSubscriber(
   IConfiguration configuration,
   PostgreSQLDomainMessageSubscriberOptions options,
+  IEnumerable<IDomainEventPublisher> publisherList,
   ILogger<PostgreSQLDomainMessageSubscriber> logger)
   : BackgroundService
 {
   private readonly IConfiguration _configuration = configuration;
   private readonly PostgreSQLDomainMessageSubscriberOptions _options = options;
+  private readonly ImmutableArray<IDomainEventPublisher> _publisherList = publisherList.ToImmutableArray();
   private readonly ILogger<PostgreSQLDomainMessageSubscriber> _logger = logger;
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -123,13 +126,14 @@ internal class PostgreSQLDomainMessageSubscriber(
             CreatedByUserId = createdByUserId,
           };
 
-          var messageType = typeof(DomainEvent<>).MakeGenericType(payload.GetType());
-          var domainEvent = Activator.CreateInstance(messageType);
-          messageType.GetProperty(nameof(DomainEvent<>.Metadata))?.SetValue(domainEvent, metadata);
-          messageType.GetProperty(nameof(DomainEvent<>.Payload))?.SetValue(domainEvent, payload);
+          _logger.LogInformation("""
+            Publishing domain-event with
+            {Metadata}
+            {Payload}
+            """, metadata, payload);
 
-          _logger.LogInformation("Publishing domain-event {DomainEvent}", domainEvent);
-          // TODO publish
+          foreach (var publisher in _publisherList)
+            await publisher.PublishAsync(metadata, payload, stoppingToken).ConfigureAwait(false);
         }
       }
 

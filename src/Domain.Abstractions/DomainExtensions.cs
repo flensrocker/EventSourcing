@@ -36,6 +36,20 @@ public static class DomainExtensions
     return Type.GetType(typeName.Replace("_-_", ", ").Replace("-", "."), false);
   }
 
+  public static object? CreateDomainEvent(DomainEventMetadata metadata, object payload)
+  {
+    var domainEventType = typeof(DomainEvent<>).MakeGenericType(payload.GetType());
+
+    var domainEvent = Activator.CreateInstance(domainEventType);
+    if (domainEvent is not null)
+    {
+      domainEventType.GetProperty(nameof(DomainEvent<>.Metadata))?.SetValue(domainEvent, metadata);
+      domainEventType.GetProperty(nameof(DomainEvent<>.Payload))?.SetValue(domainEvent, payload);
+    }
+
+    return domainEvent;
+  }
+
   public static IServiceCollection AddViewQuery<TViewQuery, TQueryRequest, TQueryResponse>(this IServiceCollection services)
     where TViewQuery : class, IViewQuery<TQueryRequest, TQueryResponse>
   {
@@ -43,5 +57,24 @@ public static class DomainExtensions
     services.AddScoped<IViewQuery<TQueryRequest, TQueryResponse>>(sp => sp.GetRequiredService<TViewQuery>());
 
     return services;
+  }
+
+  public static IServiceCollection AddDomainEventPublisher<TPublisher>(this IServiceCollection services)
+    where TPublisher : class, IDomainEventPublisher
+  {
+    services.AddSingleton<TPublisher>();
+    services.AddSingleton<IDomainEventPublisher>(sp => sp.GetRequiredService<TPublisher>());
+
+    return services;
+  }
+
+  public static IServiceCollection AddDomainEventPublisher<TPublisher, TPublisherOptions>(this IServiceCollection services, Func<TPublisherOptions> configureOptions)
+    where TPublisher : class, IDomainEventPublisher
+    where TPublisherOptions : class
+  {
+    var options = configureOptions();
+    services.AddSingleton(options);
+
+    return services.AddDomainEventPublisher<TPublisher>();
   }
 }
