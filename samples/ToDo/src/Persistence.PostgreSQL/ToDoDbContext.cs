@@ -1,6 +1,6 @@
 ﻿using Flensrocker.ToDo.Abstractions;
-using Microsoft.EntityFrameworkCore;
 using Flensrocker.ToDo.Persistence.PostgreSQL.EntityTypeConfigurations;
+using Microsoft.EntityFrameworkCore;
 
 namespace Flensrocker.ToDo.Persistence.PostgreSQL;
 

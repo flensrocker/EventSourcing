@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Flensrocker.Domain.Abstractions;
+﻿namespace Flensrocker.Domain.Abstractions;
 
 public sealed record DomainEventMetadata
 {
