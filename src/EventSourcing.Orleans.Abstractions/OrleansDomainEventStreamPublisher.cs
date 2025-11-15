@@ -23,11 +23,11 @@ public class OrleansDomainEventStreamPublisher(IClusterClient clusterClient) : I
   {
     await _pipeline.ExecuteAsync(async (cancellationToken) =>
     {
-      var streamProvider = _clusterClient.GetStreamProvider(DomainConstants.DomainEventStreamProviderName);
+      var streamProvider = _clusterClient.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
 
       if (metadata.StreamVersion == 0)
       {
-        var streamId = StreamId.Create(DomainConstants.PublicMessageStreamNamespace, metadata.StreamType);
+        var streamId = StreamId.Create(OrleansConstants.PublicMessageStreamNamespace, metadata.StreamType);
         var stream = streamProvider.GetStream<object>(streamId);
         await stream.OnNextAsync(payload).ConfigureAwait(false);
       }

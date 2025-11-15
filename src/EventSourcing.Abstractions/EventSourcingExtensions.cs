@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Flensrocker.EventSourcing.Abstractions;
 
-public static class DomainExtensions
+public static class EventSourcingExtensions
 {
   public static JsonSerializerOptions WithTypeResolversOf(this JsonSerializerOptions options, JsonSerializerContext context)
   {

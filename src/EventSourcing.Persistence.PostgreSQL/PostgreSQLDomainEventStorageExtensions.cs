@@ -53,12 +53,12 @@ public static class PostgreSQLDomainEventStorageExtensions
     return new PostgreSQLDomainEventStorageBuilder(services);
   }
 
-  public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services, Func<PostgreSQLDomainMessageSubscriberOptions> configureOptions)
+  public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services, Func<PostgreSQLMessageSubscriberOptions> configureOptions)
   {
     var storageOptions = configureOptions();
     services.TryAddSingleton(storageOptions);
 
-    services.AddHostedService<PostgreSQLDomainMessageSubscriber>();
+    services.AddHostedService<PostgreSQLMessageSubscriber>();
 
     return services;
   }
@@ -213,7 +213,7 @@ public static class PostgreSQLDomainEventStorageExtensions
       return null;
     }
 
-    if (DomainExtensions.GetTypeFromName(streamType) is not Type payloadType)
+    if (EventSourcingExtensions.GetTypeFromName(streamType) is not Type payloadType)
     {
       logger?.LogError("Missing type of payload in event-id {EventId}: {PayloadType}", eventId, streamType);
       return null;

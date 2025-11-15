@@ -10,15 +10,15 @@ public interface ISupportJsonSerialization
 
 [JsonSerializable(typeof(DomainEvent))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
-internal partial class DomainJsonSerializerContext : JsonSerializerContext, ISupportJsonSerialization
+internal partial class EventSourcingJsonSerializerContext : JsonSerializerContext, ISupportJsonSerialization
 {
   public bool Supports(Type type)
     => type == typeof(DomainEvent);
 }
 
-public class DomainJsonSerializerOptions
+public class EventSourcingJsonSerializerOptions
 {
-  public static DomainJsonSerializerOptions Default { get; } = new();
+  public static EventSourcingJsonSerializerOptions Default { get; } = new();
 
   private readonly List<Func<Type, bool>> _supports = new();
 
@@ -28,18 +28,18 @@ public class DomainJsonSerializerOptions
     PropertyNamingPolicy = null,
   };
 
-  public DomainJsonSerializerOptions()
+  public EventSourcingJsonSerializerOptions()
   {
-    Add(DomainJsonSerializerContext.Default);
+    Add(EventSourcingJsonSerializerContext.Default);
   }
 
-  public DomainJsonSerializerOptions Add<T>(T context)
+  public EventSourcingJsonSerializerOptions Add<T>(T context)
     where T : JsonSerializerContext, ISupportJsonSerialization
   {
     return Add(context.Supports, context);
   }
 
-  public DomainJsonSerializerOptions Add(Func<Type, bool> supports, JsonSerializerContext context)
+  public EventSourcingJsonSerializerOptions Add(Func<Type, bool> supports, JsonSerializerContext context)
   {
     _supports.Add(supports);
     Options.WithTypeResolversOf(context);
@@ -51,6 +51,6 @@ public class DomainJsonSerializerOptions
     return _supports.Any(supports => supports(type));
   }
 
-  public static implicit operator JsonSerializerOptions(DomainJsonSerializerOptions options)
+  public static implicit operator JsonSerializerOptions(EventSourcingJsonSerializerOptions options)
     => new JsonSerializerOptions(options.Options);
 }

@@ -1,6 +1,6 @@
 ﻿namespace Flensrocker.EventSourcing.Abstractions;
 
-public interface IDomainAggregate<TCommandBase, TEventBase>
+public interface IAggregate<TCommandBase, TEventBase>
 {
   ValueTask<TEventBase[]?> ExecuteCommandAsync(TCommandBase command);
 }

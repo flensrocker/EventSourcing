@@ -5,7 +5,7 @@ public interface IDomainEventStorage<TEventBase>
 {
   /// <returns>If the state does not exist, the result of the parameterless constructor is returned.</returns>
   Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid streamId, CancellationToken cancellationToken)
-    where TState : class, IDomainEventProjectable<TEventBase>, new();
+    where TState : class, IDomainEventProjectable, new();
 
   /// <param name="expectedVersion">If the state is expected to not exist, the expected version is 0</param>
   Task<bool> ApplyUpdatesToStorage(Guid streamId, IReadOnlyList<DomainEvent> updates, int expectedVersion);

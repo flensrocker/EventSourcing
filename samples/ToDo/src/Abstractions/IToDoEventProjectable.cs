@@ -2,7 +2,7 @@
 
 namespace Flensrocker.ToDo.Abstractions;
 
-public interface IToDoEventProjectable : IDomainEventProjectable<ToDoEvent>
+public interface IToDoEventProjectable : IDomainEventProjectable
 {
   void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload);
   void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload);

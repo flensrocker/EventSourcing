@@ -2,7 +2,7 @@
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-public class PostgreSQLDomainMessageSubscriberOptions
+public class PostgreSQLMessageSubscriberOptions
 {
   public required string ConnectionName { get; init; }
   public JsonSerializerOptions? JsonOptions { get; init; }

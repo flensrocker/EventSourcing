@@ -14,7 +14,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = DomainJsonSerializerOptions.Default
+var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
@@ -50,9 +50,9 @@ builder.UseOrleans(siloBuilder =>
   });
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  siloBuilder.AddNatsStreams(DomainConstants.DomainEventStreamProviderName, options =>
+  siloBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
   {
-    options.StreamName = DomainConstants.DomainEventStreamProviderName;
+    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
     options.JsonSerializerOptions = globalJsonOptions;
     options.NatsClientOptions = NatsOpts.Default with
     {

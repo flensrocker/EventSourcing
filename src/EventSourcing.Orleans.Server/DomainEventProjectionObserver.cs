@@ -3,24 +3,24 @@ using Orleans.Streams;
 
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
-public class DomainEventProjection<TEventBase, TProjection> : IAsyncObserver<DomainEvent>
+public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObserver<DomainEvent>
   where TEventBase : class
-  where TProjection : class, IDomainEventProjectable<TEventBase>, new()
+  where TProjection : class, IDomainEventProjectable, new()
 {
   private readonly IDomainEventStorage<TEventBase> _eventStore;
   private readonly Guid _projectionId;
 
   public TProjection Projection { get; private set; } = default!;
 
-  private DomainEventProjection(IDomainEventStorage<TEventBase> eventStore, Guid projectionId)
+  private DomainEventProjectionObserver(IDomainEventStorage<TEventBase> eventStore, Guid projectionId)
   {
     _eventStore = eventStore;
     _projectionId = projectionId;
   }
 
-  public static async Task<DomainEventProjection<TEventBase, TProjection>?> Create(IDomainEventStorage<TEventBase> eventStore, Guid projectionId, CancellationToken cancellationToken)
+  public static async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> Create(IDomainEventStorage<TEventBase> eventStore, Guid projectionId, CancellationToken cancellationToken)
   {
-    var observer = new DomainEventProjection<TEventBase, TProjection>(eventStore, projectionId);
+    var observer = new DomainEventProjectionObserver<TEventBase, TProjection>(eventStore, projectionId);
 
     (var version, observer.Projection) = await eventStore.ReadStateFromStorage<TProjection>(projectionId, cancellationToken);
 

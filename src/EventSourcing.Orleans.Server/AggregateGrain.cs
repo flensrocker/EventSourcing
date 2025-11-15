@@ -6,10 +6,10 @@ using Orleans.EventSourcing.CustomStorage;
 
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
-public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
+public abstract class AggregateGrain<TState, TCommandBase, TEventBase>
   : JournaledGrain<TState, DomainEvent>, ICustomStorageInterface<TState, DomainEvent>
-  , IDomainAggegrateGrain<TCommandBase>
-  where TState : class, IDomainAggregate<TCommandBase, TEventBase>, IDomainEventProjectable<TEventBase>, new()
+  , IAggegrateGrain<TCommandBase>
+  where TState : class, IAggregate<TCommandBase, TEventBase>, IDomainEventProjectable, new()
   where TCommandBase : class
   where TEventBase : class
 {
@@ -19,7 +19,7 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
 
   private int _nextVersion;
 
-  protected DomainAggregateGrain()
+  protected AggregateGrain()
   {
     _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
@@ -35,7 +35,7 @@ public abstract class DomainAggregateGrain<TState, TCommandBase, TEventBase>
   protected DomainEvent[] RaiseDomainEvents<TEvent>(params IEnumerable<TEvent> payloads)
     where TEvent : TEventBase
   {
-    var user = DomainRequestContextExtensions.GetUser();
+    var user = OrleansRequestContextExtensions.GetUser();
     var tenantId = user?.TenantId;
     var userId = user?.UserId;
 

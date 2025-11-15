@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 
-public static class EntityFrameworkCoreDomainExtensions
+public static class OrleansEntityFrameworkCoreExtensions
 {
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
     this IDbContextFactory<TDbContext> dbContextFactory,
@@ -13,7 +13,7 @@ public static class EntityFrameworkCoreDomainExtensions
     TEntity? projection,
     ILogger logger)
     where TDbContext : DbContext
-    where TEntity : class, IDomainEventProjectable<TEventBase>, IWhereId<TEntity>, new()
+    where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
     where TEventBase : class
   {
     var entityTypeName = typeof(TEntity).GetTypeName();

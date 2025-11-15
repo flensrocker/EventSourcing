@@ -2,17 +2,17 @@
 
 namespace Flensrocker.EventSourcing.Orleans.Abstractions;
 
-public static class DomainRequestContextExtensions
+public static class OrleansRequestContextExtensions
 {
   public const string UserKey = "User";
 
-  public static void SetUser(DomainUser user)
+  public static void SetUser(User user)
   {
     RequestContext.Set(UserKey, user);
   }
 
-  public static DomainUser? GetUser()
+  public static User? GetUser()
   {
-    return RequestContext.Get(UserKey) is DomainUser user ? user : null;
+    return RequestContext.Get(UserKey) is User user ? user : null;
   }
 }

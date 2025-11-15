@@ -12,14 +12,14 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = DomainJsonSerializerOptions.Default
+var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
 
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
-  return new PostgreSQLDomainMessageSubscriberOptions
+  return new PostgreSQLMessageSubscriberOptions
   {
     ConnectionName = "playground",
     JsonOptions = globalJsonOptions,
@@ -34,9 +34,9 @@ builder.UseOrleansClient(clientBuilder =>
   });
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  clientBuilder.AddNatsStreams(DomainConstants.DomainEventStreamProviderName, options =>
+  clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
   {
-    options.StreamName = DomainConstants.DomainEventStreamProviderName;
+    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
     options.JsonSerializerOptions = globalJsonOptions;
     options.NatsClientOptions = NatsOpts.Default with
     {

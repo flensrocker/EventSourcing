@@ -3,7 +3,7 @@ using Flensrocker.ToDo.Abstractions;
 
 namespace Flensrocker.ToDo.Domain;
 
-public partial class ToDoAggregate : IDomainAggregate<ToDoCommand, ToDoEvent>, IDomainEventVersionable, IToDoEventProjectable
+public partial class ToDoAggregate : IAggregate<ToDoCommand, ToDoEvent>, IDomainEventVersionable, IToDoEventProjectable
 {
   public int Version { get; private set; }
   public ToDoStatus Status { get; private set; }

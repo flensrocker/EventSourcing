@@ -35,7 +35,6 @@
     <Project Path="src/EventSourcing.Orleans.EntityFrameworkCore/Flensrocker.EventSourcing.Orleans.EntityFrameworkCore.csproj" />
     <Project Path="src/EventSourcing.Orleans.PostgreSQL/Flensrocker.EventSourcing.Orleans.PostgreSQL.csproj" />
     <Project Path="src/EventSourcing.Orleans.Server/Flensrocker.EventSourcing.Orleans.Server.csproj" />
-    <Project Path="src/EventSourcing.Persistence.InMemory/Flensrocker.EventSourcing.Persistence.InMemory.csproj" />
     <Project Path="src/EventSourcing.Persistence.PostgreSQL/Flensrocker.EventSourcing.Persistence.PostgreSQL.csproj" />
   </Folder>
 </Solution>

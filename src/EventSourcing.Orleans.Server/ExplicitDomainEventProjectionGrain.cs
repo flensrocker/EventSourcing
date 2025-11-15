@@ -8,12 +8,12 @@ namespace Flensrocker.ToDo.Orleans.Server;
 
 public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection> : Grain, IDomainEventProjectionGrain<TProjection>
   where TEventBase : class
-  where TProjection : class, IDomainEventProjectable<TEventBase>, new()
+  where TProjection : class, IDomainEventProjectable, new()
 {
   private readonly string _streamType = typeof(TEventBase).GetTypeName();
   private readonly IDomainEventStorage<TEventBase> _eventStore;
 
-  private DomainEventProjection<TEventBase, TProjection>? _projection;
+  private DomainEventProjectionObserver<TEventBase, TProjection>? _projection;
   private StreamSubscriptionHandle<DomainEvent>? _subscription;
 
   public ExplicitDomainEventProjectionGrain()
@@ -21,15 +21,15 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
-  private async Task<DomainEventProjection<TEventBase, TProjection>?> GetOrCreateProjection(CancellationToken cancellationToken)
+  private async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> GetOrCreateProjection(CancellationToken cancellationToken)
   {
-    _projection ??= await DomainEventProjection<TEventBase, TProjection>.Create(_eventStore, this.GetPrimaryKey(), cancellationToken);
+    _projection ??= await DomainEventProjectionObserver<TEventBase, TProjection>.Create(_eventStore, this.GetPrimaryKey(), cancellationToken);
     return _projection;
   }
 
   public override async Task OnActivateAsync(CancellationToken cancellationToken)
   {
-    var streamProvider = this.GetStreamProvider(DomainConstants.DomainEventStreamProviderName);
+    var streamProvider = this.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
     var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
     var stream = streamProvider.GetStream<DomainEvent>(streamId);
 

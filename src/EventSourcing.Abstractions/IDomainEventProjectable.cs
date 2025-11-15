@@ -1,6 +1,6 @@
 ﻿namespace Flensrocker.EventSourcing.Abstractions;
 
-public interface IDomainEventProjectable<TEventBase>
+public interface IDomainEventProjectable
 {
   void Apply(DomainEvent @event);
 

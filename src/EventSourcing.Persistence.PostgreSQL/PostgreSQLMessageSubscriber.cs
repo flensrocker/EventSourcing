@@ -10,17 +10,17 @@ using Polly.Retry;
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-internal class PostgreSQLDomainMessageSubscriber(
+internal class PostgreSQLMessageSubscriber(
   IConfiguration configuration,
-  PostgreSQLDomainMessageSubscriberOptions options,
+  PostgreSQLMessageSubscriberOptions options,
   IEnumerable<IDomainEventPublisher> publisherList,
-  ILogger<PostgreSQLDomainMessageSubscriber> logger)
+  ILogger<PostgreSQLMessageSubscriber> logger)
   : BackgroundService
 {
   private readonly IConfiguration _configuration = configuration;
-  private readonly PostgreSQLDomainMessageSubscriberOptions _options = options;
+  private readonly PostgreSQLMessageSubscriberOptions _options = options;
   private readonly IEnumerable<IDomainEventPublisher> _publisherList = publisherList;
-  private readonly ILogger<PostgreSQLDomainMessageSubscriber> _logger = logger;
+  private readonly ILogger<PostgreSQLMessageSubscriber> _logger = logger;
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
@@ -29,7 +29,7 @@ internal class PostgreSQLDomainMessageSubscriber(
     var pipeline = new ResiliencePipelineBuilder()
       .AddRetry(new RetryStrategyOptions
       {
-        Name = nameof(PostgreSQLDomainMessageSubscriber),
+        Name = nameof(PostgreSQLMessageSubscriber),
         Delay = TimeSpan.FromSeconds(2),
         MaxRetryAttempts = int.MaxValue,
         BackoffType = DelayBackoffType.Exponential,

@@ -11,7 +11,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = DomainJsonSerializerOptions.Default
+var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.Services.AddOrleansPostgreSQL(() =>

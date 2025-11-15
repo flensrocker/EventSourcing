@@ -16,7 +16,7 @@ public sealed class ToDoNamesTests
   [TestMethod]
   public void ToDoEventStreamNamespaceCanBeConvertedToType()
   {
-    var toDoEventType = DomainExtensions.GetTypeFromName(ToDoNames.ToDoEventStream);
+    var toDoEventType = EventSourcingExtensions.GetTypeFromName(ToDoNames.ToDoEventStream);
     Assert.AreEqual(typeof(ToDoEvent), toDoEventType);
   }
 }

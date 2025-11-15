@@ -9,7 +9,7 @@ internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
 {
   private readonly IDbContextFactory<ToDoDbContext> _dbContextFactory = dbContextFactory;
 
-  public async Task<ToDoQueryResponse.ListToDos> ExecuteQueryAsync(ToDoQueryRequest.ListToDos request, CancellationToken cancellationToken)
+  public async ValueTask<ToDoQueryResponse.ListToDos> ExecuteQueryAsync(ToDoQueryRequest.ListToDos request, CancellationToken cancellationToken)
   {
     using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
