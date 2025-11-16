@@ -13,16 +13,12 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
   where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
   where TEventBase : class
 {
-  private readonly IDomainEventStorage<TEventBase> _eventStore;
-  private readonly IDbContextFactory<TDbContext> _dbContextFactory;
   private readonly ILogger _logger;
 
   private TEntity? _projection;
 
   protected EntityFrameworkCoreProjectionGrain()
   {
-    _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
-    _dbContextFactory = ServiceProvider.GetRequiredService<IDbContextFactory<TDbContext>>();
     _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
   }
 
@@ -34,7 +30,12 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
 
   public async Task OnNextAsync(DomainEvent domainEvent, StreamSequenceToken? token = null)
   {
-    _projection = await _dbContextFactory.UpdateProjectionAsync(_eventStore, domainEvent, _projection, _logger);
+    await using var scope = ServiceProvider.CreateAsyncScope();
+
+    var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
+    var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+
+    _projection = await dbContext.UpdateProjectionAsync(eventStore, domainEvent, _projection, _logger);
   }
 
   public Task OnErrorAsync(Exception ex)

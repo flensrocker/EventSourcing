@@ -27,6 +27,7 @@ public static class OrleansPostgreSQLExtensions
           errorCodesToAdd: null);
       });
     });
+    services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<OrleansDbContext>>().CreateDbContext());
 
     return services;
   }

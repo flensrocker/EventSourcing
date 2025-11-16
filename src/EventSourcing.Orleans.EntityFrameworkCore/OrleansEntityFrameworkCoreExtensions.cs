@@ -7,7 +7,7 @@ namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 public static class OrleansEntityFrameworkCoreExtensions
 {
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
-    this IDbContextFactory<TDbContext> dbContextFactory,
+    this TDbContext dbContext,
     IDomainEventStorage<TEventBase> eventStore,
     DomainEvent domainEvent,
     TEntity? projection,
@@ -22,50 +22,41 @@ public static class OrleansEntityFrameworkCoreExtensions
 
     try
     {
-      using var strategyDbContext = await dbContextFactory.CreateDbContextAsync();
+      projection ??= await dbContext.Set<TEntity>().AsNoTracking().Where(TEntity.GetWhereId(entityId)).FirstOrDefaultAsync();
 
-      projection = await strategyDbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+      var addToDbContext = false;
+      if (projection is null)
       {
-        using var dbContext = await dbContextFactory.CreateDbContextAsync();
-
-        projection ??= await dbContext.Set<TEntity>().AsNoTracking().Where(TEntity.GetWhereId(entityId)).FirstOrDefaultAsync();
-
-        var addToDbContext = false;
-        if (projection is null)
-        {
-          projection = new();
-          addToDbContext = true;
-        }
-        else if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > expectedVersion)
-          return projection;
-
-        var entity = dbContext.Attach(projection);
-
-        if (projection is IDomainEventVersionable withVersion && withVersion.Version < expectedVersion)
-        {
-          logger.LogWarning("Entity {EntityType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}", entityTypeName, entityId, expectedVersion, withVersion.Version);
-
-          var fromVersion = Math.Max(1, withVersion.Version);
-          var itemEvents = await eventStore.ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default);
-          if (itemEvents is null)
-          {
-            logger.LogError("Failure in retrieving missing events from storage for type {EntityType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}", entityTypeName, entityId, fromVersion, expectedVersion);
-            return projection;
-          }
-
-          foreach (var itemEvent in itemEvents)
-            projection.Apply(itemEvent);
-        }
-
-        projection.Apply(domainEvent);
-
-        if (addToDbContext)
-          entity.State = EntityState.Added;
-
-        await dbContext.SaveChangesAsync();
-
+        projection = new();
+        addToDbContext = true;
+      }
+      else if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > expectedVersion)
         return projection;
-      });
+
+      var entity = dbContext.Attach(projection);
+
+      if (projection is IDomainEventVersionable withVersion && withVersion.Version < expectedVersion)
+      {
+        logger.LogWarning("Entity {EntityType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}", entityTypeName, entityId, expectedVersion, withVersion.Version);
+
+        var fromVersion = Math.Max(1, withVersion.Version);
+        var itemEvents = await eventStore.ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default);
+        if (itemEvents is null)
+        {
+          logger.LogError("Failure in retrieving missing events from storage for type {EntityType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}", entityTypeName, entityId, fromVersion, expectedVersion);
+          return projection;
+        }
+
+        foreach (var itemEvent in itemEvents)
+          projection.Apply(itemEvent);
+      }
+
+      projection.Apply(domainEvent);
+
+      if (addToDbContext)
+        entity.State = EntityState.Added;
+
+      await dbContext.SaveChangesAsync();
     }
     catch (Exception ex)
     {
