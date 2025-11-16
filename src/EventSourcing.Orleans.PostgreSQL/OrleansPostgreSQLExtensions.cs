@@ -21,7 +21,10 @@ public static class OrleansPostgreSQLExtensions
       {
         npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
         npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
-        npgsqlOptions.EnableRetryOnFailure();
+        npgsqlOptions.EnableRetryOnFailure(
+          maxRetryCount: 10,
+          maxRetryDelay: TimeSpan.FromSeconds(30),
+          errorCodesToAdd: null);
       });
     });
 

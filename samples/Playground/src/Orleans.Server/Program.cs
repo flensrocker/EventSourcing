@@ -36,11 +36,6 @@ builder.UseOrleans(siloBuilder =>
     options.Invariant = "Npgsql";
     options.ConnectionString = npgsqlConnectionString;
   });
-  siloBuilder.AddAdoNetGrainStorage("PubSubStore", options =>
-  {
-    options.Invariant = "Npgsql";
-    options.ConnectionString = npgsqlConnectionString;
-  });
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider(OrleansConstants.LogStorageProviderName);
 
   var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
