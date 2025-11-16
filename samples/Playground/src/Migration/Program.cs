@@ -39,22 +39,44 @@ builder.Services.AddToDoPostgreSQLPersistence(() =>
   };
 });
 
-var host = builder.Build();
+builder.Services.AddHostedService<MigrationService>();
 
-await using (var scope = host.Services.CreateAsyncScope())
+builder.Build().Run();
+
+internal class MigrationService(
+  IServiceScopeFactory scopeFactory,
+  IHostApplicationLifetime hostLifetime,
+  ILogger<MigrationService> logger)
+  : BackgroundService
 {
-  var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+  private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+  private readonly IHostApplicationLifetime _hostLifetime = hostLifetime;
+  private readonly ILogger<MigrationService> _logger = logger;
 
-  logger.LogInformation("Starting Migrations");
+  protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+  {
+    _logger.LogInformation("Starting Migrations");
 
-  logger.LogInformation("Migrate Orleans.PostgreSQL");
-  await scope.ServiceProvider.MigrateOrleansPostgreSQLAsync();
+    await using (var scope = _scopeFactory.CreateAsyncScope())
+    {
+      _logger.LogInformation("Migrate Orleans.PostgreSQL");
+      await scope.ServiceProvider.MigrateOrleansPostgreSQLAsync();
+    }
 
-  logger.LogInformation("Migrate Domain-Event-Storage");
-  await scope.ServiceProvider.MigratePostgreSQLDomainEventStorageAsync();
+    await using (var scope = _scopeFactory.CreateAsyncScope())
+    {
+      _logger.LogInformation("Migrate Domain-Event-Storage");
+      await scope.ServiceProvider.MigratePostgreSQLDomainEventStorageAsync();
+    }
 
-  logger.LogInformation("Migrate ToDo-Persistence");
-  await scope.ServiceProvider.MigrateToDoPostgreSQLPersistenceAsync();
+    await using (var scope = _scopeFactory.CreateAsyncScope())
+    {
+      _logger.LogInformation("Migrate ToDo-Persistence");
+      await scope.ServiceProvider.MigrateToDoPostgreSQLPersistenceAsync();
+    }
 
-  logger.LogInformation("Finished Migrations");
+    _logger.LogInformation("Finished Migrations");
+
+    _hostLifetime.StopApplication();
+  }
 }
