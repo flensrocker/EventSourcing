@@ -253,3 +253,18 @@ sequenceDiagram
   Note over Orleans: deactivate after<br/>idle timeout
   deactivate Orleans
 ```
+
+## Various Notes
+
+### Find Out-Of-Date Persistent Projections
+
+Example
+
+```sql
+select m."StreamId", max(l."Version") as "actual version", max(m."StreamVersion") as "expected version"
+from "EventSourcing"."Message" as m
+left join "ToDo"."ListItem" as l on m."StreamId" = l."ToDoId"
+where m."StreamType" = 'Flensrocker-ToDo-Abstractions-ToDoEvent_-_Flensrocker-ToDo-Abstractions'
+and (l."Version" is null or l."Version" < m."StreamVersion")
+group by m."StreamType", m."StreamId"
+```
