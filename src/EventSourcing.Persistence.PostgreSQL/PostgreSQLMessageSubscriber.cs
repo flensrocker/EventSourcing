@@ -1,4 +1,5 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.Diagnostics.Metrics;
+using Flensrocker.EventSourcing.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,11 @@ internal class PostgreSQLMessageSubscriber(
   ILogger<PostgreSQLMessageSubscriber> logger)
   : BackgroundService
 {
+  private static Meter _meter = new Meter("Flensrocker.EventSourcing", "1.0.0");
+  private static Counter<long> _receivedMessages = _meter.CreateCounter<long>("messages-received", "Messages", "The number of messages received from PostgreSQL");
+  private static Counter<long> _receivedInserts = _meter.CreateCounter<long>("inserts-received", "Messages", "The number of insert-messages received from PostgreSQL");
+  private static Counter<long> _sentInserts = _meter.CreateCounter<long>("inserts-sent", "Messages", "The number of insert-messages sent to publisher");
+
   private readonly IConfiguration _configuration = configuration;
   private readonly PostgreSQLMessageSubscriberOptions _options = options;
   private readonly IEnumerable<IDomainEventPublisher> _publisherList = publisherList;
@@ -49,16 +55,16 @@ internal class PostgreSQLMessageSubscriber(
 
         await foreach (var message in conn.StartReplication(slot, new PgOutputReplicationOptions(Constants.PublicationName, PgOutputProtocolVersion.V4, binary: true), cancellationToken).ConfigureAwait(false))
         {
+          _receivedMessages.Add(1L);
+
           if (message is InsertMessage insertMessage)
           {
+            _receivedInserts.Add(1L);
+
             var domainEvent = await insertMessage.ToDomainEventAsync(state.JsonOptions, state.Logger, cancellationToken).ConfigureAwait(false);
             if (domainEvent.HasValue)
             {
-              state.Logger.LogInformation("""
-                Publishing domain-event with
-                {Metadata}
-                {Payload}
-                """, domainEvent.Value.Metadata, domainEvent.Value.Payload);
+              _sentInserts.Add(1L);
 
               foreach (var publisher in state.PublisherList)
                 await publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
