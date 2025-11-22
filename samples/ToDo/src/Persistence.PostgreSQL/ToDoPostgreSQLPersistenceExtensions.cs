@@ -30,7 +30,6 @@ public static class ToDoPostgreSQLPersistenceExtensions
           errorCodesToAdd: null);
       });
     });
-    services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<ToDoDbContext>>().CreateDbContext());
 
     services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>();
 

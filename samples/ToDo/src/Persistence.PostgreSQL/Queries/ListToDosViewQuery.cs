@@ -14,6 +14,7 @@ internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
     using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
     var listItems = await dbContext.ListItem
+      .AsNoTracking()
       .Where(e => e.TenantId == request.TenantId)
       .OrderBy(e => e.Status)
       .ThenByDescending(e => e.CreatedAt)

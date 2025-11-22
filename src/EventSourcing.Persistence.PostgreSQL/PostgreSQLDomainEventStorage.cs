@@ -7,14 +7,12 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 internal class PostgreSQLDomainEventStorage<TEventBase>(
   PostgreSQLDomainEventStorageOptions options,
   IDbContextFactory<EventSourcingDbContext> dbContextFactory,
-  EventSourcingDbContext readDbContext,
   ILogger<PostgreSQLDomainEventStorage<TEventBase>> logger)
   : IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
   private readonly PostgreSQLDomainEventStorageOptions _options = options;
   private readonly IDbContextFactory<EventSourcingDbContext> _dbContextFactory = dbContextFactory;
-  private readonly EventSourcingDbContext _readDbContext = readDbContext;
   private readonly ILogger<PostgreSQLDomainEventStorage<TEventBase>> _logger = logger;
 
   private readonly string _streamType = typeof(TEventBase).GetTypeName();
@@ -23,7 +21,9 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     var state = new TState();
 
-    var domainEventList = (await _readDbContext
+    using var dbContext = _dbContextFactory.CreateDbContext();
+
+    var domainEventList = (await dbContext
       .Set<MessageEntity>()
       .AsNoTracking()
       .Where(e => e.StreamType == _streamType && e.StreamId == streamId && e.StreamVersion > 0)
@@ -47,14 +47,14 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     try
     {
-      using var writeDbContext = _dbContextFactory.CreateDbContext();
+      using var dbContext = _dbContextFactory.CreateDbContext();
 
       var messageList = updates
         .Select(ev => ev.ToMessageEntity(_options.JsonOptions))
         .ToArray();
 
-      await writeDbContext.AddRangeAsync(messageList).ConfigureAwait(false);
-      await writeDbContext.SaveChangesAsync().ConfigureAwait(false);
+      await dbContext.AddRangeAsync(messageList).ConfigureAwait(false);
+      await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
       return true;
     }
@@ -70,7 +70,9 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     if (fromVersionIncl > 0 && (toVersionExcl <= 0 || toVersionExcl > fromVersionIncl))
     {
-      var domainEventList = (await _readDbContext
+      using var dbContext = _dbContextFactory.CreateDbContext();
+
+      var domainEventList = (await dbContext
         .Set<MessageEntity>()
         .AsNoTracking()
         .Where(e => e.StreamType == _streamType && e.StreamId == streamId && e.StreamVersion >= fromVersionIncl && (toVersionExcl <= 0 || e.StreamVersion < toVersionExcl))

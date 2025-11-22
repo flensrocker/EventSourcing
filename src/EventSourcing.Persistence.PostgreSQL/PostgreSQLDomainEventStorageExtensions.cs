@@ -52,7 +52,6 @@ public static class PostgreSQLDomainEventStorageExtensions
           errorCodesToAdd: null);
       });
     });
-    services.AddScoped(sp => sp.GetRequiredService<IDbContextFactory<EventSourcingDbContext>>().CreateDbContext());
 
     return new PostgreSQLDomainEventStorageBuilder(services);
   }
