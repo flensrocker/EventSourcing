@@ -11,11 +11,11 @@ public class PostgreSQLMessageSubscriberMetrics
 
   public PostgreSQLMessageSubscriberMetrics(IMeterFactory meterFactory)
   {
-    var _meter = meterFactory.Create(EventSourcingConstants.MeterName, EventSourcingConstants.MeterVersion);
+    var meter = meterFactory.Create(EventSourcingConstants.MeterName, EventSourcingConstants.MeterVersion);
 
-    _receivedMessages = _meter.CreateCounter<long>("messages-received", "Messages", "The number of messages received from PostgreSQL");
-    _receivedInserts = _meter.CreateCounter<long>("inserts-received", "Messages", "The number of insert-messages received from PostgreSQL");
-    _sentInserts = _meter.CreateCounter<long>("inserts-sent", "Messages", "The number of insert-messages sent to publisher");
+    _receivedMessages = meter.CreateCounter<long>("messages-received", "Messages", "The number of messages received from PostgreSQL");
+    _receivedInserts = meter.CreateCounter<long>("inserts-received", "Messages", "The number of insert-messages received from PostgreSQL");
+    _sentInserts = meter.CreateCounter<long>("inserts-sent", "Messages", "The number of insert-messages sent to publisher");
   }
 
   public void MessageReceived()

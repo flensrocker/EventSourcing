@@ -39,6 +39,6 @@ builder.UseOrleansClient(clientBuilder =>
   });
 });
 
-builder.Services.AddDomainEventPublisher<OrleansDomainEventStreamPublisher>();
+builder.Services.AddOrleansDomainEventStreamPublisher();
 
 builder.Build().Run();
