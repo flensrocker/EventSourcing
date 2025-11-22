@@ -19,7 +19,8 @@ var postgres = builder
   .WithImageTag("18-alpine")
   .WithArgs("-c", "wal_level=logical")
   .WithDataVolume("playground-postgres-data")
-  .WithPgAdmin();
+  //.WithPgAdmin()
+  .WithPgWeb();
 
 var playgroundDb = postgres.AddDatabase("playground");
 
