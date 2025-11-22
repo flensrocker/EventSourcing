@@ -59,6 +59,7 @@ public static class Extensions
           .AddAspNetCoreInstrumentation()
           .AddHttpClientInstrumentation()
           .AddRuntimeInstrumentation()
+          .AddMeter("Microsoft.EntityFrameworkCore")
           .AddMeter("Microsoft.Orleans")
           .AddMeter("Flensrocker.EventSourcing");
       })

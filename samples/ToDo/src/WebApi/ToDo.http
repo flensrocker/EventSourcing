@@ -36,6 +36,9 @@ Content-Type: application/json
 GET http://{{host}}:{{port}}/api/todo
 
 ###
+GET http://{{host}}:{{port}}/api/todo/events
+
+###
 GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}
 
 ###

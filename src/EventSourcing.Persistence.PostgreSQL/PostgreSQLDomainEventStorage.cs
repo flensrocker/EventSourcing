@@ -1,4 +1,5 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.Runtime.CompilerServices;
+using Flensrocker.EventSourcing.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -21,17 +22,16 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     var state = new TState();
 
-    using var dbContext = _dbContextFactory.CreateDbContext();
+    await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-    var domainEventList = (await dbContext
+    var domainEventList = await dbContext
       .Set<MessageEntity>()
       .AsNoTracking()
       .Where(e => e.StreamType == _streamType && e.StreamId == streamId && e.StreamVersion > 0)
       .OrderBy(e => e.StreamVersion)
-      .ToArrayAsync(cancellationToken)
-      .ConfigureAwait(false))
       .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions))
-      .ToArray();
+      .ToArrayAsync(cancellationToken)
+      .ConfigureAwait(false);
 
     if (domainEventList is { Length: > 0 })
     {
@@ -47,7 +47,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     try
     {
-      using var dbContext = _dbContextFactory.CreateDbContext();
+      await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
       var messageList = updates
         .Select(ev => ev.ToMessageEntity(_options.JsonOptions))
@@ -70,17 +70,16 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     if (fromVersionIncl > 0 && (toVersionExcl <= 0 || toVersionExcl > fromVersionIncl))
     {
-      using var dbContext = _dbContextFactory.CreateDbContext();
+      await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-      var domainEventList = (await dbContext
+      var domainEventList = await dbContext
         .Set<MessageEntity>()
         .AsNoTracking()
         .Where(e => e.StreamType == _streamType && e.StreamId == streamId && e.StreamVersion >= fromVersionIncl && (toVersionExcl <= 0 || e.StreamVersion < toVersionExcl))
         .OrderBy(e => e.StreamVersion)
-        .ToArrayAsync(cancellationToken)
-        .ConfigureAwait(false))
         .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions))
-        .ToArray();
+        .ToArrayAsync(cancellationToken)
+        .ConfigureAwait(false);
 
       if (domainEventList is { Length: > 0 }
         && domainEventList[0].Metadata.StreamVersion == fromVersionIncl
@@ -91,5 +90,21 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     }
 
     return null;
+  }
+
+  async IAsyncEnumerable<DomainEvent> IDomainEventStorage<TEventBase>.ReadAllEventsFromStorage([EnumeratorCancellation] CancellationToken cancellationToken)
+  {
+    await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+    var domainEventList = dbContext
+      .Set<MessageEntity>()
+      .AsNoTracking()
+      .Where(e => e.StreamType == _streamType)
+      .OrderBy(e => e.GlobalIndex)
+      .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions))
+      .AsAsyncEnumerable();
+
+    await foreach (var domainEvent in domainEventList.WithCancellation(cancellationToken).ConfigureAwait(false))
+      yield return domainEvent;
   }
 }

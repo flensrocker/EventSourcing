@@ -87,16 +87,12 @@ public static class ToDoEndpoints
         : Results.BadRequest();
     });
 
-    builder.MapGet("/api/todo/{toDoId}", static async (
-      Guid toDoId,
-      [FromServices] IClusterClient client,
+    builder.MapGet("/api/todo/events", static (
+      [FromServices] IDomainEventStorage<ToDoEvent> eventStore,
       CancellationToken cancellationToken) =>
     {
-      var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
-      var result = await toDoDetails.GetProjection(cancellationToken);
-      return result is null
-        ? Results.NotFound()
-        : Results.Ok(result);
+      var toDoEvents = eventStore.ReadAllEventsFromStorage(cancellationToken);
+      return Results.ServerSentEvents(toDoEvents, eventType: nameof(ToDoEvent));
     });
 
     builder.MapGet("/api/todo/{toDoId}/events", static async (
@@ -122,6 +118,18 @@ public static class ToDoEndpoints
         "payload" => toDoEvents.Select(ev => ev.Payload).ToArray(),
         _ => toDoEvents,
       });
+    });
+
+    builder.MapGet("/api/todo/{toDoId}", static async (
+      Guid toDoId,
+      [FromServices] IClusterClient client,
+      CancellationToken cancellationToken) =>
+    {
+      var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
+      var result = await toDoDetails.GetProjection(cancellationToken);
+      return result is null
+        ? Results.NotFound()
+        : Results.Ok(result);
     });
 
     builder.MapGet("/api/todo", static async (

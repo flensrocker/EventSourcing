@@ -1,4 +1,6 @@
-﻿namespace Flensrocker.EventSourcing.Abstractions;
+﻿using System.Runtime.CompilerServices;
+
+namespace Flensrocker.EventSourcing.Abstractions;
 
 public interface IDomainEventStorage<TEventBase>
   where TEventBase : class
@@ -14,4 +16,6 @@ public interface IDomainEventStorage<TEventBase>
   /// <param name="toVersionExcl">A value of 0 means all events up to the last, otherwise must be greater than <c>fromVersionIncl</c></param>
   /// <returns><c>null</c> if the range is invalid or referencing non existing events</returns>
   Task<IReadOnlyList<DomainEvent>?> ReadEventsFromStorage(Guid streamId, int fromVersionIncl, int toVersionExcl, CancellationToken cancellationToken);
+
+  IAsyncEnumerable<DomainEvent> ReadAllEventsFromStorage(CancellationToken cancellationToken);
 }
