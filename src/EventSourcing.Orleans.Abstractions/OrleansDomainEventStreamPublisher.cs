@@ -7,6 +7,7 @@ namespace Flensrocker.EventSourcing.Orleans.Abstractions;
 
 public class OrleansDomainEventStreamPublisher(IClusterClient clusterClient) : IDomainEventPublisher
 {
+  // TODO use DI for metrics
   private static Meter _meter = new Meter("Flensrocker.EventSourcing", "1.0.0");
   private static Counter<long> _publishedMessages = _meter.CreateCounter<long>("messages-published", "Messages", "The number of messages published to Orleans");
   private static Counter<long> _publishedDomainEvents = _meter.CreateCounter<long>("domainevents-published", "Domain-Events", "The number of domain-events published to Orleans");

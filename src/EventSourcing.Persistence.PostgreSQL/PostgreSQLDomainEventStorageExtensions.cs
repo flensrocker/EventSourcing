@@ -59,6 +59,8 @@ public static class PostgreSQLDomainEventStorageExtensions
 
   public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services, Func<PostgreSQLMessageSubscriberOptions> configureOptions)
   {
+    services.AddSingleton<PostgreSQLMessageSubscriberMetrics>();
+
     var storageOptions = configureOptions();
     services.TryAddSingleton(storageOptions);
 

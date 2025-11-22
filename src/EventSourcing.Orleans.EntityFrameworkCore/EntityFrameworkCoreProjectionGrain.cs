@@ -14,6 +14,7 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
   where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
   where TEventBase : class
 {
+  // TODO use DI for metrics
   private static Meter _meter = new Meter("Flensrocker.EventSourcing", "1.0.0");
   private static Counter<long> _projectionMessagesReceived = _meter.CreateCounter<long>("projection-messages-received", "Messages", "The number of messages received from Orleans");
   private static Counter<long> _projectionMessagesSaved = _meter.CreateCounter<long>("projection-messages-saved", "Messages", "The number of messages saved to PostgreSQL");
