@@ -65,6 +65,8 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
                     b.HasIndex("GlobalIndex")
                         .IsUnique();
 
+                    b.HasIndex("StreamType", "GlobalIndex");
+
                     b.HasIndex("StreamType", "StreamId", "StreamVersion")
                         .IsUnique();
 

@@ -45,6 +45,12 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
         unique: true);
 
       migrationBuilder.CreateIndex(
+        name: "IX_Message_StreamType_GlobalIndex",
+        schema: "EventSourcing",
+        table: "Message",
+        columns: new[] { "StreamType", "GlobalIndex" });
+
+      migrationBuilder.CreateIndex(
         name: "IX_Message_StreamType_StreamId_StreamVersion",
         schema: "EventSourcing",
         table: "Message",

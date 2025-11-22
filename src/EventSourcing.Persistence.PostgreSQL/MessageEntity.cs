@@ -62,6 +62,9 @@ internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTyp
       .IsUnique();
 
     builder
+      .HasIndex(e => new { e.StreamType, e.GlobalIndex });
+
+    builder
       .HasIndex(e => new { e.StreamType, e.StreamId, e.StreamVersion })
       .IncludeProperties(e => new { e.TenantId })
       .IsUnique();

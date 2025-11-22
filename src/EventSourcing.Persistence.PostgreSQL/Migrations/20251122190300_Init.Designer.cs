@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(EventSourcingDbContext))]
-    [Migration("20251115192137_Init")]
+    [Migration("20251122190300_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -67,6 +67,8 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
 
                     b.HasIndex("GlobalIndex")
                         .IsUnique();
+
+                    b.HasIndex("StreamType", "GlobalIndex");
 
                     b.HasIndex("StreamType", "StreamId", "StreamVersion")
                         .IsUnique();
