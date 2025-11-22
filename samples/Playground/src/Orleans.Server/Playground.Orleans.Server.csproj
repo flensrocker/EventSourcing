@@ -21,6 +21,7 @@
     <PackageReference Include="Microsoft.Orleans.Persistence.Memory" />
     <PackageReference Include="Microsoft.Orleans.Persistence.Redis" />
     <PackageReference Include="Microsoft.Orleans.Server" />
+    <PackageReference Include="Microsoft.Orleans.Streaming.AdoNet" />
     <PackageReference Include="Microsoft.Orleans.Streaming.NATS" />
   </ItemGroup>
 

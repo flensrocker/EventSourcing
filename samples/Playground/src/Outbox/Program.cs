@@ -5,6 +5,7 @@ using Flensrocker.ToDo.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
+using Orleans.Hosting;
 using Orleans.Streaming.NATS.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -27,16 +28,24 @@ builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 
 builder.UseOrleansClient(clientBuilder =>
 {
-  var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  {
-    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-    options.JsonSerializerOptions = globalJsonOptions;
-    options.NatsClientOptions = NatsOpts.Default with
-    {
-      Url = natsConnectionString,
-    };
-  });
+  //var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+
+  //clientBuilder.AddAdoNetStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  //{
+  //  options.Invariant = "Npgsql";
+  //  options.ConnectionString = npgsqlConnectionString;
+  //});
+
+  //var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
+  //clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  //{
+  //  options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+  //  options.JsonSerializerOptions = globalJsonOptions;
+  //  options.NatsClientOptions = NatsOpts.Default with
+  //  {
+  //    Url = natsConnectionString,
+  //  };
+  //});
 });
 
 builder.Services.AddOrleansDomainEventStreamPublisher();

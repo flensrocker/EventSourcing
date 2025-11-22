@@ -17,6 +17,7 @@ namespace Flensrocker.EventSourcing.Orleans.PostgreSQL.Migrations
         "Flensrocker.EventSourcing.Orleans.PostgreSQL.SqlScripts.clustering.sql",
         "Flensrocker.EventSourcing.Orleans.PostgreSQL.SqlScripts.persistence.sql",
         "Flensrocker.EventSourcing.Orleans.PostgreSQL.SqlScripts.reminders.sql",
+        "Flensrocker.EventSourcing.Orleans.PostgreSQL.SqlScripts.streaming.sql",
       ];
 
       foreach (var sqlScriptName in sqlScriptNames)

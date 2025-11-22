@@ -29,16 +29,24 @@ builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenc
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {
-  var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  {
-    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-    options.JsonSerializerOptions = globalJsonOptions;
-    options.NatsClientOptions = NatsOpts.Default with
-    {
-      Url = natsConnectionString,
-    };
-  });
+  //var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+
+  //clientBuilder.AddAdoNetStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  //{
+  //  options.Invariant = "Npgsql";
+  //  options.ConnectionString = npgsqlConnectionString;
+  //});
+
+  //var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
+  //clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  //{
+  //  options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+  //  options.JsonSerializerOptions = globalJsonOptions;
+  //  options.NatsClientOptions = NatsOpts.Default with
+  //  {
+  //    Url = natsConnectionString,
+  //  };
+  //});
 });
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>

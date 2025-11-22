@@ -40,7 +40,10 @@ public static class OrleansEntityFrameworkCoreExtensions
         addToDbContext = true;
       }
       else if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > expectedVersion)
+      {
+        logger.LogInformation("Skipping event on Entity {EntityType}, entity-id {EntityId}: Version {EntityVersion} > {ExpectedVersion}", entityTypeName, entityId, hasVersion.Version, expectedVersion);
         return projection;
+      }
 
       var entity = dbContext.Attach(projection);
 

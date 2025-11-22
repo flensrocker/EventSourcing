@@ -13,6 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Microsoft.Orleans.Client" />
     <PackageReference Include="Microsoft.Orleans.Clustering.Redis" />
+    <PackageReference Include="Microsoft.Orleans.Streaming.AdoNet" />
     <PackageReference Include="Microsoft.Orleans.Streaming.NATS" />
   </ItemGroup>
 

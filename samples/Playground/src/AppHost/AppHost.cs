@@ -34,7 +34,7 @@ var orleans = builder
   .WithServiceId("playground")
   .WithClusterId("default")
   .WithClustering(redis)
-  //.WithMemoryStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName)
+  .WithMemoryStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName)
   .WithMemoryGrainStorage("PubSubStore");
 
 var silo = builder

@@ -1,4 +1,5 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Orleans.Streams;
 using Polly;
 using Polly.Timeout;
 
@@ -9,7 +10,7 @@ internal class OrleansDomainEventStreamPublisher(
   OrleansDomainEventStreamPublisherMetrics metrics)
   : IDomainEventPublisher
 {
-  private readonly IClusterClient _clusterClient = clusterClient;
+  private readonly IStreamProvider _streamProvider = clusterClient.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
   private readonly OrleansDomainEventStreamPublisherMetrics _metrics = metrics;
   private readonly ResiliencePipeline _pipeline = new ResiliencePipelineBuilder()
     .AddRetry(new()
@@ -27,12 +28,10 @@ internal class OrleansDomainEventStreamPublisher(
   {
     await _pipeline.ExecuteAsync(async (cancellationToken) =>
     {
-      var streamProvider = _clusterClient.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
-
       if (metadata.StreamVersion == 0)
       {
         var streamId = StreamId.Create(OrleansConstants.PublicMessageStreamNamespace, metadata.StreamType);
-        var stream = streamProvider.GetStream<object>(streamId);
+        var stream = _streamProvider.GetStream<object>(streamId);
         await stream.OnNextAsync(payload).ConfigureAwait(false);
 
         _metrics.MessagePublished();
@@ -46,7 +45,7 @@ internal class OrleansDomainEventStreamPublisher(
         };
 
         var streamId = StreamId.Create(metadata.StreamType, metadata.StreamId);
-        var stream = streamProvider.GetStream<DomainEvent>(streamId);
+        var stream = _streamProvider.GetStream<DomainEvent>(streamId);
         await stream.OnNextAsync(domainEvent).ConfigureAwait(false);
 
         _metrics.DomainEventPublished();
