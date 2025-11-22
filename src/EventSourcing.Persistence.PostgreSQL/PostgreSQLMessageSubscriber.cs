@@ -13,14 +13,14 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 internal class PostgreSQLMessageSubscriber(
   IConfiguration configuration,
   PostgreSQLMessageSubscriberOptions options,
-  IEnumerable<IDomainEventPublisher> publisherList,
+  IDomainEventPublisher publisher,
   PostgreSQLMessageSubscriberMetrics metrics,
   ILogger<PostgreSQLMessageSubscriber> logger)
   : BackgroundService
 {
   private readonly IConfiguration _configuration = configuration;
   private readonly PostgreSQLMessageSubscriberOptions _options = options;
-  private readonly IEnumerable<IDomainEventPublisher> _publisherList = publisherList;
+  private readonly IDomainEventPublisher _publisher = publisher;
   private readonly PostgreSQLMessageSubscriberMetrics _metrics = metrics;
   private readonly ILogger<PostgreSQLMessageSubscriber> _logger = logger;
 
@@ -62,14 +62,13 @@ internal class PostgreSQLMessageSubscriber(
             {
               state.Metrics.InsertSent();
 
-              foreach (var publisher in state.PublisherList)
-                await publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
+              await state.Publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
             }
           }
 
           conn.SetReplicationStatus(message.WalEnd);
         }
-      }, (ConnectionString: connectionString, _options.JsonOptions, PublisherList: _publisherList, Metrics: _metrics, Logger: _logger), stoppingToken).ConfigureAwait(false);
+      }, (ConnectionString: connectionString, _options.JsonOptions, Publisher: _publisher, Metrics: _metrics, Logger: _logger), stoppingToken).ConfigureAwait(false);
     }
   }
 }
