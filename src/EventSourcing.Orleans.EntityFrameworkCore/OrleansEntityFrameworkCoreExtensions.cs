@@ -1,11 +1,20 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 
 public static class OrleansEntityFrameworkCoreExtensions
 {
+  public static IServiceCollection AddOrleansEntityFrameworkCoreProjections(this IServiceCollection services)
+  {
+    services.TryAddSingleton<OrleansEntityFrameworkCoreProjectionMetrics>();
+
+    return services;
+  }
+
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
     this TDbContext dbContext,
     IDomainEventStorage<TEventBase> eventStore,

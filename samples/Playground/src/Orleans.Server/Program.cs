@@ -2,6 +2,7 @@
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -50,6 +51,8 @@ builder.UseOrleans(siloBuilder =>
       Url = natsConnectionString,
     };
   });
+
+  siloBuilder.AddToDoOrleans();
 });
 
 await builder.Build().RunAsync();
