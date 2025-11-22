@@ -7,10 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.EntityFrameworkCore\Flensrocker.EventSourcing.Orleans.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
   </ItemGroup>
 

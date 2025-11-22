@@ -1,10 +1,12 @@
 ﻿using System.Reflection;
 using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL.Queries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.ToDo.Persistence.PostgreSQL;
 
@@ -38,9 +40,14 @@ public static class ToDoPostgreSQLPersistenceExtensions
 
   public static async Task MigrateToDoPostgreSQLPersistenceAsync(this IServiceProvider services)
   {
+    var logger = services.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(ToDoPostgreSQLPersistenceExtensions));
     var dbContextFactory = services.GetRequiredService<IDbContextFactory<ToDoDbContext>>();
 
-    using var dbContext = dbContextFactory.CreateDbContext();
-    await dbContext.Database.MigrateAsync().ConfigureAwait(false);
+    await using (var dbContext = await dbContextFactory.CreateDbContextAsync().ConfigureAwait(false))
+      await dbContext.Database.MigrateAsync().ConfigureAwait(false);
+
+    // TODO evaluate if the projection has to be rebuilt
+    //var eventStore = services.GetRequiredService<IDomainEventStorage<ToDoEvent>>();
+    //await dbContextFactory.RebuildProjectionAsync<ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(eventStore, logger, default).ConfigureAwait(false);
   }
 }
