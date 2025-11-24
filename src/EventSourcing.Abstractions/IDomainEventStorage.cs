@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Flensrocker.EventSourcing.Abstractions;
+﻿namespace Flensrocker.EventSourcing.Abstractions;
 
 public interface IDomainEventStorage<TEventBase>
   where TEventBase : class
