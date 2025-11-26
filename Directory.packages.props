@@ -29,8 +29,8 @@
     <PackageVersion Include="Microsoft.Orleans.Streaming" Version="9.2.0-nightly.20251112.1" />
     <PackageVersion Include="Microsoft.Orleans.Streaming.AdoNet" Version="9.2.0-nightly.20251112.1" />
     <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="9.2.0-nightly.20251112.1.alpha.1" />
-    <PackageVersion Include="Npgsql" Version="10.0.0-rc.1" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-rc.2" />
+    <PackageVersion Include="Npgsql" Version="10.0.0" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
