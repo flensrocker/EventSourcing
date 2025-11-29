@@ -1,4 +1,6 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
+using Microsoft.CodeAnalysis;
 using Orleans.Streams;
 using Polly;
 using Polly.Timeout;
@@ -23,6 +25,23 @@ internal class OrleansDomainEventStreamPublisher(
     })
     .AddTimeout(TimeSpan.FromSeconds(10))
     .Build();
+
+  async Task IDomainEventPublisher.InitializeAsync(CancellationToken cancellationToken)
+  {
+    do
+    {
+      try
+      {
+        // TODO Wait until StreamProvider is ready, this throws NullRef if called too early
+        _ = _streamProvider.IsRewindable;
+        break;
+      }
+      catch (NullReferenceException)
+      {
+        await Task.Delay(TimeSpan.FromSeconds(1L), cancellationToken).ConfigureAwait(false);
+      }
+    } while (true);
+  }
 
   async Task IDomainEventPublisher.PublishAsync(DomainEventMetadata metadata, object payload, CancellationToken cancellationToken)
   {

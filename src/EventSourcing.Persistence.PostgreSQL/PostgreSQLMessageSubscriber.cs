@@ -26,6 +26,8 @@ internal class PostgreSQLMessageSubscriber(
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
+    await _publisher.InitializeAsync(stoppingToken).ConfigureAwait(false);
+
     var connectionString = _configuration.GetConnectionString(_options.ConnectionName);
 
     var pipeline = new ResiliencePipelineBuilder()
