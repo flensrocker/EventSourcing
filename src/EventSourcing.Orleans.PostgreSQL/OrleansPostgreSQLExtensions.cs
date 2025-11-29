@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Flensrocker.EventSourcing.Extension.EntityFrameworkCore;
+using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

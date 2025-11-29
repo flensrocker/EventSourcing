@@ -8,6 +8,8 @@ public abstract partial record ToDoView
   [GenerateSerializer]
   public sealed record ToDoListItem : ToDoView, IDomainEventVersionable, IToDoEventProjectable, IWhereId<ToDoListItem>
   {
+    public const int ProjectionVersion = 1;
+
     [Id(0)]
     public Guid ToDoId { get; private set; }
     [Id(1)]

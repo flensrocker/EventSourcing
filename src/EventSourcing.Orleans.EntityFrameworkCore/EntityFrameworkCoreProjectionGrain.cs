@@ -1,4 +1,5 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

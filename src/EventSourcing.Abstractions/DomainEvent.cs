@@ -1,4 +1,6 @@
-﻿namespace Flensrocker.EventSourcing.Abstractions;
+﻿using System;
+
+namespace Flensrocker.EventSourcing.Abstractions;
 
 [GenerateSerializer]
 public sealed record DomainEventMetadata
@@ -38,5 +40,24 @@ public record DomainEvent
   {
     [Id(0)]
     public required IReadOnlyCollection<object> MessageList { get; init; }
+  }
+
+  public static DomainEvent Create<TEventBase, TPayload>(Guid streamId, int streamVersion, TPayload payload, Guid? tenantId, Guid? userId, DateTimeOffset createdAt)
+    where TPayload : notnull, TEventBase
+  {
+    return new DomainEvent
+    {
+      Metadata = new DomainEventMetadata
+      {
+        EventId = Guid.CreateVersion7(),
+        StreamType = typeof(TEventBase).GetTypeName(),
+        StreamId = streamId,
+        StreamVersion = streamVersion,
+        TenantId = tenantId,
+        CreatedAt = createdAt,
+        CreatedByUserId = userId,
+      },
+      Payload = payload,
+    };
   }
 }

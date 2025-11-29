@@ -1,9 +1,13 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 
 namespace Flensrocker.EventSourcing.Abstractions;
 
 [JsonSerializable(typeof(DomainEvent))]
+[JsonSerializable(typeof(PersistentProjectionEvent))]
+[JsonSerializable(typeof(PersistentProjectionEvent.ProjectionRegistered))]
+[JsonSerializable(typeof(PersistentProjectionEvent.ProjectionRebuilt))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
 internal partial class EventSourcingJsonSerializerContext : JsonSerializerContext
 {

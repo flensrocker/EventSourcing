@@ -1,7 +1,8 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Extension.EntityFrameworkCore;
+using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
+using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -57,7 +58,8 @@ public static class PostgreSQLDomainEventStorageExtensions
       });
       services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
 
-      return new PostgreSQLDomainEventStorageBuilder(services);
+      return new PostgreSQLDomainEventStorageBuilder(services)
+        .ForDomainEvents<PersistentProjectionEvent>();
     }
 
     public IServiceCollection AddPostgreSQLDomainMessageSubscriber(Func<PostgreSQLMessageSubscriberOptions> configureOptions)

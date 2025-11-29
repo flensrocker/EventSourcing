@@ -40,20 +40,12 @@ public abstract class AggregateGrain<TState, TCommandBase, TEventBase>
     var userId = user?.UserId;
 
     // TODO Enable adding public messages to domain events.
-    var domainEvents = payloads.Select(payload => new DomainEvent
-    {
-      Metadata = new DomainEventMetadata
-      {
-        EventId = Guid.CreateVersion7(),
-        StreamType = _streamType,
-        StreamId = this.GetPrimaryKey(),
-        StreamVersion = _nextVersion++,
-        TenantId = tenantId,
-        CreatedAt = _timeProvider.GetUtcNow(), // ignoring the clock skew in a cluster, the exact time stamp is not important
-        CreatedByUserId = userId,
-      },
-      Payload = payload,
-    }).ToArray();
+    var streamId = this.GetPrimaryKey();
+    var createdAt = _timeProvider.GetUtcNow();
+    var domainEvents = payloads
+      .Select((payload, index) => DomainEvent.Create<TEventBase, TEvent>(streamId, _nextVersion + index, payload, tenantId, userId, createdAt))
+      .ToArray();
+    _nextVersion += domainEvents.Length;
 
     RaiseEvents(domainEvents);
 

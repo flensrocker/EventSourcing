@@ -1,7 +1,8 @@
 ﻿using System.Reflection;
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Extension.EntityFrameworkCore;
+using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Persistence.PostgreSQL.Projections;
 using Flensrocker.ToDo.Persistence.PostgreSQL.Queries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,10 +34,9 @@ public static class ToDoPostgreSQLPersistenceExtensions
             errorCodesToAdd: null);
         });
       });
+
       services.AddEntityFrameworkCoreDbMigration<ToDoDbContext>();
-      // TODO after migration: evaluate if the projection has to be rebuilt
-      //var eventStore = services.GetRequiredService<IDomainEventStorage<ToDoEvent>>();
-      //await dbContextFactory.RebuildProjectionAsync<ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(eventStore, logger, default).ConfigureAwait(false);
+      services.AddEntityFrameworkCorePersistentProjection<ToDoListItemProjection, ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(ToDoView.ToDoListItem.ProjectionVersion);
 
       services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>();
 
