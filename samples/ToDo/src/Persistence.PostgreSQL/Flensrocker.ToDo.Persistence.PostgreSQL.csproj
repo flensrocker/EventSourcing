@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\EventSourcing.Extensions.EntityFrameworkCore\Flensrocker.EventSourcing.Extension.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.EntityFrameworkCore\Flensrocker.EventSourcing.Orleans.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
   </ItemGroup>

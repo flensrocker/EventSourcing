@@ -54,4 +54,27 @@ public static class EventSourcingExtensions
 
     return services.AddDomainEventPublisher<TPublisher>();
   }
+
+  extension(IServiceCollection services)
+  {
+    public IServiceCollection AddDbMigration<TDbMigration>()
+      where TDbMigration : class, IDbMigration
+    {
+      services.AddScoped<TDbMigration>();
+      services.AddScoped<IDbMigration>(sp => sp.GetRequiredService<TDbMigration>());
+
+      return services;
+    }
+  }
+
+  extension(IServiceProvider serviceProvider)
+  {
+    public async Task RunDbMigrationsAsync()
+    {
+      var dbMigrations = serviceProvider.GetServices<IDbMigration>();
+
+      foreach (var dbMigration in dbMigrations)
+        await dbMigration.MigrateAsync().ConfigureAwait(false);
+    }
+  }
 }

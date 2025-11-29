@@ -14,4 +14,8 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\EventSourcing.Extensions.EntityFrameworkCore\Flensrocker.EventSourcing.Extension.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Extension.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -52,6 +53,7 @@ public static class PostgreSQLDomainEventStorageExtensions
           errorCodesToAdd: null);
       });
     });
+    services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
 
     return new PostgreSQLDomainEventStorageBuilder(services);
   }
@@ -76,27 +78,6 @@ public static class PostgreSQLDomainEventStorageExtensions
   internal static void DropPublication(this MigrationBuilder migrationBuilder)
   {
     migrationBuilder.Sql($"DROP PUBLICATION {Constants.PublicationName};");
-  }
-
-  public static async Task MigratePostgreSQLDomainEventStorageAsync(this IServiceProvider services)
-  {
-    var dbContextFactory = services.GetRequiredService<IDbContextFactory<EventSourcingDbContext>>();
-
-    using (var migrationDbContext = dbContextFactory.CreateDbContext())
-      await migrationDbContext.Database.MigrateAsync().ConfigureAwait(false);
-
-    using (var slotDbContext = dbContextFactory.CreateDbContext())
-    {
-      var createSlot = $"""
-        DO $$
-        BEGIN
-          SELECT * FROM pg_create_logical_replication_slot('{Constants.PublicationSlotName}', 'pgoutput');
-          EXCEPTION WHEN OTHERS THEN NULL;
-        END$$;
-        """;
-
-      await slotDbContext.Database.ExecuteSqlRawAsync(createSlot).ConfigureAwait(false);
-    }
   }
 
   internal static MessageEntity ToMessageEntity(this DomainEvent @event, JsonSerializerOptions? jsonOptions)

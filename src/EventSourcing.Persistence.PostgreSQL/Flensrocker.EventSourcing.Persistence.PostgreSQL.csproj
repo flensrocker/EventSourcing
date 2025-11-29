@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EventSourcing.Abstractions\Flensrocker.EventSourcing.Abstractions.csproj" />
+    <ProjectReference Include="..\EventSourcing.Extensions.EntityFrameworkCore\Flensrocker.EventSourcing.Extension.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

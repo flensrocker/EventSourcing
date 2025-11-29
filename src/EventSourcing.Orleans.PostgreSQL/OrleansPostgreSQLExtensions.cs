@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Flensrocker.EventSourcing.Extension.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,15 +28,8 @@ public static class OrleansPostgreSQLExtensions
           errorCodesToAdd: null);
       });
     });
+    services.AddEntityFrameworkCoreDbMigration<OrleansDbContext>();
 
     return services;
-  }
-
-  public static async Task MigrateOrleansPostgreSQLAsync(this IServiceProvider services)
-  {
-    var dbContextFactory = services.GetRequiredService<IDbContextFactory<OrleansDbContext>>();
-
-    using var dbContext = dbContextFactory.CreateDbContext();
-    await dbContext.Database.MigrateAsync().ConfigureAwait(false);
   }
 }
