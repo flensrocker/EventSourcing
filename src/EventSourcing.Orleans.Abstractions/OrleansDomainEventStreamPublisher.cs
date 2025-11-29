@@ -1,5 +1,4 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Microsoft.CodeAnalysis;
 using Orleans.Streams;
 using Polly;
