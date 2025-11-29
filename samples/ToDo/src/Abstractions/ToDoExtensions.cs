@@ -4,8 +4,9 @@ namespace Flensrocker.ToDo.Abstractions;
 
 public static class ToDoExtensions
 {
-  public static EventSourcingJsonSerializerOptions AddToDoJsonOptions(this EventSourcingJsonSerializerOptions jsonOptions)
+  extension(EventSourcingJsonSerializerOptions jsonOptions)
   {
-    return jsonOptions.Add(ToDoJsonSerializerContext.Default);
+    public EventSourcingJsonSerializerOptions AddToDoJsonOptions()
+      => jsonOptions.Add(ToDoJsonSerializerContext.Default);
   }
 }

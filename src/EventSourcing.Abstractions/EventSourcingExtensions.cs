@@ -6,10 +6,13 @@ namespace Flensrocker.EventSourcing.Abstractions;
 
 public static class EventSourcingExtensions
 {
-  public static JsonSerializerOptions WithTypeResolversOf(this JsonSerializerOptions options, JsonSerializerContext context)
+  extension(JsonSerializerOptions options)
   {
-    options.TypeInfoResolverChain.Add(context);
-    return options;
+    public JsonSerializerOptions WithTypeResolversOf(JsonSerializerContext context)
+    {
+      options.TypeInfoResolverChain.Add(context);
+      return options;
+    }
   }
 
   public static string GetTypeName(this Type? type)
@@ -27,36 +30,36 @@ public static class EventSourcingExtensions
     return Type.GetType(typeName.Replace("_-_", ", ").Replace("-", "."), false);
   }
 
-  public static IServiceCollection AddViewQuery<TViewQuery, TQueryRequest, TQueryResponse>(this IServiceCollection services)
-    where TViewQuery : class, IViewQuery<TQueryRequest, TQueryResponse>
-  {
-    services.AddScoped<TViewQuery>();
-    services.AddScoped<IViewQuery<TQueryRequest, TQueryResponse>>(sp => sp.GetRequiredService<TViewQuery>());
-
-    return services;
-  }
-
-  public static IServiceCollection AddDomainEventPublisher<TPublisher>(this IServiceCollection services)
-    where TPublisher : class, IDomainEventPublisher
-  {
-    services.AddSingleton<TPublisher>();
-    services.AddSingleton<IDomainEventPublisher>(sp => sp.GetRequiredService<TPublisher>());
-
-    return services;
-  }
-
-  public static IServiceCollection AddDomainEventPublisher<TPublisher, TPublisherOptions>(this IServiceCollection services, Func<TPublisherOptions> configureOptions)
-    where TPublisher : class, IDomainEventPublisher
-    where TPublisherOptions : class
-  {
-    var options = configureOptions();
-    services.AddSingleton(options);
-
-    return services.AddDomainEventPublisher<TPublisher>();
-  }
-
   extension(IServiceCollection services)
   {
+    public IServiceCollection AddViewQuery<TViewQuery, TQueryRequest, TQueryResponse>()
+    where TViewQuery : class, IViewQuery<TQueryRequest, TQueryResponse>
+    {
+      services.AddScoped<TViewQuery>();
+      services.AddScoped<IViewQuery<TQueryRequest, TQueryResponse>>(sp => sp.GetRequiredService<TViewQuery>());
+
+      return services;
+    }
+
+    public IServiceCollection AddDomainEventPublisher<TPublisher>()
+      where TPublisher : class, IDomainEventPublisher
+    {
+      services.AddSingleton<TPublisher>();
+      services.AddSingleton<IDomainEventPublisher>(sp => sp.GetRequiredService<TPublisher>());
+
+      return services;
+    }
+
+    public IServiceCollection AddDomainEventPublisher<TPublisher, TPublisherOptions>(Func<TPublisherOptions> configureOptions)
+      where TPublisher : class, IDomainEventPublisher
+      where TPublisherOptions : class
+    {
+      var options = configureOptions();
+      services.AddSingleton(options);
+
+      return services.AddDomainEventPublisher<TPublisher>();
+    }
+
     public IServiceCollection AddDbMigration<TDbMigration>()
       where TDbMigration : class, IDbMigration
     {

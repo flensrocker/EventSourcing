@@ -8,11 +8,14 @@ namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 
 public static class OrleansEntityFrameworkCoreExtensions
 {
-  public static IServiceCollection AddOrleansEntityFrameworkCoreProjections(this IServiceCollection services)
+  extension(IServiceCollection services)
   {
-    services.TryAddSingleton<OrleansEntityFrameworkCoreProjectionMetrics>();
+    public IServiceCollection AddOrleansEntityFrameworkCoreProjections()
+    {
+      services.TryAddSingleton<OrleansEntityFrameworkCoreProjectionMetrics>();
 
-    return services;
+      return services;
+    }
   }
 
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(

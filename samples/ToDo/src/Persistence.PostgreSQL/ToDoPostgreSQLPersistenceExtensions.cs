@@ -11,33 +11,36 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL;
 
 public static class ToDoPostgreSQLPersistenceExtensions
 {
-  public static IServiceCollection AddToDoPostgreSQLPersistence(this IServiceCollection services, Func<ToDoPostgreSQLPersistenceOptions> configureOptions)
+  extension(IServiceCollection services)
   {
-    var storageOptions = configureOptions();
-    services.AddSingleton(storageOptions);
-
-    services.AddPooledDbContextFactory<ToDoDbContext>((serviceProvider, dbOptions) =>
+    public IServiceCollection AddToDoPostgreSQLPersistence(Func<ToDoPostgreSQLPersistenceOptions> configureOptions)
     {
-      var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-      var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
+      var storageOptions = configureOptions();
+      services.AddSingleton(storageOptions);
 
-      dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+      services.AddPooledDbContextFactory<ToDoDbContext>((serviceProvider, dbOptions) =>
       {
-        npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-        npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
-        npgsqlOptions.EnableRetryOnFailure(
-          maxRetryCount: 10,
-          maxRetryDelay: TimeSpan.FromSeconds(30),
-          errorCodesToAdd: null);
+        var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+        var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
+
+        dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+          npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+          npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+          npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 10,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorCodesToAdd: null);
+        });
       });
-    });
-    services.AddEntityFrameworkCoreDbMigration<ToDoDbContext>();
-    // TODO after migration: evaluate if the projection has to be rebuilt
-    //var eventStore = services.GetRequiredService<IDomainEventStorage<ToDoEvent>>();
-    //await dbContextFactory.RebuildProjectionAsync<ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(eventStore, logger, default).ConfigureAwait(false);
+      services.AddEntityFrameworkCoreDbMigration<ToDoDbContext>();
+      // TODO after migration: evaluate if the projection has to be rebuilt
+      //var eventStore = services.GetRequiredService<IDomainEventStorage<ToDoEvent>>();
+      //await dbContextFactory.RebuildProjectionAsync<ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(eventStore, logger, default).ConfigureAwait(false);
 
-    services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>();
+      services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>();
 
-    return services;
+      return services;
+    }
   }
 }

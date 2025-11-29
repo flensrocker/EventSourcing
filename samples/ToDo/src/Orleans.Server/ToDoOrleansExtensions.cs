@@ -4,10 +4,13 @@ namespace Flensrocker.ToDo.Orleans.Server;
 
 public static class ToDoOrleansExtensions
 {
-  public static ISiloBuilder AddToDoOrleans(this ISiloBuilder siloBuilder)
+  extension(ISiloBuilder siloBuilder)
   {
-    siloBuilder.Services.AddOrleansEntityFrameworkCoreProjections();
+    public ISiloBuilder AddToDoOrleans()
+    {
+      siloBuilder.Services.AddOrleansEntityFrameworkCoreProjections();
 
-    return siloBuilder;
+      return siloBuilder;
+    }
   }
 }

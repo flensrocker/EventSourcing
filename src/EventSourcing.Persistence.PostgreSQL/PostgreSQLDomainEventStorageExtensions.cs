@@ -33,51 +33,57 @@ public static class PostgreSQLDomainEventStorageExtensions
     }
   }
 
-  public static PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(this IServiceCollection services, Func<PostgreSQLDomainEventStorageOptions> configureOptions)
+  extension(IServiceCollection services)
   {
-    var storageOptions = configureOptions();
-    services.TryAddSingleton(storageOptions);
-
-    services.AddPooledDbContextFactory<EventSourcingDbContext>((serviceProvider, dbOptions) =>
+    public PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(Func<PostgreSQLDomainEventStorageOptions> configureOptions)
     {
-      var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-      var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
+      var storageOptions = configureOptions();
+      services.TryAddSingleton(storageOptions);
 
-      dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+      services.AddPooledDbContextFactory<EventSourcingDbContext>((serviceProvider, dbOptions) =>
       {
-        npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-        npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
-        npgsqlOptions.EnableRetryOnFailure(
-          maxRetryCount: 10,
-          maxRetryDelay: TimeSpan.FromSeconds(30),
-          errorCodesToAdd: null);
+        var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+        var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
+
+        dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+          npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+          npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+          npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 10,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorCodesToAdd: null);
+        });
       });
-    });
-    services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
+      services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
 
-    return new PostgreSQLDomainEventStorageBuilder(services);
+      return new PostgreSQLDomainEventStorageBuilder(services);
+    }
+
+    public IServiceCollection AddPostgreSQLDomainMessageSubscriber(Func<PostgreSQLMessageSubscriberOptions> configureOptions)
+    {
+      services.AddSingleton<PostgreSQLMessageSubscriberMetrics>();
+
+      var storageOptions = configureOptions();
+      services.TryAddSingleton(storageOptions);
+
+      services.AddHostedService<PostgreSQLMessageSubscriber>();
+
+      return services;
+    }
   }
 
-  public static IServiceCollection AddPostgreSQLDomainMessageSubscriber(this IServiceCollection services, Func<PostgreSQLMessageSubscriberOptions> configureOptions)
+  extension(MigrationBuilder migrationBuilder)
   {
-    services.AddSingleton<PostgreSQLMessageSubscriberMetrics>();
+    internal void CreatePublication()
+    {
+      migrationBuilder.Sql($"CREATE PUBLICATION {Constants.PublicationName} FOR TABLE \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" WITH (publish = 'insert');");
+    }
 
-    var storageOptions = configureOptions();
-    services.TryAddSingleton(storageOptions);
-
-    services.AddHostedService<PostgreSQLMessageSubscriber>();
-
-    return services;
-  }
-
-  internal static void CreatePublication(this MigrationBuilder migrationBuilder)
-  {
-    migrationBuilder.Sql($"CREATE PUBLICATION {Constants.PublicationName} FOR TABLE \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" WITH (publish = 'insert');");
-  }
-
-  internal static void DropPublication(this MigrationBuilder migrationBuilder)
-  {
-    migrationBuilder.Sql($"DROP PUBLICATION {Constants.PublicationName};");
+    internal void DropPublication()
+    {
+      migrationBuilder.Sql($"DROP PUBLICATION {Constants.PublicationName};");
+    }
   }
 
   internal static MessageEntity ToMessageEntity(this DomainEvent @event, JsonSerializerOptions? jsonOptions)

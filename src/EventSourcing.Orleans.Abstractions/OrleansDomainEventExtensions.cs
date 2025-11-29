@@ -5,11 +5,14 @@ namespace Flensrocker.EventSourcing.Orleans.Abstractions;
 
 public static class OrleansDomainEventExtensions
 {
-  public static IServiceCollection AddOrleansDomainEventStreamPublisher(this IServiceCollection services)
+  extension(IServiceCollection services)
   {
-    services.AddSingleton<OrleansDomainEventStreamPublisherMetrics>();
-    services.AddDomainEventPublisher<OrleansDomainEventStreamPublisher>();
+    public IServiceCollection AddOrleansDomainEventStreamPublisher()
+    {
+      services.AddSingleton<OrleansDomainEventStreamPublisherMetrics>();
+      services.AddDomainEventPublisher<OrleansDomainEventStreamPublisher>();
 
-    return services;
+      return services;
+    }
   }
 }

@@ -8,28 +8,31 @@ namespace Flensrocker.EventSourcing.Orleans.PostgreSQL;
 
 public static class OrleansPostgreSQLExtensions
 {
-  public static IServiceCollection AddOrleansPostgreSQL(this IServiceCollection services, Func<OrleansPostgreSQLOptions> configureOptions)
+  extension(IServiceCollection services)
   {
-    var storageOptions = configureOptions();
-    services.AddSingleton(storageOptions);
-
-    services.AddPooledDbContextFactory<OrleansDbContext>((serviceProvider, dbOptions) =>
+    public IServiceCollection AddOrleansPostgreSQL(Func<OrleansPostgreSQLOptions> configureOptions)
     {
-      var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-      var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
+      var storageOptions = configureOptions();
+      services.AddSingleton(storageOptions);
 
-      dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+      services.AddPooledDbContextFactory<OrleansDbContext>((serviceProvider, dbOptions) =>
       {
-        npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-        npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
-        npgsqlOptions.EnableRetryOnFailure(
-          maxRetryCount: 10,
-          maxRetryDelay: TimeSpan.FromSeconds(30),
-          errorCodesToAdd: null);
-      });
-    });
-    services.AddEntityFrameworkCoreDbMigration<OrleansDbContext>();
+        var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+        var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
 
-    return services;
+        dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+        {
+          npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+          npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+          npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 10,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorCodesToAdd: null);
+        });
+      });
+      services.AddEntityFrameworkCoreDbMigration<OrleansDbContext>();
+
+      return services;
+    }
   }
 }
