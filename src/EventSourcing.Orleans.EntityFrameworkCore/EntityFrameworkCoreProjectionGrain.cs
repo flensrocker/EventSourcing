@@ -34,6 +34,13 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
   {
     _metrics.ProjectionMessagesReceived();
 
+    var expectedVersion = domainEvent.Metadata.StreamVersion - 1;
+    if (_projection is IDomainEventVersionable hasVersion && hasVersion.Version > expectedVersion)
+    {
+      _metrics.ProjectionMessagesSkipped();
+      return;
+    }
+
     await using var scope = ServiceProvider.CreateAsyncScope();
 
     var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
