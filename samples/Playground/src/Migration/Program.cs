@@ -57,6 +57,7 @@ internal class MigrationService(
   {
     _logger.LogInformation("Starting Migrations");
 
+    // TODO refactor to dependency injection with `IDbMigration.MigrateAsync`
     await using (var scope = _scopeFactory.CreateAsyncScope())
     {
       _logger.LogInformation("Migrate Orleans.PostgreSQL");
