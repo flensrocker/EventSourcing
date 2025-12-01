@@ -60,6 +60,9 @@ public static class EventSourcingExtensions
       return services.AddDomainEventPublisher<TPublisher>();
     }
 
+    public IServiceCollection AddNoopDomainEventPublisher()
+      => services.AddDomainEventPublisher<NoopDomainEventPublisher>();
+
     public IServiceCollection AddDbMigration<TDbMigration>()
       where TDbMigration : class, IDbMigration
     {
