@@ -5,7 +5,6 @@ using Flensrocker.ToDo.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
-using Orleans.Hosting;
 using Orleans.Streaming.NATS.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);

@@ -1,5 +1,6 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using Orleans.Streams;
 using Polly;
 using Polly.Timeout;
@@ -7,12 +8,18 @@ using Polly.Timeout;
 namespace Flensrocker.EventSourcing.Orleans.Abstractions;
 
 internal class OrleansDomainEventStreamPublisher(
-  IClusterClient clusterClient,
+  IServiceProvider serviceProvider,
   OrleansDomainEventStreamPublisherMetrics metrics)
   : IDomainEventPublisher
+  , ILifecycleParticipant<IClusterClientLifecycle>
 {
-  private readonly IStreamProvider _streamProvider = clusterClient.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
+  private readonly IServiceProvider _serviceProvider = serviceProvider;
   private readonly OrleansDomainEventStreamPublisherMetrics _metrics = metrics;
+
+  private readonly TaskCompletionSource _initialized = new(TaskCreationOptions.RunContinuationsAsynchronously);
+  // will be set before use, if not let it crash!
+  private IStreamProvider _streamProvider = default!;
+
   private readonly ResiliencePipeline _pipeline = new ResiliencePipelineBuilder()
     .AddRetry(new()
     {
@@ -25,21 +32,23 @@ internal class OrleansDomainEventStreamPublisher(
     .AddTimeout(TimeSpan.FromSeconds(10))
     .Build();
 
+  public void Participate(IClusterClientLifecycle lifecycle)
+  {
+    lifecycle.Subscribe<OrleansDomainEventStreamPublisher>(
+      ServiceLifecycleStage.Active,
+      _ =>
+      {
+        _initialized.TrySetResult();
+        return Task.CompletedTask;
+      });
+  }
+
   async Task IDomainEventPublisher.InitializeAsync(CancellationToken cancellationToken)
   {
-    do
-    {
-      try
-      {
-        // TODO Wait until StreamProvider is ready, this throws NullRef if called too early
-        _ = _streamProvider.IsRewindable;
-        break;
-      }
-      catch (NullReferenceException)
-      {
-        await Task.Delay(TimeSpan.FromSeconds(1L), cancellationToken).ConfigureAwait(false);
-      }
-    } while (true);
+    await _initialized.Task;
+
+    // this is a singleton used by another singleton, so ignoring locking...
+    _streamProvider ??= _serviceProvider.GetRequiredService<IClusterClient>().GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
   }
 
   async Task IDomainEventPublisher.PublishAsync(DomainEventMetadata metadata, object payload, CancellationToken cancellationToken)
