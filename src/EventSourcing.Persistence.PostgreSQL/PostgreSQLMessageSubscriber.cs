@@ -66,6 +66,8 @@ internal class PostgreSQLMessageSubscriber(
               {
                 state.Metrics.InsertSent();
 
+                // TODO Link domainEvent.Value.Metadata.TraceId/.SpanId to current Activity
+
                 await state.Publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
               }
             }
