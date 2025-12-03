@@ -30,6 +30,8 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
           TenantId = table.Column<Guid>(type: "uuid", nullable: true),
           CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
           CreatedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
+          TraceId = table.Column<byte[]>(type: "bytea", maxLength: 16, nullable: true),
+          SpanId = table.Column<byte[]>(type: "bytea", maxLength: 8, nullable: true),
           PayloadJson = table.Column<string>(type: "jsonb", nullable: false)
         },
         constraints: table =>

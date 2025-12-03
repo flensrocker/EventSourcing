@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Diagnostics;
 
 namespace Flensrocker.EventSourcing.Abstractions;
 
@@ -19,6 +19,10 @@ public sealed record DomainEventMetadata
   public required DateTimeOffset CreatedAt { get; init; }
   [Id(6)]
   public required Guid? CreatedByUserId { get; init; }
+  [Id(7)]
+  public byte[]? TraceId { get; init; }
+  [Id(8)]
+  public byte[]? SpanId { get; init; }
 }
 
 [GenerateSerializer]
@@ -45,6 +49,16 @@ public record DomainEvent
   public static DomainEvent Create<TEventBase, TPayload>(Guid streamId, int streamVersion, TPayload payload, Guid? tenantId, Guid? userId, DateTimeOffset createdAt)
     where TPayload : notnull, TEventBase
   {
+    byte[]? traceId = null;
+    byte[]? spanId = null;
+    if (Activity.Current is not null && Activity.Current.IdFormat == ActivityIdFormat.W3C)
+    {
+      traceId = new byte[16];
+      spanId = new byte[8];
+      Activity.Current.TraceId.CopyTo(traceId);
+      Activity.Current.SpanId.CopyTo(spanId);
+    }
+
     return new DomainEvent
     {
       Metadata = new DomainEventMetadata
@@ -56,6 +70,8 @@ public record DomainEvent
         TenantId = tenantId,
         CreatedAt = createdAt,
         CreatedByUserId = userId,
+        TraceId = traceId,
+        SpanId = spanId,
       },
       Payload = payload,
     };

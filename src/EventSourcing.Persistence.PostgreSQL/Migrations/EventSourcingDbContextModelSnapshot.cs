@@ -46,6 +46,10 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
+                    b.Property<byte[]>("SpanId")
+                        .HasMaxLength(8)
+                        .HasColumnType("bytea");
+
                     b.Property<Guid>("StreamId")
                         .HasColumnType("uuid");
 
@@ -59,6 +63,10 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid");
+
+                    b.Property<byte[]>("TraceId")
+                        .HasMaxLength(16)
+                        .HasColumnType("bytea");
 
                     b.HasKey("Id");
 

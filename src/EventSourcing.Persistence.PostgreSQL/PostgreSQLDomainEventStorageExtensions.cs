@@ -99,6 +99,8 @@ public static class PostgreSQLDomainEventStorageExtensions
       TenantId = @event.Metadata.TenantId,
       CreatedAt = @event.Metadata.CreatedAt,
       CreatedByUserId = @event.Metadata.CreatedByUserId,
+      TraceId = @event.Metadata.TraceId,
+      SpanId = @event.Metadata.SpanId,
       PayloadJson = JsonSerializer.Serialize(@event.Payload, jsonOptions),
     };
   }
@@ -117,6 +119,8 @@ public static class PostgreSQLDomainEventStorageExtensions
         TenantId = entity.TenantId,
         CreatedAt = entity.CreatedAt,
         CreatedByUserId = entity.CreatedByUserId,
+        TraceId = entity.TraceId,
+        SpanId = entity.SpanId,
       },
       Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions) is TEventBase p ? p : default!,
     };
@@ -131,6 +135,8 @@ public static class PostgreSQLDomainEventStorageExtensions
     Guid? tenantId = default;
     DateTimeOffset? createdAt = default;
     Guid? createdByUserId = default;
+    byte[]? traceId = default;
+    byte[]? spanId = default;
     string? payloadJson = default;
 
     await foreach (var column in insertMessage.NewRow.ConfigureAwait(false))
@@ -174,6 +180,28 @@ public static class PostgreSQLDomainEventStorageExtensions
         case nameof(MessageEntity.CreatedByUserId):
           {
             createdByUserId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+            break;
+          }
+        case nameof(MessageEntity.TraceId):
+          {
+            if (column.IsDBNull)
+              traceId = null;
+            else
+            {
+              traceId = new byte[16];
+              await column.GetStream().ReadExactlyAsync(traceId, 0, traceId.Length, cancellationToken).ConfigureAwait(false);
+            }
+            break;
+          }
+        case nameof(MessageEntity.SpanId):
+          {
+            if (column.IsDBNull)
+              spanId = null;
+            else
+            {
+              spanId = new byte[8];
+              await column.GetStream().ReadExactlyAsync(spanId, 0, spanId.Length, cancellationToken).ConfigureAwait(false);
+            }
             break;
           }
         case nameof(MessageEntity.PayloadJson):
@@ -228,6 +256,8 @@ public static class PostgreSQLDomainEventStorageExtensions
       TenantId = tenantId,
       CreatedAt = createdAt.Value,
       CreatedByUserId = createdByUserId,
+      TraceId = traceId,
+      SpanId = spanId,
     };
 
     return (metadata, payload);

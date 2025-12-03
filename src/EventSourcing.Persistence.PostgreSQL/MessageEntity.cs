@@ -22,6 +22,9 @@ internal class MessageEntity
   internal DateTimeOffset CreatedAt { get; set; }
   internal Guid? CreatedByUserId { get; set; }
 
+  internal byte[]? TraceId { get; set; }
+  internal byte[]? SpanId { get; set; }
+
   // Either DomainEvent<TEventBase>.Payload as JSON
   // Or just the public message as JSON
   internal string PayloadJson { get; set; } = "";
@@ -52,6 +55,9 @@ internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTyp
     builder.Property(e => e.TenantId);
     builder.Property(e => e.CreatedAt);
     builder.Property(e => e.CreatedByUserId);
+
+    builder.Property(e => e.TraceId).HasMaxLength(16);
+    builder.Property(e => e.SpanId).HasMaxLength(8);
 
     builder
       .Property(e => e.PayloadJson)

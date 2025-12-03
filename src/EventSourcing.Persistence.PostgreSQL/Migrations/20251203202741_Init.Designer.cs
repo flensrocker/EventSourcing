@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(EventSourcingDbContext))]
-    [Migration("20251122190300_Init")]
+    [Migration("20251203202741_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -49,6 +49,10 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
+                    b.Property<byte[]>("SpanId")
+                        .HasMaxLength(8)
+                        .HasColumnType("bytea");
+
                     b.Property<Guid>("StreamId")
                         .HasColumnType("uuid");
 
@@ -62,6 +66,10 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("uuid");
+
+                    b.Property<byte[]>("TraceId")
+                        .HasMaxLength(16)
+                        .HasColumnType("bytea");
 
                     b.HasKey("Id");
 
