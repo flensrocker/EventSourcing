@@ -192,14 +192,23 @@ sequenceDiagram
 
 ### Rebuild Persistent Projections
 
-If you have to change the logic of your persisted projection (adding/remove fields, interpret events in a different way),
+If you have to change the logic of your persisted projection (add/remove fields, interpret events in a different way),
 you have the problem, that you have a database full of data, that's not conforming to the new kind of projection.
 
 But event sourcing has you covered!
 You can "just" delete all of the projected data and rebuild the database with replaying all the events that are important to the projection.
-Doing this manually can be tedious.
+But doing this manually can be tedious.
 
-// TODO provide an easy "rebuild projection" integration
+To make this easier, there's an `IPersistentProjection` interface, that encapsulate the rebuild logic.
+There's also an EF Core implementation `EntityFrameworkCorePersistentProjection`, from which you can derive your projection and filling in the details like the `DbContext`, the type of the projection entity and the basetype of the events.
+
+All `IPersistentProjection`s are registered as keyed services in the dependency injection container including a version number.
+Whenever the projection has to be rebuilt, increase the version registered in DI.
+With this in place the migration command can iterate over all persistent projections which are outdated and call the `RebuildAsync` method.
+The actual version of the projection is stored as an `PersistentProjectionEvent` in the event store.
+
+If needed this can be extended with a `--force` option to rebuild all projections regardless of their version.
+This might be useful if only the event store is restored from a backup.
 
 ## Ad-hoc Projections
 
@@ -258,7 +267,10 @@ sequenceDiagram
 
 ### Find Out-Of-Date Persistent Projections
 
-Example
+When the event stream and the persistent projection is stored in the same database
+you can easily query outdated projections with a `JOIN`.
+
+**Example:**
 
 ```sql
 select m."StreamId", max(l."Version") as "actual version", max(m."StreamVersion") as "expected version"
