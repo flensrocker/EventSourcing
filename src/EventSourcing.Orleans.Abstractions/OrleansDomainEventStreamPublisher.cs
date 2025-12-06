@@ -1,4 +1,5 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.Diagnostics;
+using Flensrocker.EventSourcing.Abstractions;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -10,12 +11,14 @@ namespace Flensrocker.EventSourcing.Orleans.Abstractions;
 
 internal partial class OrleansDomainEventStreamPublisher(
   IServiceProvider serviceProvider,
+  EventSourcingActivitySource activitySource,
   OrleansDomainEventStreamPublisherMetrics metrics,
   ILogger<OrleansDomainEventStreamPublisher> logger)
   : IDomainEventPublisher
   , ILifecycleParticipant<IClusterClientLifecycle>
 {
   private readonly IServiceProvider _serviceProvider = serviceProvider;
+  private readonly EventSourcingActivitySource _activitySource = activitySource;
   private readonly OrleansDomainEventStreamPublisherMetrics _metrics = metrics;
   private readonly ILogger<OrleansDomainEventStreamPublisher> _logger = logger;
 
@@ -57,6 +60,8 @@ internal partial class OrleansDomainEventStreamPublisher(
   {
     await _pipeline.ExecuteAsync(async (cancellationToken) =>
     {
+      using var activity = _activitySource.Source.StartActivity("PublishToOrleansStream", ActivityKind.Internal, parentContext: Activity.Current?.Context ?? default);
+
       if (metadata.StreamVersion == 0)
       {
         LogPublishingPublicMessage(_logger, payload.GetType());
