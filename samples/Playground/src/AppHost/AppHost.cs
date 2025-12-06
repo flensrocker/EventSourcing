@@ -38,16 +38,6 @@ var orleans = builder
   .WithMemoryStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName)
   .WithMemoryGrainStorage("PubSubStore");
 
-//var allInOne = builder
-//  .AddProject<Projects.Playground_AllInOne>("playground-all-in-one")
-//  .WithReference(nats)
-//  .WithReference(playgroundDb)
-//  .WithReference(orleans)
-//  .WithExternalHttpEndpoints()
-//  .WaitFor(nats)
-//  .WaitFor(redis)
-//  .WaitForCompletion(migration);
-
 var silo = builder
   .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
   .WithReference(nats)
@@ -77,5 +67,16 @@ var webApi = builder
   .WaitFor(redis)
   .WaitForCompletion(migration)
   .WaitFor(silo);
+
+// Host silo, outbox and webApi in one process
+//var allInOne = builder
+//  .AddProject<Projects.Playground_AllInOne>("playground-all-in-one")
+//  .WithReference(nats)
+//  .WithReference(playgroundDb)
+//  .WithReference(orleans)
+//  .WithExternalHttpEndpoints()
+//  .WaitFor(nats)
+//  .WaitFor(redis)
+//  .WaitForCompletion(migration);
 
 builder.Build().Run();
