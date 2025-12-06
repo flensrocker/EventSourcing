@@ -29,7 +29,11 @@ internal partial class PostgreSQLMessageSubscriber(
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
-    await _publisher.InitializeAsync(stoppingToken).ConfigureAwait(false);
+    using (var activity = _activitySource.Source.StartActivity("InitializeMessageSubscriber"))
+    {
+      LogStartingSubscriber(_logger);
+      await _publisher.InitializeAsync(stoppingToken).ConfigureAwait(false);
+    }
 
     var connectionString = _configuration.GetConnectionString(_options.ConnectionName);
 
@@ -51,6 +55,7 @@ internal partial class PostgreSQLMessageSubscriber(
       {
         await pipeline.ExecuteAsync(static async (state, cancellationToken) =>
         {
+          LogConnecting(state.Logger);
           await using var conn = new LogicalReplicationConnection(state.ConnectionString);
           await conn.Open(cancellationToken).ConfigureAwait(false);
 
@@ -98,6 +103,9 @@ internal partial class PostgreSQLMessageSubscriber(
     }
   }
 
+  [LoggerMessage(LogLevel.Information, Message = "Connecting to PostgreSQL")]
+  internal static partial void LogConnecting(ILogger logger);
+
   [LoggerMessage(LogLevel.Information, Message = "Received replication message {ReplicationMessageType}")]
   internal static partial void LogReceivedReplicationMessage(ILogger logger, Type replicationMessageType);
 
@@ -109,6 +117,9 @@ internal partial class PostgreSQLMessageSubscriber(
 
   [LoggerMessage(LogLevel.Information, Message = "Acknowledged replication message")]
   internal static partial void LogAcknowledgedReplicationMessage(ILogger logger);
+
+  [LoggerMessage(LogLevel.Information, Message = "Starting PostgreSQL Message Subscriber")]
+  internal static partial void LogStartingSubscriber(ILogger logger);
 
   [LoggerMessage(LogLevel.Information, Message = "Stopping PostgreSQL Message Subscriber as requested")]
   internal static partial void LogStoppingSubscriber(ILogger logger);

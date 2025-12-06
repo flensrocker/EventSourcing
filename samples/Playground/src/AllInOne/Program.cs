@@ -17,6 +17,7 @@ var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
 
 builder.AddKeyedRedisClient("redis");
 
+builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
 {
   ConnectionName = "playground",

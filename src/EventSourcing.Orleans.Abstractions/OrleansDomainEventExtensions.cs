@@ -12,6 +12,7 @@ public static class OrleansDomainEventExtensions
       services.AddSingleton<OrleansDomainEventStreamPublisherMetrics>();
       services.AddDomainEventPublisher<OrleansDomainEventStreamPublisher>();
       services.AddSingleton<ILifecycleParticipant<IClusterClientLifecycle>>(sp => sp.GetRequiredService<OrleansDomainEventStreamPublisher>());
+      services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(sp => sp.GetRequiredService<OrleansDomainEventStreamPublisher>());
 
       return services;
     }
