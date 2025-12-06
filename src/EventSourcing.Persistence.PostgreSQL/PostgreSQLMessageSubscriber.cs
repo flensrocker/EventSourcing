@@ -71,6 +71,7 @@ internal partial class PostgreSQLMessageSubscriber(
             if (message is InsertMessage insertMessage)
             {
               state.Metrics.InsertReceived();
+              var startingTimestamp = Stopwatch.GetTimestamp();
 
               var domainEvent = await insertMessage.ToDomainEventAsync(state.JsonOptions, state.Logger, cancellationToken).ConfigureAwait(false);
               if (domainEvent.HasValue)
@@ -83,6 +84,7 @@ internal partial class PostgreSQLMessageSubscriber(
 
                 await state.Publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
 
+                state.Metrics.PublishDuration(startingTimestamp);
                 LogPublishedInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
               }
             }
