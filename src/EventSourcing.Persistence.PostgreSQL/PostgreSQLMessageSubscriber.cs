@@ -84,7 +84,7 @@ internal partial class PostgreSQLMessageSubscriber(
 
                 await state.Publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
 
-                state.Metrics.PublishDuration(startingTimestamp);
+                state.Metrics.ProcessInsertMessageDuration(startingTimestamp);
                 LogPublishedInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
               }
             }

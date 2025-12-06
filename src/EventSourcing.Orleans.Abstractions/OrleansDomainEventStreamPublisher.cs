@@ -84,9 +84,12 @@ internal partial class OrleansDomainEventStreamPublisher(
       if (metadata.StreamVersion == 0)
       {
         LogPublishingPublicMessage(_logger, payload.GetType());
+
+        var startingTimestamp = Stopwatch.GetTimestamp();
         var streamId = StreamId.Create(OrleansConstants.PublicMessageStreamNamespace, metadata.StreamType);
         var stream = _streamProvider.GetStream<object>(streamId);
         await stream.OnNextAsync(payload).ConfigureAwait(false);
+        _metrics.PublishToStreamDuration(startingTimestamp);
 
         _metrics.MessagePublished();
         LogPublishedPublicMessage(_logger, payload.GetType());
@@ -101,9 +104,11 @@ internal partial class OrleansDomainEventStreamPublisher(
           Payload = payload,
         };
 
+        var startingTimestamp = Stopwatch.GetTimestamp();
         var streamId = StreamId.Create(metadata.StreamType, metadata.StreamId);
         var stream = _streamProvider.GetStream<DomainEvent>(streamId);
         await stream.OnNextAsync(domainEvent).ConfigureAwait(false);
+        _metrics.PublishToStreamDuration(startingTimestamp);
 
         _metrics.DomainEventPublished();
         LogPublishedDomainEvent(_logger, payload.GetType());
