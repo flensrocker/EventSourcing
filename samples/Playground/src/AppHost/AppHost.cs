@@ -35,48 +35,53 @@ var orleans = builder
   .WithServiceId("playground")
   .WithClusterId("default")
   .WithClustering(redis)
-  .WithMemoryStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName)
+  //.WithMemoryStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName)
   .WithMemoryGrainStorage("PubSubStore");
 
-var silo = builder
-  .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
-  .WithReference(nats)
-  .WithReference(playgroundDb)
-  .WithReference(orleans)
-  .WaitFor(nats)
-  .WaitFor(redis)
-  .WaitForCompletion(migration);
+var hostAllServicesInOneProcess = false;
+if (hostAllServicesInOneProcess)
+{
+  var allInOne = builder
+    .AddProject<Projects.Playground_AllInOne>("playground-all-in-one")
+    .WithReference(nats)
+    .WithReference(playgroundDb)
+    .WithReference(orleans)
+    .WithExternalHttpEndpoints()
+    .WaitFor(nats)
+    .WaitFor(redis)
+    .WaitForCompletion(migration);
+}
+else
+{
+  var silo = builder
+    .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
+    .WithReference(nats)
+    .WithReference(playgroundDb)
+    .WithReference(orleans)
+    .WaitFor(nats)
+    .WaitFor(redis)
+    .WaitForCompletion(migration);
 
-var outbox = builder
-  .AddProject<Projects.Playground_Outbox>("playground-outbox")
-  .WithReference(nats)
-  .WithReference(playgroundDb)
-  .WithReference(orleans.AsClient())
-  .WaitFor(nats)
-  .WaitFor(redis)
-  .WaitForCompletion(migration)
-  .WaitFor(silo);
+  var outbox = builder
+    .AddProject<Projects.Playground_Outbox>("playground-outbox")
+    .WithReference(nats)
+    .WithReference(playgroundDb)
+    .WithReference(orleans.AsClient())
+    .WaitFor(nats)
+    .WaitFor(redis)
+    .WaitForCompletion(migration)
+    .WaitFor(silo);
 
-var webApi = builder
-  .AddProject<Projects.Playground_WebApi>("playground-webapi")
-  .WithReference(nats)
-  .WithReference(playgroundDb)
-  .WithReference(orleans.AsClient())
-  .WithExternalHttpEndpoints()
-  .WaitFor(nats)
-  .WaitFor(redis)
-  .WaitForCompletion(migration)
-  .WaitFor(silo);
-
-// Host silo, outbox and webApi in one process
-//var allInOne = builder
-//  .AddProject<Projects.Playground_AllInOne>("playground-all-in-one")
-//  .WithReference(nats)
-//  .WithReference(playgroundDb)
-//  .WithReference(orleans)
-//  .WithExternalHttpEndpoints()
-//  .WaitFor(nats)
-//  .WaitFor(redis)
-//  .WaitForCompletion(migration);
+  var webApi = builder
+    .AddProject<Projects.Playground_WebApi>("playground-webapi")
+    .WithReference(nats)
+    .WithReference(playgroundDb)
+    .WithReference(orleans.AsClient())
+    .WithExternalHttpEndpoints()
+    .WaitFor(nats)
+    .WaitFor(redis)
+    .WaitForCompletion(migration)
+    .WaitFor(silo);
+}
 
 builder.Build().Run();

@@ -56,16 +56,16 @@ builder.UseOrleans(siloBuilder =>
   //  options.ConnectionString = npgsqlConnectionString;
   //});
 
-  //var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  //siloBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  //{
-  //  options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-  //  options.JsonSerializerOptions = globalJsonOptions;
-  //  options.NatsClientOptions = NatsOpts.Default with
-  //  {
-  //    Url = natsConnectionString,
-  //  };
-  //});
+  var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
+  siloBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  {
+    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+    options.JsonSerializerOptions = globalJsonOptions;
+    options.NatsClientOptions = NatsOpts.Default with
+    {
+      Url = natsConnectionString,
+    };
+  });
 
   siloBuilder.AddToDoOrleans();
 });
