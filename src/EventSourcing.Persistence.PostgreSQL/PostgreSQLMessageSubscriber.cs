@@ -1,4 +1,5 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.Diagnostics;
+using Flensrocker.EventSourcing.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,9 +11,10 @@ using Polly.Retry;
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-internal class PostgreSQLMessageSubscriber(
+internal partial class PostgreSQLMessageSubscriber(
   IConfiguration configuration,
   PostgreSQLMessageSubscriberOptions options,
+  EventSourcingActivitySource activitySource,
   IDomainEventPublisher publisher,
   PostgreSQLMessageSubscriberMetrics metrics,
   ILogger<PostgreSQLMessageSubscriber> logger)
@@ -20,6 +22,7 @@ internal class PostgreSQLMessageSubscriber(
 {
   private readonly IConfiguration _configuration = configuration;
   private readonly PostgreSQLMessageSubscriberOptions _options = options;
+  private readonly EventSourcingActivitySource _activitySource = activitySource;
   private readonly IDomainEventPublisher _publisher = publisher;
   private readonly PostgreSQLMessageSubscriberMetrics _metrics = metrics;
   private readonly ILogger<PostgreSQLMessageSubscriber> _logger = logger;
@@ -55,6 +58,7 @@ internal class PostgreSQLMessageSubscriber(
 
           await foreach (var message in conn.StartReplication(slot, new PgOutputReplicationOptions(Constants.PublicationName, PgOutputProtocolVersion.V4, binary: true), cancellationToken).ConfigureAwait(false))
           {
+            LogReceivedReplicationMessage(state.Logger, message.GetType());
             state.Metrics.MessageReceived();
 
             if (message is InsertMessage insertMessage)
@@ -64,26 +68,51 @@ internal class PostgreSQLMessageSubscriber(
               var domainEvent = await insertMessage.ToDomainEventAsync(state.JsonOptions, state.Logger, cancellationToken).ConfigureAwait(false);
               if (domainEvent.HasValue)
               {
+                using var activity = state.ActivitySource.StartActivity("PublishMessage");
+
+                LogPublishingInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
                 state.Metrics.InsertSent();
 
-                // TODO Link domainEvent.Value.Metadata.TraceId/.SpanId to current Activity
+                if (activity is not null && domainEvent.Value.Metadata.TraceId is byte[] traceId && domainEvent.Value.Metadata.SpanId is byte[] spanId)
+                  activity.AddLink(new ActivityLink(new ActivityContext(ActivityTraceId.CreateFromBytes(traceId), ActivitySpanId.CreateFromBytes(spanId), ActivityTraceFlags.None)));
 
                 await state.Publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
+
+                LogPublishedInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
               }
             }
 
             conn.SetReplicationStatus(message.WalEnd);
+            LogAcknowledgedReplicationMessage(state.Logger);
           }
-        }, (ConnectionString: connectionString, _options.JsonOptions, Publisher: _publisher, Metrics: _metrics, Logger: _logger), stoppingToken).ConfigureAwait(false);
+        }, (ActivitySource: _activitySource.Source, ConnectionString: connectionString, _options.JsonOptions, Publisher: _publisher, Metrics: _metrics, Logger: _logger), stoppingToken).ConfigureAwait(false);
       }
       catch (OperationCanceledException opex) when (opex.CancellationToken == stoppingToken && stoppingToken.IsCancellationRequested)
       {
-        _logger.LogInformation("Stopping PostgreSQL Message Subscriber as requested");
+        LogStoppingSubscriber(_logger);
       }
       catch (Exception ex)
       {
-        _logger.LogError(ex, "Reconnecting PostgreSQL Message Subscriber");
+        LogReconnectingSubscriber(_logger, ex);
       }
     }
   }
+
+  [LoggerMessage(LogLevel.Information, Message = "Received replication message {ReplicationMessageType}")]
+  internal static partial void LogReceivedReplicationMessage(ILogger logger, Type replicationMessageType);
+
+  [LoggerMessage(LogLevel.Information, Message = "Publishing insert message {InsertMessageType}")]
+  internal static partial void LogPublishingInsertMessage(ILogger logger, Type insertMessageType);
+
+  [LoggerMessage(LogLevel.Information, Message = "Published insert message {InsertMessageType}")]
+  internal static partial void LogPublishedInsertMessage(ILogger logger, Type insertMessageType);
+
+  [LoggerMessage(LogLevel.Information, Message = "Acknowledged insert message")]
+  internal static partial void LogAcknowledgedReplicationMessage(ILogger logger);
+
+  [LoggerMessage(LogLevel.Information, Message = "Stopping PostgreSQL Message Subscriber as requested")]
+  internal static partial void LogStoppingSubscriber(ILogger logger);
+
+  [LoggerMessage(LogLevel.Error, Message = "Reconnecting PostgreSQL Message Subscriber")]
+  internal static partial void LogReconnectingSubscriber(ILogger logger, Exception ex);
 }

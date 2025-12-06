@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Flensrocker.EventSourcing.Abstractions;
 
@@ -68,6 +69,16 @@ public static class EventSourcingExtensions
     {
       services.AddScoped<TDbMigration>();
       services.AddScoped<IDbMigration>(sp => sp.GetRequiredService<TDbMigration>());
+
+      return services;
+    }
+  }
+
+  extension(IServiceCollection services)
+  {
+    public IServiceCollection AddFlensrockerEventSourcingCore()
+    {
+      services.TryAddSingleton(_ => new EventSourcingActivitySource());
 
       return services;
     }
