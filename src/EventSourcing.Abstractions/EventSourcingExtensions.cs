@@ -33,6 +33,13 @@ public static class EventSourcingExtensions
 
   extension(IServiceCollection services)
   {
+    public IServiceCollection AddFlensrockerEventSourcingCore()
+    {
+      services.TryAddSingleton(_ => new EventSourcingActivitySource());
+
+      return services;
+    }
+
     public IServiceCollection AddViewQuery<TViewQuery, TQueryRequest, TQueryResponse>()
     where TViewQuery : class, IViewQuery<TQueryRequest, TQueryResponse>
     {
@@ -69,16 +76,6 @@ public static class EventSourcingExtensions
     {
       services.AddScoped<TDbMigration>();
       services.AddScoped<IDbMigration>(sp => sp.GetRequiredService<TDbMigration>());
-
-      return services;
-    }
-  }
-
-  extension(IServiceCollection services)
-  {
-    public IServiceCollection AddFlensrockerEventSourcingCore()
-    {
-      services.TryAddSingleton(_ => new EventSourcingActivitySource());
 
       return services;
     }
