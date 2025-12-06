@@ -58,6 +58,8 @@ internal partial class PostgreSQLMessageSubscriber(
 
           await foreach (var message in conn.StartReplication(slot, new PgOutputReplicationOptions(Constants.PublicationName, PgOutputProtocolVersion.V4, binary: true), cancellationToken).ConfigureAwait(false))
           {
+            using var activity = state.ActivitySource.StartActivity("PublishMessage");
+
             LogReceivedReplicationMessage(state.Logger, message.GetType());
             state.Metrics.MessageReceived();
 
@@ -68,8 +70,6 @@ internal partial class PostgreSQLMessageSubscriber(
               var domainEvent = await insertMessage.ToDomainEventAsync(state.JsonOptions, state.Logger, cancellationToken).ConfigureAwait(false);
               if (domainEvent.HasValue)
               {
-                using var activity = state.ActivitySource.StartActivity("PublishMessage");
-
                 LogPublishingInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
                 state.Metrics.InsertSent();
 
@@ -107,7 +107,7 @@ internal partial class PostgreSQLMessageSubscriber(
   [LoggerMessage(LogLevel.Information, Message = "Published insert message {InsertMessageType}")]
   internal static partial void LogPublishedInsertMessage(ILogger logger, Type insertMessageType);
 
-  [LoggerMessage(LogLevel.Information, Message = "Acknowledged insert message")]
+  [LoggerMessage(LogLevel.Information, Message = "Acknowledged replication message")]
   internal static partial void LogAcknowledgedReplicationMessage(ILogger logger);
 
   [LoggerMessage(LogLevel.Information, Message = "Stopping PostgreSQL Message Subscriber as requested")]
