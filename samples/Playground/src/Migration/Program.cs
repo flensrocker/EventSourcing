@@ -17,7 +17,7 @@ builder.Services.AddOrleansPostgreSQL(() =>
 {
   return new OrleansPostgreSQLOptions
   {
-    ConnectionName = "playground",
+    ConnectionName = "playground-db",
   };
 });
 
@@ -26,7 +26,7 @@ builder.Services.AddPostgreSQLDomainEventStorage(() =>
 {
   return new PostgreSQLDomainEventStorageOptions
   {
-    ConnectionName = "playground",
+    ConnectionName = "playground-db",
     JsonOptions = globalJsonOptions,
   };
 }).ForDomainEvents<ToDoEvent>();
@@ -35,7 +35,7 @@ builder.Services.AddToDoPostgreSQLPersistence(() =>
 {
   return new ToDoPostgreSQLPersistenceOptions
   {
-    ConnectionName = "playground",
+    ConnectionName = "playground-db",
   };
 });
 

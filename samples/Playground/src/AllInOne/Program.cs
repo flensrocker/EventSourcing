@@ -20,27 +20,27 @@ builder.AddKeyedRedisClient("redis");
 builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
 {
-  ConnectionName = "playground",
+  ConnectionName = "playground-db",
   JsonOptions = globalJsonOptions,
 }).ForDomainEvents<ToDoEvent>();
 
 builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
 {
-  ConnectionName = "playground",
+  ConnectionName = "playground-db",
 });
 
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
   return new PostgreSQLMessageSubscriberOptions
   {
-    ConnectionName = "playground",
+    ConnectionName = "playground-db",
     JsonOptions = globalJsonOptions,
   };
 });
 
 builder.UseOrleans(siloBuilder =>
 {
-  var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground-db") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
   siloBuilder.AddAdoNetGrainStorage("Default", options =>
   {

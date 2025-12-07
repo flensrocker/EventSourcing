@@ -21,14 +21,14 @@ builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
   return new PostgreSQLMessageSubscriberOptions
   {
-    ConnectionName = "playground",
+    ConnectionName = "playground-db",
     JsonOptions = globalJsonOptions,
   };
 });
 
 builder.UseOrleansClient(clientBuilder =>
 {
-  //var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  //var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground-db") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
   //clientBuilder.AddAdoNetStreams(OrleansConstants.DomainEventStreamProviderName, options =>
   //{

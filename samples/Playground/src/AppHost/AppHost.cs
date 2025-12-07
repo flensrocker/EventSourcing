@@ -19,69 +19,75 @@ var postgres = builder
   .WithImageTag("18-alpine")
   .WithArgs("-c", "wal_level=logical")
   .WithDataVolume("playground-postgres-data")
-  //.WithPgAdmin()
   .WithPgWeb();
 
-var playgroundDb = postgres.AddDatabase("playground");
+var db = postgres.AddDatabase("playground-db", databaseName: "playground");
 
-var migration = builder
-  .AddProject<Projects.Playground_Migration>("playground-migration")
-  .WithReference(playgroundDb)
-  .WithParentRelationship(playgroundDb)
-  .WaitFor(playgroundDb);
+var dbMigration = builder
+  .AddProject<Projects.Playground_Migration>("playground-db-migration")
+  .WithReference(db)
+  .WithParentRelationship(db)
+  .WaitFor(db);
 
 var orleans = builder
-  .AddOrleans("Playground")
+  .AddOrleans("playground-orleans")
   .WithServiceId("playground")
   .WithClusterId("default")
   .WithClustering(redis)
-  //.WithMemoryStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName)
   .WithMemoryGrainStorage("PubSubStore");
 
+IResourceBuilder<IResourceWithServiceDiscovery> webApi;
 var hostAllServicesInOneProcess = false;
+
 if (hostAllServicesInOneProcess)
 {
-  var allInOne = builder
-    .AddProject<Projects.Playground_AllInOne>("playground-all-in-one")
+  webApi = builder
+    .AddProject<Projects.Playground_AllInOne>("playground-webapi")
     .WithReference(nats)
-    .WithReference(playgroundDb)
+    .WithReference(db)
     .WithReference(orleans)
     .WithExternalHttpEndpoints()
     .WaitFor(nats)
     .WaitFor(redis)
-    .WaitForCompletion(migration);
+    .WaitForCompletion(dbMigration);
 }
 else
 {
   var silo = builder
     .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
     .WithReference(nats)
-    .WithReference(playgroundDb)
+    .WithReference(db)
     .WithReference(orleans)
     .WaitFor(nats)
     .WaitFor(redis)
-    .WaitForCompletion(migration);
+    .WaitForCompletion(dbMigration);
 
   var outbox = builder
     .AddProject<Projects.Playground_Outbox>("playground-outbox")
     .WithReference(nats)
-    .WithReference(playgroundDb)
+    .WithReference(db)
     .WithReference(orleans.AsClient())
     .WaitFor(nats)
     .WaitFor(redis)
-    .WaitForCompletion(migration)
+    .WaitForCompletion(dbMigration)
     .WaitFor(silo);
 
-  var webApi = builder
+  webApi = builder
     .AddProject<Projects.Playground_WebApi>("playground-webapi")
     .WithReference(nats)
-    .WithReference(playgroundDb)
+    .WithReference(db)
     .WithReference(orleans.AsClient())
     .WithExternalHttpEndpoints()
     .WaitFor(nats)
     .WaitFor(redis)
-    .WaitForCompletion(migration)
+    .WaitForCompletion(dbMigration)
     .WaitFor(silo);
 }
+
+var frontend = builder.AddJavaScriptApp("playground-frontend", "../Frontend", runScriptName: "start")
+  .WithReference(webApi)
+  .WaitFor(webApi)
+  .WithHttpEndpoint(env: "PORT")
+  .WithExternalHttpEndpoints();
 
 builder.Build().Run();
