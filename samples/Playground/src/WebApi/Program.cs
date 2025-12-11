@@ -15,6 +15,7 @@ var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
+builder.AddKeyedAzureQueueServiceClient("azure-queues-streams");
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
@@ -38,16 +39,16 @@ builder.Host.UseOrleansClient(clientBuilder =>
   //  options.ConnectionString = npgsqlConnectionString;
   //});
 
-  var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  {
-    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-    options.JsonSerializerOptions = globalJsonOptions;
-    options.NatsClientOptions = NatsOpts.Default with
-    {
-      Url = natsConnectionString,
-    };
-  });
+  //var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
+  //clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  //{
+  //  options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+  //  options.JsonSerializerOptions = globalJsonOptions;
+  //  options.NatsClientOptions = NatsOpts.Default with
+  //  {
+  //    Url = natsConnectionString,
+  //  };
+  //});
 });
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
