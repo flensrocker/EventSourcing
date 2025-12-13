@@ -280,3 +280,11 @@ where m."StreamType" = 'Flensrocker-ToDo-Abstractions-ToDoEvent_-_Flensrocker-To
 and (l."Version" is null or l."Version" < m."StreamVersion")
 group by m."StreamType", m."StreamId"
 ```
+
+### Bombardier
+
+**With Grain:**
+
+```sh
+bombardier --http2 -l -c 300 -n 1000 -t 30s -m POST -H "Content-Type: application/json" -b "{""Content"":""Dummy""}" http://localhost:5188/api/measure/webapi-grain
+```
