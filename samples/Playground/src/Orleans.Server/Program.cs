@@ -1,6 +1,8 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
+using Flensrocker.Measure.Orleans.Abstractions;
+using Flensrocker.Measure.Orleans.Server;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
@@ -14,6 +16,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.AddServiceDefaults();
 
 var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
+  .AddMeasureJsonOptions()
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient("redis");
@@ -60,6 +63,7 @@ builder.UseOrleans(siloBuilder =>
   //  };
   //});
 
+  siloBuilder.AddMeasureOrleans();
   siloBuilder.AddToDoOrleans();
 });
 

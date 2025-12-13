@@ -1,0 +1,18 @@
+@host=localhost
+@port=5188
+
+###
+POST http://{{host}}:{{port}}/api/measure/webapi-only
+Content-Type: application/json
+
+{
+  "Content": "Dummy"
+}
+
+###
+POST http://{{host}}:{{port}}/api/measure/webapi-grain
+Content-Type: application/json
+
+{
+  "Content": "Dummy"
+}

@@ -29,6 +29,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Persistence.PostgreSQL\Flensrocker.EventSourcing.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.Server\Flensrocker.EventSourcing.Orleans.Server.csproj" />
+    <ProjectReference Include="..\..\..\Measure\src\Orleans.Server\Flensrocker.Measure.Orleans.Server.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\Orleans.Server\Flensrocker.ToDo.Orleans.Server.csproj" />
     <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>
