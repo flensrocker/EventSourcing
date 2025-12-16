@@ -11,6 +11,7 @@ var redis = builder
 
 var nats = builder
   .AddNats("nats")
+  .WithImageTag("2")
   .WithJetStream()
   .WithDataVolume("playground-nats-data");
 
