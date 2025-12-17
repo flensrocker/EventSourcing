@@ -4,9 +4,9 @@ builder.AddDockerComposeEnvironment("compose");
 
 var redis = builder
   .AddRedis("redis")
-  .WithImageRegistry("ghcr.io")
-  .WithImage("microsoft/garnet", "1")
-  .WithEntrypoint("/app/GarnetServer")
+  //.WithImageRegistry("ghcr.io")
+  //.WithImage("microsoft/garnet", "1")
+  //.WithEntrypoint("/app/GarnetServer")
   .WithDataVolume("playground-redis-data");
 
 var nats = builder
