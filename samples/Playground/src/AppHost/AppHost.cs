@@ -1,13 +1,12 @@
+using Playground.AppHost;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 builder.AddDockerComposeEnvironment("compose");
 
 var redis = builder
-  .AddRedis("redis")
-  //.WithImageRegistry("ghcr.io")
-  //.WithImage("microsoft/garnet", "1")
-  //.WithEntrypoint("/app/GarnetServer")
-  .WithDataVolume("playground-redis-data");
+  .AddGarnet("redis")
+  .WithDataVolume("playground-garnet-data");
 
 var nats = builder
   .AddNats("nats")
@@ -40,7 +39,7 @@ var orleans = builder
   .AddOrleans("playground-orleans")
   .WithServiceId("playground")
   .WithClusterId("default")
-  .WithClustering(redis)
+  .WithClustering(CustomProviderConfiguration.Create(redis, "Redis"))
   .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, azureQueuesStreams)
   .WithMemoryGrainStorage("PubSubStore");
 
