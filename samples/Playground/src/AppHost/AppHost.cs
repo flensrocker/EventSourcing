@@ -6,6 +6,7 @@ builder.AddDockerComposeEnvironment("compose");
 
 var redis = builder
   .AddGarnet("redis")
+  .WithOrleansProviderType("Redis")
   .WithDataVolume("playground-garnet-data");
 
 var nats = builder
@@ -39,7 +40,7 @@ var orleans = builder
   .AddOrleans("playground-orleans")
   .WithServiceId("playground")
   .WithClusterId("default")
-  .WithClustering(CustomProviderConfiguration.Create(redis, "Redis"))
+  .WithClustering(CustomProviderConfiguration.Create(redis))
   .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, azureQueuesStreams)
   .WithMemoryGrainStorage("PubSubStore");
 
