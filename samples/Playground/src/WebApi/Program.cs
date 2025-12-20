@@ -8,6 +8,7 @@ using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
 using NATS.Client.Core;
 using Orleans.Streaming.NATS.Hosting;
+using Playground.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,24 +18,24 @@ var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
   .AddMeasureJsonOptions()
   .AddToDoJsonOptions();
 
-builder.AddKeyedRedisClient("redis");
-builder.AddKeyedAzureQueueServiceClient("azure-queues-streams");
+builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
+builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
 {
-  ConnectionName = "playground-db",
+  ConnectionName = ServiceKeys.PostgresDb,
   JsonOptions = globalJsonOptions,
 }).ForDomainEvents<ToDoEvent>();
 
 builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
 {
-  ConnectionName = "playground-db",
+  ConnectionName = ServiceKeys.PostgresDb,
 });
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {
-  //var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground-db") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  //var npgsqlConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb) ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
   //clientBuilder.AddAdoNetStreams(OrleansConstants.DomainEventStreamProviderName, options =>
   //{

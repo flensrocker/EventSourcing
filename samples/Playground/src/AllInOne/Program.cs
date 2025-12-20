@@ -1,15 +1,16 @@
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
-using Flensrocker.ToDo.Abstractions;
 using Flensrocker.Measure.Orleans.Abstractions;
 using Flensrocker.Measure.Orleans.Server;
 using Flensrocker.Measure.WebApi;
+using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
 using NATS.Client.Core;
 using Orleans.Streaming.NATS.Hosting;
+using Playground.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,33 +20,33 @@ var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
   .AddMeasureJsonOptions()
   .AddToDoJsonOptions();
 
-builder.AddKeyedRedisClient("redis");
-builder.AddKeyedAzureQueueServiceClient("azure-queues-streams");
+builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
+builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
 {
-  ConnectionName = "playground-db",
+  ConnectionName = ServiceKeys.PostgresDb,
   JsonOptions = globalJsonOptions,
 }).ForDomainEvents<ToDoEvent>();
 
 builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
 {
-  ConnectionName = "playground-db",
+  ConnectionName = ServiceKeys.PostgresDb,
 });
 
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
   return new PostgreSQLMessageSubscriberOptions
   {
-    ConnectionName = "playground-db",
+    ConnectionName = ServiceKeys.PostgresDb,
     JsonOptions = globalJsonOptions,
   };
 });
 
 builder.UseOrleans(siloBuilder =>
 {
-  var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground-db") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  var npgsqlConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb) ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
   siloBuilder.AddAdoNetGrainStorage("Default", options =>
   {
@@ -61,16 +62,16 @@ builder.UseOrleans(siloBuilder =>
   //  options.ConnectionString = npgsqlConnectionString;
   //});
 
-  var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  siloBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  {
-    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-    options.JsonSerializerOptions = globalJsonOptions;
-    options.NatsClientOptions = NatsOpts.Default with
-    {
-      Url = natsConnectionString,
-    };
-  });
+  //var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
+  //siloBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  //{
+  //  options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+  //  options.JsonSerializerOptions = globalJsonOptions;
+  //  options.NatsClientOptions = NatsOpts.Default with
+  //  {
+  //    Url = natsConnectionString,
+  //  };
+  //});
 
   siloBuilder.AddMeasureOrleans();
   siloBuilder.AddToDoOrleans();

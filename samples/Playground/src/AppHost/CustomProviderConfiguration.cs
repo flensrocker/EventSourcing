@@ -1,6 +1,4 @@
-﻿using Aspire.Hosting.Orleans;
-
-namespace Playground.AppHost;
+﻿namespace Aspire.Hosting.Orleans;
 
 public sealed class OrleansProviderTypeAnnotation : IResourceAnnotation
 {
@@ -10,7 +8,36 @@ public sealed class OrleansProviderTypeAnnotation : IResourceAnnotation
   public string ProviderType { get; internal set; } = "";
 }
 
-internal sealed class CustomProviderConfiguration(string providerType, string? serviceKey = null, IResourceBuilder<IResourceWithConnectionString>? resource = null) : IProviderConfiguration
+public static class OrleansServiceExtensions
+{
+  /// <summary>
+  /// Adds a custom provider type to the resource that will be used for Orleans.
+  /// </summary>
+  /// <example>
+  /// Garnet can be used as a drop-in replacement for Redis.
+  /// Since Orleans only knows how to use the "Redis" client in its <c>RedisClusteringProviderBuilder</c> and other provider builders,
+  /// we need to override the provider type of "Garnet" (derived from the type <c>GarnetResource</c>) to be "Redis".
+  /// This does not only apply to clustering, but also to other Orleans providers that can use drop-in replacements,
+  /// such as stream providers, grain directory providers and grain storage.
+  /// <code>
+  /// var garnet = builder.AddGarnet("garnet")
+  ///   .WithOrleansProviderType("Redis");
+  ///
+  /// var orleans = builder.AddOrleans("orleans")
+  ///   .WithClustering(garnet);
+  /// </code>
+  /// </example>
+  /// <param name="builder">The builder of the resource that should be annotated.</param>
+  /// <param name="providerType">The provider type to use.</param>
+  /// <returns>The resource builder.</returns>
+  public static IResourceBuilder<T> WithOrleansProviderType<T>(this IResourceBuilder<T> builder, string providerType)
+      where T : IResource
+  {
+    return builder.WithAnnotation(new OrleansProviderTypeAnnotation { ProviderType = providerType });
+  }
+}
+
+public sealed class CustomProviderConfiguration(string providerType, string? serviceKey = null, IResourceBuilder<IResourceWithConnectionString>? resource = null) : IProviderConfiguration
 {
   internal static CustomProviderConfiguration Create(IResourceBuilder<IResourceWithConnectionString> resourceBuilder)
   {
@@ -25,7 +52,7 @@ internal sealed class CustomProviderConfiguration(string providerType, string? s
     var resourceType = resourceBuilder.Resource.GetType().Name;
 
     // Use a simple transformation to get the provider type: remove the "Resource" suffix if it exists.
-    var providerType = (resourceType.EndsWith(resource) ? resourceType[..^resource.Length] : resourceType);
+    var providerType = resourceType.EndsWith(resource) ? resourceType[..^resource.Length] : resourceType;
 
     return new(providerType, serviceKey, resourceBuilder);
   }
@@ -43,14 +70,5 @@ internal sealed class CustomProviderConfiguration(string providerType, string? s
     {
       resourceBuilder.WithReference(resource);
     }
-  }
-}
-
-internal static class CustomProviderConfigurationExtensions
-{
-  public static IResourceBuilder<T> WithOrleansProviderType<T>(this IResourceBuilder<T> builder, string providerType)
-      where T : IResource
-  {
-    return builder.WithAnnotation(new OrleansProviderTypeAnnotation { ProviderType = providerType });
   }
 }

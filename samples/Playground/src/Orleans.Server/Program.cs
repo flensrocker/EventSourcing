@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
 using Orleans.Streaming.NATS.Hosting;
+using Playground.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -19,24 +20,24 @@ var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
   .AddMeasureJsonOptions()
   .AddToDoJsonOptions();
 
-builder.AddKeyedRedisClient("redis");
-builder.AddKeyedAzureQueueServiceClient("azure-queues-streams");
+builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
+builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
 {
-  ConnectionName = "playground-db",
+  ConnectionName = ServiceKeys.PostgresDb,
   JsonOptions = globalJsonOptions,
 }).ForDomainEvents<ToDoEvent>();
 
 builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
 {
-  ConnectionName = "playground-db",
+  ConnectionName = ServiceKeys.PostgresDb,
 });
 
 builder.UseOrleans(siloBuilder =>
 {
-  var npgsqlConnectionString = builder.Configuration.GetConnectionString("playground-db") ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  var npgsqlConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb) ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
   siloBuilder.AddAdoNetGrainStorage("Default", options =>
   {

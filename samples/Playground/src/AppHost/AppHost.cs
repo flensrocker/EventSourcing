@@ -1,11 +1,12 @@
-using Playground.AppHost;
+using Aspire.Hosting.Orleans;
+using Playground.ServiceDefaults;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
 builder.AddDockerComposeEnvironment("compose");
 
-var redis = builder
-  .AddGarnet("redis")
+var garnetClusteringStorage = builder
+  .AddGarnet(ServiceKeys.OrleansClustering)
   .WithOrleansProviderType("Redis")
   .WithDataVolume("playground-garnet-data");
 
@@ -19,7 +20,7 @@ var azure = builder
   .AddAzureStorage("azure")
   .RunAsEmulator();
 var azureQueuesStreams = azure
-  .AddQueues("azure-queues-streams");
+  .AddQueues(ServiceKeys.OrleansStreaming);
 
 var postgres = builder
   .AddPostgres("postgres")
@@ -28,7 +29,7 @@ var postgres = builder
   .WithDataVolume("playground-postgres-data")
   .WithPgWeb();
 
-var db = postgres.AddDatabase("playground-db", databaseName: "playground");
+var db = postgres.AddDatabase(ServiceKeys.PostgresDb, databaseName: "playground");
 
 var dbMigration = builder
   .AddProject<Projects.Playground_Migration>("playground-db-migration")
@@ -40,7 +41,7 @@ var orleans = builder
   .AddOrleans("playground-orleans")
   .WithServiceId("playground")
   .WithClusterId("default")
-  .WithClustering(CustomProviderConfiguration.Create(redis))
+  .WithClustering(CustomProviderConfiguration.Create(garnetClusteringStorage))
   .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, azureQueuesStreams)
   .WithMemoryGrainStorage("PubSubStore");
 
@@ -57,7 +58,7 @@ if (hostAllServicesInOneProcess)
     .WithReference(orleans)
     .WithExternalHttpEndpoints()
     .WaitFor(nats)
-    .WaitFor(redis)
+    .WaitFor(garnetClusteringStorage)
     .WaitForCompletion(dbMigration);
 }
 else
@@ -69,7 +70,7 @@ else
     .WithReference(db)
     .WithReference(orleans)
     .WaitFor(nats)
-    .WaitFor(redis)
+    .WaitFor(garnetClusteringStorage)
     .WaitForCompletion(dbMigration);
 
   var outbox = builder
@@ -79,7 +80,7 @@ else
     .WithReference(db)
     .WithReference(orleans.AsClient())
     .WaitFor(nats)
-    .WaitFor(redis)
+    .WaitFor(garnetClusteringStorage)
     .WaitForCompletion(dbMigration)
     .WaitFor(silo);
 
@@ -91,7 +92,7 @@ else
     .WithReference(orleans.AsClient())
     .WithExternalHttpEndpoints()
     .WaitFor(nats)
-    .WaitFor(redis)
+    .WaitFor(garnetClusteringStorage)
     .WaitForCompletion(dbMigration)
     .WaitFor(silo);
 }

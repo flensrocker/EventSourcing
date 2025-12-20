@@ -5,6 +5,7 @@ using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Playground.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -17,7 +18,7 @@ builder.Services.AddOrleansPostgreSQL(() =>
 {
   return new OrleansPostgreSQLOptions
   {
-    ConnectionName = "playground-db",
+    ConnectionName = ServiceKeys.PostgresDb,
   };
 });
 
@@ -26,7 +27,7 @@ builder.Services.AddPostgreSQLDomainEventStorage(() =>
 {
   return new PostgreSQLDomainEventStorageOptions
   {
-    ConnectionName = "playground-db",
+    ConnectionName = ServiceKeys.PostgresDb,
     JsonOptions = globalJsonOptions,
   };
 }).ForDomainEvents<ToDoEvent>();
@@ -35,7 +36,7 @@ builder.Services.AddToDoPostgreSQLPersistence(() =>
 {
   return new ToDoPostgreSQLPersistenceOptions
   {
-    ConnectionName = "playground-db",
+    ConnectionName = ServiceKeys.PostgresDb,
   };
 });
 
