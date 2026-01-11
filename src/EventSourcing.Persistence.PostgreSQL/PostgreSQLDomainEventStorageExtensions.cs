@@ -88,23 +88,6 @@ public static class PostgreSQLDomainEventStorageExtensions
     }
   }
 
-  internal static MessageEntity ToMessageEntity(this DomainEvent @event, JsonSerializerOptions? jsonOptions)
-  {
-    return new MessageEntity
-    {
-      Id = @event.Metadata.EventId,
-      StreamType = @event.Metadata.StreamType,
-      StreamId = @event.Metadata.StreamId,
-      StreamVersion = @event.Metadata.StreamVersion,
-      TenantId = @event.Metadata.TenantId,
-      CreatedAt = @event.Metadata.CreatedAt,
-      CreatedByUserId = @event.Metadata.CreatedByUserId,
-      TraceId = @event.Metadata.TraceId,
-      SpanId = @event.Metadata.SpanId,
-      PayloadJson = JsonSerializer.Serialize(@event.Payload, jsonOptions),
-    };
-  }
-
   internal static DomainEvent ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
