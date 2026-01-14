@@ -1,0 +1,119 @@
+# DRAFT: Chat
+
+Storing the `DisplayName` of the users on each event for building the list of participants with up-to-date names without the need to monitor "User.DisplayNameChanged" events.
+
+## Events of a `Conversation`
+
+- `Started`
+  - `ConversationId`
+  - `StartedAt`
+  - `StartedByUserId`
+  - `StartedByDisplayName`
+  - `RecipientList`
+    - `UserId`
+    - `DisplayName`
+  - `Topic`
+  - `MessageId`
+  - `MessageContent`
+- `RecipientAdded`
+  - `ConversationId`
+  - `AddedAt`
+  - `AddedByUserId`
+  - `AddedByDisplayName`
+  - `RecipientUserId`
+  - `RecipientDisplayName`
+- `RecipientRemoved`
+  - `ConversationId`
+  - `RemovedAt`
+  - `RemovedByUserId`
+  - `RemovedByDisplayName`
+  - `RecipientUserId`
+- `TopicEdited`
+  - `ConversationId`
+  - `EditedAt`
+  - `EditedByUserId`
+  - `EditedByDisplayName`
+  - `Topic`
+- `Archived`
+  - `ConversationId`
+  - `ArchivedAt`
+  - `ArchivedByUserId`
+  - `ArchivedByDisplayName`
+- `Restored`
+  - `ConversationId`
+  - `RestoredAt`
+  - `RestoredByUserId`
+  - `RestoredByDisplayName`
+- `ReplySent`
+  - `ConversationId`
+  - `RepliedAt`
+  - `RepliedByUserId`
+  - `RepliedByDisplayName`
+  - `RepliedToMessageId?`
+  - `MessageId`
+  - `MessageContent`
+- `MessageRead`
+  - `ConversationId`
+  - `ReadAt`
+  - `ReadByUserId`
+  - `ReadByDisplayName`
+  - `MessageId`
+- `MessageEdited`
+  - `ConversationId`
+  - `EditedAt`
+  - `EditedByUserId`
+  - `EditedByDisplayName`
+  - `MessageId`
+  - `MessageContent`
+- `MessageRemoved`
+  - `ConversationId`
+  - `RemovedAt`
+  - `RemovedByUserId`
+  - `RemovedByDisplayName`
+  - `MessageId`
+- `MessageRestored`
+  - `ConversationId`
+  - `RestoredAt`
+  - `RestoredByUserId`
+  - `RestoredByDisplayName`
+  - `MessageId`
+- `ReactionAdded`
+  - `ConversationId`
+  - `ReactedAt`
+  - `ReactedByUserId`
+  - `ReactedByDisplayName`
+  - `MessageId`
+  - `ReactionId`
+  - `Emoji`
+- `ReactionRemoved`
+  - `ConversationId`
+  - `RemovedAt`
+  - `RemovedByUserId`
+  - `RemovedByDisplayName`
+  - `ReactionId`
+- `FileUploaded`
+  - `ConversationId`
+  - `UploadedAt`
+  - `UploadedByUserId`
+  - `UploadedByDisplayName`
+  - `FileId` (FileContent => Blob-Storage)
+  - `Filename`
+- `FileRenamed`
+  - `ConversationId`
+  - `RenamedAt`
+  - `RenamedByUserId`
+  - `RenamedByDisplayName`
+  - `FileId`
+  - `Filename`
+- `FileRemoved`
+  - `ConversationId`
+  - `RemovedAt`
+  - `RemovedByUserId`
+  - `RemovedByDisplayName`
+  - `FileId`
+- `FileRestored`
+  - `ConversationId`
+  - `RestoredAt`
+  - `RestoredByUserId`
+  - `RestoredByDisplayName`
+  - `FileId`
