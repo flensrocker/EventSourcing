@@ -2,32 +2,98 @@
 
 Storing the `DisplayName` of the users on each event for building the list of participants with up-to-date names without the need to monitor "User.DisplayNameChanged" events.
 
-## Events of a `Conversation`
+## `Group`
+
+### Description
+
+- A `Group` is the list of participants of a conversation.
+- Each group can have multiple conversations.
+- Every current member of a group can see all conversations and every message regardless of when the messages were sent or the member was added to the group.
+- Each member has one of the following roles:
+  - `Owner`
+    - Can do anything with the group.
+    - Can do anything with all the conversations of this group.
+    - Can see the complete message history including edits and removals.
+  - `Moderator`
+    - Can do anything with all the conversations except starting/archiving/restoring them.
+    - Can see the complete message history including edits and removals.
+  - `Member`
+    - Can send messages/reactions/files to each conversation of the group
+    - Can edit/remove own messages/reactions/files.
+- When a group is archived every conversation will also be archived.
+- When a group is restored every conversation will be restored, that was archived because of the group's archiving.
+
+### Events
+
+- `Registered`
+  - `GroupId`
+  - `DisplayName`
+  - `RegisteredAt`
+  - `RegisteredByUserId`
+  - `RegisteredByUserDisplayName`
+- `Renamed`
+  - `GroupId`
+  - `DisplayName`
+  - `RenamedAt`
+  - `RenamedByUserId`
+  - `RenamedByUserDisplayName`
+- `Archived`
+  - `GroupId`
+  - `ArchivedAt`
+  - `ArchivedByUserId`
+  - `ArchivedByDisplayName`
+- `Restored`
+  - `GroupId`
+  - `RestoredAt`
+  - `RestoredByUserId`
+  - `RestoredByDisplayName`
+- `MemberAdded`
+  - `GroupId`
+  - `AddedAt`
+  - `AddedByUserId`
+  - `AddedByDisplayName`
+  - `MemberUserId`
+  - `MemberDisplayName`
+  - `MemberRole` (owner, moderator, member)
+- `MemberRoleChanged`
+  - `GroupId`
+  - `ChangedAt`
+  - `ChangedByUserId`
+  - `ChangedByDisplayName`
+  - `MemberUserId`
+  - `MemberDisplayName`
+  - `MemberRole` (owner, moderator, member)
+- `MemberRemoved`
+  - `GroupId`
+  - `RemovedAt`
+  - `RemovedByUserId`
+  - `RemovedByDisplayName`
+  - `MemberUserId`
+
+## `Conversation`
+
+## Description
+
+- A `Conversation` is a list of `Message`s provided to a `Group` of participants.
+- Each conversation has a `Topic`.
+- Each message can have a list of `Reaction`s (e.g. 👍🤷♥️🙋❓).
+- Messages will be marked as "read" if they are displayed on an user's screen.
+- A conversation can have multiple `File`s (e.g. images, PDF).
+- A conversation can be archived.
+- Archived conversations are only visible to the owner of the group.
+
+### Events
 
 - `Started`
   - `ConversationId`
   - `StartedAt`
   - `StartedByUserId`
   - `StartedByDisplayName`
-  - `RecipientList`
-    - `UserId`
-    - `DisplayName`
+  - `GroupId`
+  - `GroupDisplayName`
   - `Topic`
   - `MessageId`
   - `MessageContent`
-- `RecipientAdded`
-  - `ConversationId`
-  - `AddedAt`
-  - `AddedByUserId`
-  - `AddedByDisplayName`
-  - `RecipientUserId`
-  - `RecipientDisplayName`
-- `RecipientRemoved`
-  - `ConversationId`
-  - `RemovedAt`
-  - `RemovedByUserId`
-  - `RemovedByDisplayName`
-  - `RecipientUserId`
 - `TopicEdited`
   - `ConversationId`
   - `EditedAt`
@@ -39,24 +105,31 @@ Storing the `DisplayName` of the users on each event for building the list of pa
   - `ArchivedAt`
   - `ArchivedByUserId`
   - `ArchivedByDisplayName`
+  - `Reason` (only this conversation; because of group being archived)
 - `Restored`
   - `ConversationId`
   - `RestoredAt`
   - `RestoredByUserId`
   - `RestoredByDisplayName`
-- `ReplySent`
+- `MessageSent`
   - `ConversationId`
-  - `RepliedAt`
-  - `RepliedByUserId`
-  - `RepliedByDisplayName`
-  - `RepliedToMessageId?`
+  - `SentAt`
+  - `SentByUserId`
+  - `SentByDisplayName`
+  - `ReplyToMessageId?`
   - `MessageId`
   - `MessageContent`
-- `MessageRead`
+- `MessageMarkedAsRead`
   - `ConversationId`
-  - `ReadAt`
-  - `ReadByUserId`
-  - `ReadByDisplayName`
+  - `MarkedAt`
+  - `MarkedByUserId`
+  - `MarkedByDisplayName`
+  - `MessageId`
+- `MessageMarkedAsNew`
+  - `ConversationId`
+  - `MarkedAt`
+  - `MarkedByUserId`
+  - `MarkedByDisplayName`
   - `MessageId`
 - `MessageEdited`
   - `ConversationId`
