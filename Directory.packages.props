@@ -15,29 +15,25 @@
     <PackageVersion Include="Aspire.NATS.Net" Version="13.1.0" />
     <PackageVersion Include="Aspire.Npgsql" Version="13.1.0" />
     <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.1.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.2.0" />
-    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Clustering.Redis" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.EventSourcing" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Persistence.AdoNet" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Persistence.Memory" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Persistence.Redis" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming.AdoNet" Version="10.0.0-rc.2" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming.AzureStorage" Version="10.0.0" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="10.0.0-rc.2.alpha.1" />
+    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Clustering.Redis" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.EventSourcing" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Persistence.AdoNet" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Persistence.Memory" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Persistence.Redis" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming.AdoNet" Version="10.0.1-alpha.1" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming.AzureStorage" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="10.0.1-alpha.1" />
     <PackageVersion Include="Npgsql" Version="10.0.0" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.0" />

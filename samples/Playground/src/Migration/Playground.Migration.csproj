@@ -13,11 +13,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <!-- Microsoft.CodeAnalysis.* can be removed when the version conflicts with the nightly builds have been resolved -->
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" />
   </ItemGroup>
 
   <ItemGroup>
