@@ -72,7 +72,7 @@ Storing the `DisplayName` of the users on each event for building the list of pa
 
 ## `Conversation`
 
-## Description
+### Description
 
 - A `Conversation` is a list of `Message`s provided to a `Group` of participants.
 - Each conversation has a `Topic`.
