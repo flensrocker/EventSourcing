@@ -7,14 +7,15 @@ Management of `User`s, `Tenant`s and their `Role`s in each tenant.
 ### Description
 
 Roles are statically defined by the application per module.
-
-They are implemented as claims with the name of the role as the "claim-type" and e.g. the id of the tenant as the "claim-value".
+They have a name, an optional `TenantId` and an optional (string) value.
+They should be stored as claims in the auth-token.
+The name and the tenant-id can be interpreted as the claim-type, and the value as the claim-value.
 
 ### Identity-Roles
 
 - Roles belonging to the (physical) system (no claim-value)
-  - `System.Admin`
-  - `System.Supporter`? (with limited permissions)
+  - `System.Operator`
+  - `System.Manager`? (with limited permissions)
 - Roles belonging to a tenant (claim-value is `TenantId`)
   - `Tenant.Owner`
   - `Tenant.Admin`
@@ -28,6 +29,7 @@ They are implemented as claims with the name of the role as the "claim-type" and
 A tenant is a logical unit of users who belong together like an "organization" or "workspace".
 
 - Logo?
+- Profile?
 
 ### Events
 
@@ -41,6 +43,10 @@ A tenant is a logical unit of users who belong together like an "organization" o
   - `ChangedAt`
   - `ChangedByUserId`
   - `DisplayName`
+- `Activated`
+  - `TenantId`
+  - `ActivatedAt`
+  - `ActivatedByUserId`
 - `Suspended`
   - `TenantId`
   - `SuspendedAt`
@@ -65,7 +71,7 @@ A tenant is a logical unit of users who belong together like an "organization" o
 - Users can register tenants.
 - Users can be invited to tenants.
 - The roles of an user are bound to a tenant.
-- Profile picture?
+- Profile (with avatar/picture)?
 
 ### Events
 
@@ -83,7 +89,6 @@ A tenant is a logical unit of users who belong together like an "organization" o
 - `SignInCodeSent`
   - `UserId`
   - `SentAt`
-  - `SentByUserId`
   - `Email`
   - `VerificationCode`
 - `SignedIn`
@@ -108,34 +113,13 @@ A tenant is a logical unit of users who belong together like an "organization" o
   - `SentByUserId`
   - `Email`
   - `VerificationCode`
-- `PasskeyAdded`
-  - `UserId`
-  - `AddedAt`
-  - `AddedByUserId`
-  - `CredentialId`
-  - `Data` (will be `Microsoft.AspNetCore.Identity.IdentityPasskeyData`)
-- `PasskeyUpdated`
-  - `UserId`
-  - `UpdatedAt`
-  - `UpdatedByUserId`
-  - `CredentialId`
-  - `Data` (will be `Microsoft.AspNetCore.Identity.IdentityPasskeyData`)
-- `PasskeyRemoved`
-  - `UserId`
-  - `RemovedAt`
-  - `RemovedByUserId`
-  - `CredentialId`
-- `Invited`
+- `Invited` (how to do if user is not registered yet?)
   - `UserId`
   - `InvitedAt`
   - `InvitedByUserId`
   - `TenantId`
   - `Role`
-- `InvitationConfirmed`
-  - `UserId`
-  - `ConfirmedAt`
-  - `ConfirmedByUserId`
-  - `TenantId`
+  - `VerificationCode`
 - `RoleChanged`
   - `UserId`
   - `ChangedAt`
@@ -157,3 +141,23 @@ A tenant is a logical unit of users who belong together like an "organization" o
   - `RevokedAt`
   - `RevokedByUserId`
   - `TenantId`
+
+Later:
+
+- `PasskeyAdded`
+  - `UserId`
+  - `AddedAt`
+  - `AddedByUserId`
+  - `CredentialId`
+  - `Data` (will be `Microsoft.AspNetCore.Identity.IdentityPasskeyData`)
+- `PasskeyUpdated`
+  - `UserId`
+  - `UpdatedAt`
+  - `UpdatedByUserId`
+  - `CredentialId`
+  - `Data` (will be `Microsoft.AspNetCore.Identity.IdentityPasskeyData`)
+- `PasskeyRemoved`
+  - `UserId`
+  - `RemovedAt`
+  - `RemovedByUserId`
+  - `CredentialId`
