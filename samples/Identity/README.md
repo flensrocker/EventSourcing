@@ -1,6 +1,9 @@
 # DRAFT: Identity
 
-Management of `User`s, `Tenant`s and their `Role`s in each tenant.
+Management of `Email`s, `Username`s, `User`s, `Tenant`s and their `Role`s in each tenant.
+
+**TODO:**
+Define the self-registration and invitation process.
 
 ## `Role`
 
@@ -22,50 +25,95 @@ The name and the tenant-id can be interpreted as the claim-type, and the value a
   - `Tenant.Manager`?
   - `Tenant.Member`
 
-## `Tenant`
+## `Email`
 
 ### Description
 
-A tenant is a logical unit of users who belong together like an "organization" or "workspace".
+E-mail addresses are key to the identity management.
 
-- Logo?
-- Profile?
+- They have to be unique and there cannot be a user without an e-mail.
+- They are used to invite users to the platform.
+- They can be "requested" in the process of self-onboarding without invitation.
+
+So there has to be a "source of truth" for them.
+
+- The e-mail-key is normalized (e.g. similar to Microsoft.AspNetCore.Identity with `string.Normalize().ToLowerInvariant()`).
+- There can be multiple invitations in parallel for different tenants.
+- A new invitation for a tenant overwrites the previous one and invalidates the verification code and role.
+- Invitations are invalidated after some timeout (to be specified).
+- A new request overwrites the previous one and invalidates the verification code.
+- Requests and invitations can run in parallel.
+- Verified invitations also verify ongoing requests.
+- Verifying a request doesn't verify invitations.
+- After abandoning an e-mail it can be re-requested/invited for a new user with a new user-id.
+- If in the "abandoned" state it can be restored for the current user.
 
 ### Events
 
-- `Registered`
+- `Reserved`
+  - `NormalizedEmail`
+  - `Email`
+  - `ReservedAt`
+  - `ForUserId`
+  - `VerificationCode`
+- `Invited`
+  - `NormalizedEmail`
+  - `Email`
+  - `InvitedAt`
+  - `InvitedByUserId`
+  - `ForUserId`
+  - `VerificationCode`
   - `TenantId`
-  - `RegisteredAt`
-  - `RegisteredByUserId`
-  - `DisplayName`
-- `DisplayNameChanged`
+  - `Role`
+- `InvitationRevoked`
+  - `NormalizedEmail`
+  - `RevokedAt`
+  - `RevokedByUserId`
   - `TenantId`
-  - `ChangedAt`
-  - `ChangedByUserId`
-  - `DisplayName`
-- `Activated`
-  - `TenantId`
-  - `ActivatedAt`
-  - `ActivatedByUserId`
-- `Suspended`
-  - `TenantId`
-  - `SuspendedAt`
-  - `SuspendedByUserId`
-- `Resumed`
-  - `TenantId`
-  - `ResumedAt`
-  - `ResumedByUserId`
-- `Terminated`
-  - `TenantId`
-  - `TerminatedAt`
-  - `TerminatedByUserId`
+- `VerificationCodeConfirmed`
+  - `NormalizedEmail`
+  - `ConfirmedAt`
+  - `VerificationCode`
+- `VerificationCodeExpired`
+  - `NormalizedEmail`
+  - `ExpiredAt`
+  - `VerificationCode`
+- `Abandoned`
+  - `NormalizedEmail`
+  - `AbandonedAt`
+  - `AbandonedByUserId`
+- `Restored`
+  - `NormalizedEmail`
+  - `RestoredAt`
+  - `RestoredByUserId`
+
+## `Username`
+
+### Description
+
+- Usernames have to be unique to the system.
+- Usernames and users have a 1:1 relationship.
+- The username-key is normalized (e.g. similar to Microsoft.AspNetCore.Identity with `string.Normalize().ToLowerInvariant()`).
+- Requests for usernames expire after a timeout (to be specified).
+
+### Events
+
+- `Reserved`
+  - `NormalizedUsername`
+  - `Username`
+  - `ReservedAt`
+  - `ForUserId`
+- `ReservationConfirmed`
+  - `NormalizedUsername`
+  - `ConfirmedAt`
+- `ReservationExpired`
+  - `NormalizedUsername`
+  - `ExpiredAt`
 
 ## `User`
 
 ### Description
 
-- Usernames have to be unique.
-- E-mail addresses have to be unique.
 - Signing in can be done via passkey or "code by email".
 - For each sign-in a unique `SessionId` is generated and stored in the auth token.
 - Users can register tenants.
@@ -77,14 +125,17 @@ A tenant is a logical unit of users who belong together like an "organization" o
 
 - `Registered`
   - `UserId`
+  - `RegisteredAt`
   - `Username`
   - `DisplayName`
-  - `RegisteredAt`
   - `Email`
-  - `VerificationCode`
-- `VerificationConfirmed`
+- `VerificationCodeConfirmed`
   - `UserId`
   - `ComfirmedAt`
+  - `VerificationCode` (links to the originating event)
+- `VerificationCodeExpired`
+  - `UserId`
+  - `ExpiredAt`
   - `VerificationCode` (links to the originating event)
 - `SignInCodeSent`
   - `UserId`
@@ -102,6 +153,11 @@ A tenant is a logical unit of users who belong together like an "organization" o
   - `UserId`
   - `SignedOutAt`
   - `SessionId`
+- `UsernameChanged`
+  - `UserId`
+  - `ChangedAt`
+  - `ChangedByUserId`
+  - `Username`
 - `DisplayNameChanged`
   - `UserId`
   - `ChangedAt`
@@ -112,13 +168,6 @@ A tenant is a logical unit of users who belong together like an "organization" o
   - `SentAt`
   - `SentByUserId`
   - `Email`
-  - `VerificationCode`
-- `Invited` (how to do if user is not registered yet?)
-  - `UserId`
-  - `InvitedAt`
-  - `InvitedByUserId`
-  - `TenantId`
-  - `Role`
   - `VerificationCode`
 - `RoleChanged`
   - `UserId`
@@ -161,3 +210,41 @@ Later:
   - `RemovedAt`
   - `RemovedByUserId`
   - `CredentialId`
+
+## `Tenant`
+
+### Description
+
+A tenant is a logical unit of users who belong together like an "organization" or "workspace".
+
+- Logo?
+- Profile?
+
+### Events
+
+- `Registered`
+  - `TenantId`
+  - `RegisteredAt`
+  - `RegisteredByUserId`
+  - `DisplayName`
+- `DisplayNameChanged`
+  - `TenantId`
+  - `ChangedAt`
+  - `ChangedByUserId`
+  - `DisplayName`
+- `Activated`
+  - `TenantId`
+  - `ActivatedAt`
+  - `ActivatedByUserId`
+- `Suspended`
+  - `TenantId`
+  - `SuspendedAt`
+  - `SuspendedByUserId`
+- `Resumed`
+  - `TenantId`
+  - `ResumedAt`
+  - `ResumedByUserId`
+- `Terminated`
+  - `TenantId`
+  - `TerminatedAt`
+  - `TerminatedByUserId`
