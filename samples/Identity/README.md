@@ -11,6 +11,11 @@ Management of `EmailAddress`es, `User`s, `Tenant`s and their `Role`s in each ten
 
 ### Self-Registration
 
+The user start registration with providing an email-address.
+The system sends a verification code to this address.
+The app navigates to a form for entering the email-address, verification code and a "display-name" for the user.
+If the reservation is not confirmed within a timeout, it gets automatically marked as "expired".
+
 - C: `EmailAddress.Reserve`  
   if not already reserved:
   - E: `EmailAddress.Reserved`
@@ -20,6 +25,9 @@ Management of `EmailAddress`es, `User`s, `Tenant`s and their `Role`s in each ten
   if not already expired:
   - E: `EmailAddress.ReservationConfirmed`
   - C: `User.Register`
+- C: `EmailAddress.ExpireReservation`:  
+  if not already confirmed:
+  - E: `EmailAddress.ReservationExpired`
 
 ### Invitation
 
@@ -83,6 +91,7 @@ Reservation:
   - `NormalizedEmailAddress`
   - `ConfirmedAt`
   - `VerificationCode`
+  - `UserDisplayName`
 - `ReservationExpired`
   - `NormalizedEmailAddress`
   - `ExpiredAt`
