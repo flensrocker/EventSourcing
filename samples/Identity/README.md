@@ -1,9 +1,29 @@
 # DRAFT: Identity
 
-Management of `Email`s, `Username`s, `User`s, `Tenant`s and their `Role`s in each tenant.
+Management of `EmailAddress`es, `User`s, `Tenant`s and their `Role`s in each tenant.
 
-**TODO:**
-Define the self-registration and invitation process.
+## Processes
+
+- C = Command
+- E = Event
+- T = Timer
+- A = Action/Sideeffect
+
+### Self-Registration
+
+- C: `EmailAddress.Reserve`  
+  if not already reserved:
+  - E: `EmailAddress.Reserved`
+  - T: `EmailAddress.ExpireReservation`
+  - A: Sent verification code
+- C: `EmailAddress.ConfirmReservation`  
+  if not already expired:
+  - E: `EmailAddress.ReservationConfirmed`
+  - C: `User.Register`
+
+### Invitation
+
+**TODO**
 
 ## `Role`
 
@@ -25,100 +45,94 @@ The name and the tenant-id can be interpreted as the claim-type, and the value a
   - `Tenant.Manager`?
   - `Tenant.Member`
 
-## `Email`
+## `EmailAddress`
 
 ### Description
 
 E-mail addresses are key to the identity management.
+They are essentially the "username".
 
-- They have to be unique and there cannot be a user without an e-mail.
+- They have to be unique and there cannot be a user without an e-mail address.
 - They are used to invite users to the platform.
-- They can be "requested" in the process of self-onboarding without invitation.
+- They can be "reserved" in the process of self-registration without invitation.
 
 So there has to be a "source of truth" for them.
 
-- The e-mail-key is normalized (e.g. similar to Microsoft.AspNetCore.Identity with `string.Normalize().ToLowerInvariant()`).
+- The e-mail-address is normalized (e.g. similar to Microsoft.AspNetCore.Identity with `string.Normalize().ToLowerInvariant()`).
 - There can be multiple invitations in parallel for different tenants.
 - A new invitation for a tenant overwrites the previous one and invalidates the verification code and role.
-- Invitations are invalidated after some timeout (to be specified).
-- A new request overwrites the previous one and invalidates the verification code.
-- Requests and invitations can run in parallel.
-- Verified invitations also verify ongoing requests.
-- Verifying a request doesn't verify invitations.
-- After abandoning an e-mail it can be re-requested/invited for a new user with a new user-id.
+- Invitations expire after some timeout (to be specified).
+- A new reservation overwrites the previous one and invalidates the verification code.
+- Reservations and invitations can run in parallel.
+- Accpeted invitations also confirm ongoing reservations.
+- Confirming a reservation doesn't accept invitations.
+- After abandoning an e-mail address it can be reserved/invited for a new user with a new user-id.
 - If in the "abandoned" state it can be restored for the current user.
 
 ### Events
 
+Reservation:
+
 - `Reserved`
-  - `NormalizedEmail`
-  - `Email`
+  - `NormalizedEmailAddress`
+  - `EmailAddress`
   - `ReservedAt`
   - `ForUserId`
   - `VerificationCode`
-- `Invited`
-  - `NormalizedEmail`
-  - `Email`
-  - `InvitedAt`
-  - `InvitedByUserId`
+- `ReservationConfirmed`
+  - `NormalizedEmailAddress`
+  - `ConfirmedAt`
+  - `VerificationCode`
+- `ReservationExpired`
+  - `NormalizedEmailAddress`
+  - `ExpiredAt`
+  - `VerificationCode`
+
+Invitation:
+
+- `InvitationSubmitted`
+  - `NormalizedEmailAddress`
+  - `EmailAddress`
+  - `SubmittedAt`
+  - `SubmittedByUserId`
   - `ForUserId`
   - `VerificationCode`
   - `TenantId`
   - `Role`
 - `InvitationRevoked`
-  - `NormalizedEmail`
+  - `NormalizedEmailAddress`
   - `RevokedAt`
   - `RevokedByUserId`
   - `TenantId`
-- `VerificationCodeConfirmed`
-  - `NormalizedEmail`
-  - `ConfirmedAt`
+- `InvitationAccpeted`
+  - `NormalizedEmailAddress`
+  - `AcceptedAt`
+  - `AcceptedByUserId`
   - `VerificationCode`
-- `VerificationCodeExpired`
-  - `NormalizedEmail`
+- `InvitationExpired`
+  - `NormalizedEmailAddress`
   - `ExpiredAt`
   - `VerificationCode`
+
+Other:
+
 - `Abandoned`
-  - `NormalizedEmail`
+  - `NormalizedEmailAddress`
   - `AbandonedAt`
   - `AbandonedByUserId`
 - `Restored`
-  - `NormalizedEmail`
+  - `NormalizedEmailAddress`
   - `RestoredAt`
   - `RestoredByUserId`
-
-## `Username`
-
-### Description
-
-- Usernames have to be unique to the system.
-- Usernames and users have a 1:1 relationship.
-- The username-key is normalized (e.g. similar to Microsoft.AspNetCore.Identity with `string.Normalize().ToLowerInvariant()`).
-- Requests for usernames expire after a timeout (to be specified).
-
-### Events
-
-- `Reserved`
-  - `NormalizedUsername`
-  - `Username`
-  - `ReservedAt`
-  - `ForUserId`
-- `ReservationConfirmed`
-  - `NormalizedUsername`
-  - `ConfirmedAt`
-- `ReservationExpired`
-  - `NormalizedUsername`
-  - `ExpiredAt`
 
 ## `User`
 
 ### Description
 
-- Signing in can be done via passkey or "code by email".
+- Signing in can be done via "code by email" (later with passkey).
 - For each sign-in a unique `SessionId` is generated and stored in the auth token.
-- Users can register tenants.
-- Users can be invited to tenants.
-- The roles of an user are bound to a tenant.
+- Accessing with an auth-token containing a "signed-out" session-id needs reauthentication.
+- Each user has one role per invited tenant.
 - Profile (with avatar/picture)?
 
 ### Events
@@ -126,49 +140,53 @@ So there has to be a "source of truth" for them.
 - `Registered`
   - `UserId`
   - `RegisteredAt`
-  - `Username`
+  - `EmailAddress`
   - `DisplayName`
-  - `Email`
-- `VerificationCodeConfirmed`
-  - `UserId`
-  - `ComfirmedAt`
-  - `VerificationCode` (links to the originating event)
-- `VerificationCodeExpired`
-  - `UserId`
-  - `ExpiredAt`
-  - `VerificationCode` (links to the originating event)
-- `SignInCodeSent`
-  - `UserId`
-  - `SentAt`
-  - `Email`
-  - `VerificationCode`
-- `SignedIn`
-  - `UserId`
-  - `SignedInAt`
-  - `SignInType` ("passkey", "verification-code" etc.)
-  - `SignInData` (`CredentialId`, `VerificationCode`)
-  - `SessionId`
-  - `RemoteInfo`? (like IP address?)
-- `SignedOut`
-  - `UserId`
-  - `SignedOutAt`
-  - `SessionId`
-- `UsernameChanged`
-  - `UserId`
-  - `ChangedAt`
-  - `ChangedByUserId`
-  - `Username`
 - `DisplayNameChanged`
   - `UserId`
   - `ChangedAt`
   - `ChangedByUserId`
   - `DisplayName`
-- `EmailChangeConfirmationSent`
+- `EmailAddressChangeConfirmationSent`
   - `UserId`
   - `SentAt`
   - `SentByUserId`
-  - `Email`
+  - `NewEmailAddress`
   - `VerificationCode`
+- `EmailAddressChangeConfirmed`
+  - `UserId`
+  - `ComfirmedAt`
+  - `VerificationCode`
+- `EmailAddressChangeExpired`
+  - `UserId`
+  - `ExpiredAt`
+  - `VerificationCode`
+- `SignInCodeSent`
+  - `UserId`
+  - `SentAt`
+  - `EmailAddress`
+  - `VerificationCode`
+- `SignInCodeConfirmed`
+  - `UserId`
+  - `ComfirmedAt`
+  - `VerificationCode`
+  - `SessionId`
+  - `RemoteInfo`? (like IP address?)
+- `SignInCodeExpired`
+  - `UserId`
+  - `ExpiredAt`
+  - `VerificationCode`
+- `SignedOut`
+  - `UserId`
+  - `SignedOutAt`
+  - `SignedOutByUserId`
+  - `SessionId`
+- `MembershipStarted`
+  - `UserId`
+  - `StartedAt`
+  - `StartedByUserId`
+  - `TenantId`
+  - `Role`
 - `RoleChanged`
   - `UserId`
   - `ChangedAt`
@@ -210,6 +228,13 @@ Later:
   - `RemovedAt`
   - `RemovedByUserId`
   - `CredentialId`
+- `PasskeySignedIn`
+  - `UserId`
+  - `SignedInAt`
+  - `CredentialId`
+  - `Data`? (what is needed?)
+  - `SessionId`
+  - `RemoteInfo`? (like IP address?)
 
 ## `Tenant`
 
@@ -217,6 +242,9 @@ Later:
 
 A tenant is a logical unit of users who belong together like an "organization" or "workspace".
 
+- Tenants are registered by users.
+- Tenants have to be activated, e.g. by payment or "demo".
+- Activations expire automatically and must be renewed.
 - Logo?
 - Profile?
 
@@ -236,14 +264,11 @@ A tenant is a logical unit of users who belong together like an "organization" o
   - `TenantId`
   - `ActivatedAt`
   - `ActivatedByUserId`
-- `Suspended`
+  - `ActivationExpiresAt`
+- `Deactivated`
   - `TenantId`
-  - `SuspendedAt`
-  - `SuspendedByUserId`
-- `Resumed`
-  - `TenantId`
-  - `ResumedAt`
-  - `ResumedByUserId`
+  - `DeactivatedAt`
+  - `DeactivatedByUserId`
 - `Terminated`
   - `TenantId`
   - `TerminatedAt`
