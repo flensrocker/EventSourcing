@@ -6,28 +6,46 @@ Management of `EmailAddress`es, `User`s, `Tenant`s and their `Role`s in each ten
 
 - C = Command
 - E = Event
-- T = Timer
+- T = Timer (command)
 - A = Action/Sideeffect
+- S = State/Status
 
-### Self-Registration
+### Registration/Sign In
 
-The user start registration with providing an email-address.
+The user starts the registration or sign-in process with providing an email-address.
 The system sends a verification code to this address.
-The app navigates to a form for entering the email-address, verification code and a "display-name" for the user.
-If the reservation is not confirmed within a timeout, it gets automatically marked as "expired".
+The app navigates to a form for entering the email-address, verification code and (if not yet registered) a "display-name" for the user.
+If the reservation/sign-in is not confirmed within a timeout, it gets automatically marked as "expired".
 
-- C: `EmailAddress.Reserve`  
-  if not already reserved:
-  - E: `EmailAddress.Reserved`
-  - T: `EmailAddress.ExpireReservation`
-  - A: Sent verification code
-- C: `EmailAddress.ConfirmReservation`  
-  if not already expired:
-  - E: `EmailAddress.ReservationConfirmed`
-  - C: `User.Register`
-- C: `EmailAddress.ExpireReservation`:  
-  if not already confirmed:
-  - E: `EmailAddress.ReservationExpired`
+(draft, not in sync with the events mentioned below)
+
+- C: `EmailAddress.SignIn`
+  - S: "Version 0"
+    - C: `User.Reserve` -> E: `User.Reserved` (get user-id)
+    - E: `EmailAddress.Reserved` (connect e-mail to user-id)
+    - A: Send verification code
+    - T: `EmailAddress.ExpireSignInCode`
+  - S: `Reserved`, `Expired`
+    - E: `EmailAddress.Reserved`
+    - A: Send new verification code (invalidates previous code)
+    - T: `EmailAddress.ExpireSignInCode`
+  - S: `Confirmed`
+    - E: `EmailAddress.SignInCodeSent`
+    - A: Send new verification code
+    - T: `EmailAddress.ExpireSignInCode`
+- C: `EmailAddress.VerifySignInCode`
+  - S: `Expired`
+    - ERROR
+  - S: `Reserved`
+    - E: `EmailAddress.Confirmed` (-> C: `User.Register`)
+    - E: `EmailAddress.SignedIn`
+    - A: Send auth-cookie (just the user-id? session-id?)
+  - S: `Confirmed`
+    - E: `EmailAddress.SignedIn`
+    - A: Send auth-cookie (just the user-id? session-id?)
+- C: `EmailAddress.ExpireSignInCode`
+  - S: not `Confirmed`
+    - E: `EmailAddress.SignInCodeExpired`
 
 ### Invitation
 
@@ -146,6 +164,10 @@ Other:
 
 ### Events
 
+- `Reserved`
+  - `UserId`
+  - `ReservedAt`
+  - `EmailAddress`
 - `Registered`
   - `UserId`
   - `RegisteredAt`
