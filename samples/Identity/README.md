@@ -1,55 +1,76 @@
 # DRAFT: Identity
 
-Management of `EmailAddress`es, `User`s, `Tenant`s and their `Role`s in each tenant.
+A collection of unsorted thoughts about identity and authentication management.
 
-## Processes
+## About
+
+Management of `VerificationCode`s, `EmailAddress`es, `User`s, `Tenant`s and their `Role`s in each tenant.
+
+## Definitions
+
+Abbrevations
 
 - C = Command
+- Q = Query
 - E = Event
 - T = Timer (command)
 - A = Action/Sideeffect
 - S = State/Status
+- R = Result/Response
+- "Version 0" = aggregate does not exist yet
 
-### Registration/Sign In
+Names of commands, events, queries, roles etc. are "namespaced" with the name of the module and entity/aggregate.
+Example: `Identity.User.Registered`
+
+"Obvious" parts of the names are omitted in this document for brevity.
+
+## Workflows
+
+### Sign Up/In/Off
 
 The user starts the registration or sign-in process with providing an email-address.
 The system sends a verification code to this address.
 The app navigates to a form for entering the email-address, verification code and (if not yet registered) a "display-name" for the user.
-If the reservation/sign-in is not confirmed within a timeout, it gets automatically marked as "expired".
+If the reservation/sign-in is not confirmed within the expiration timeout, it gets automatically marked as "expired".
+Sending the correct verification code within the expiration timeout transitions the email-address to "confirmed".
+While not confirmed a new verification code can be requested overwriting the previous one.
 
-(draft, not in sync with the events mentioned below)
+- C: `Auth.SignIn` (returns `Register`/`SignIn`)
+  - C: `EmailAddress.Register`
+    - R: `Confirmed`
+      - C: `VerificationCode.Request` // TODO define `SignIn` source
+  - A: Send verification code
+- C: `Auth.ConfirmRegistration`
+  - C: `EmailAddress.ConfirmRegistration`
+  - A: Send auth-cookie
+- C: `Auth.ConfirmSignIn`
+  - C: `VerificationCode.Confirm`
+  - A: Send auth-cookie
+- C: `Auth.SignOff`
+  - A: Delete auth-cookie
 
-- C: `EmailAddress.SignIn`
-  - S: "Version 0"
-    - C: `User.Reserve` -> E: `User.Reserved` (get user-id)
-    - E: `EmailAddress.Reserved` (connect e-mail to user-id)
-    - A: Send verification code
-    - T: `EmailAddress.ExpireSignInCode`
-  - S: `Reserved`, `Expired`
-    - E: `EmailAddress.Reserved`
-    - A: Send new verification code (invalidates previous code)
-    - T: `EmailAddress.ExpireSignInCode`
+### Register E-mail Address
+
+Returns: `UserId`, `Registered` with `VerificationCode` or `Confirmed`
+
+- C: `EmailAddress.Register`
+  - S: "Version 0", `Closed`
+    - C: `User.Reserve` (create user-id)
+    - GOTO `Registered`
+  - S: `Registered`
+    - C: `VerificationCode.Request` // TODO define `Register` source
+    - E: `EmailAddress.Registered`
   - S: `Confirmed`
-    - E: `EmailAddress.SignInCodeSent`
-    - A: Send new verification code
-    - T: `EmailAddress.ExpireSignInCode`
-- C: `EmailAddress.VerifySignInCode`
-  - S: `Expired`
-    - ERROR
-  - S: `Reserved`
-    - E: `EmailAddress.Confirmed` (-> C: `User.Register`)
-    - E: `EmailAddress.SignedIn`
-    - A: Send auth-cookie (just the user-id? session-id?)
-  - S: `Confirmed`
-    - E: `EmailAddress.SignedIn`
-    - A: Send auth-cookie (just the user-id? session-id?)
-- C: `EmailAddress.ExpireSignInCode`
-  - S: not `Confirmed`
-    - E: `EmailAddress.SignInCodeExpired`
+    - OK
 
-### Invitation
+### Confirm E-mail Address Registration
 
-**TODO**
+- C: `EmailAddress.ConfirmRegistration`
+  - S: `Registered`
+    - C: `VerificationCode.Confirm`
+    - E: `EmailAddress.RegistrationConfirmed`
+
+TODO how/when execute `User.Register`?
 
 ## `Role`
 
@@ -63,13 +84,78 @@ The name and the tenant-id can be interpreted as the claim-type, and the value a
 ### Identity-Roles
 
 - Roles belonging to the (physical) system (no claim-value)
-  - `System.Operator`
-  - `System.Manager`? (with limited permissions)
+  - `Identity.System.Operator`
+  - `Identity.System.Manager`? (with limited permissions)
 - Roles belonging to a tenant (claim-value is `TenantId`)
-  - `Tenant.Owner`
-  - `Tenant.Admin`
-  - `Tenant.Manager`?
-  - `Tenant.Member`
+  - `Identity.Tenant.Owner`
+  - `Identity.Tenant.Admin`
+  - `Identity.Tenant.Manager`?
+  - `Identity.Tenant.Member`
+
+## `VerificationCode`
+
+### Description
+
+Verification codes guard actions like signing in.
+They are sent via email to the user.
+After confirming a code for a given action it will transition to "confirmed".
+If a verfication code is not confirmed within the expiration timeout it will transition to "expired".
+Once a verfication code is "confirmed" or has "expired" it cannot be reused.
+
+Each verification code is associated with a "source".
+When confirming a verfication code the correct source must be provided.
+The message sent along with the code can be derived from the source.
+
+TODO Start async workflow on `Confirmed` derived from `Source`?
+
+### State Transitions
+
+```mermaid
+stateDiagram-v2
+  state "Requested" as rq
+  state "Confirmed" as cf
+  state "Expired" as ex
+
+  [*] --> rq: C=Request
+  rq --> cf: C=Confirm
+  rq --> ex: T=Expire
+  ex --> [*]
+  cf --> [*]
+```
+
+### Events
+
+- `Requested`
+  - `VerificationCode`
+  - `RequestedAt`
+  - `RequestedByUserId`
+  - `EmailAddress`
+  - `Source`
+- `Confirmed`
+  - `VerificationCode`
+  - `ConfirmedAt`
+  - `ConfirmedByUserId`
+- `Expired`
+  - `VerificationCode`
+  - `ExpiredAt`
+  - `ExpiredByUserId`
+- `Revoked`
+  - `VerificationCode`
+  - `RevokedAt`
+  - `RevokedByUserId`
+
+### Commands
+
+- `Request`
+  - `EmailAddress`
+  - `Source`
+- `Confirm`
+  - `VerificationCode`
+  - `Source`
+- `Expire`
+  - `VerificationCode`
+- `Revoke`
+  - `VerificationCode`
 
 ## `EmailAddress`
 
@@ -79,38 +165,37 @@ E-mail addresses are key to the identity management.
 They are essentially the "username".
 
 - They have to be unique and there cannot be a user without an e-mail address.
+- A user can have multiple e-mail addresses.
 - They are used to invite users to the platform.
-- They can be "reserved" in the process of self-registration without invitation.
 
 So there has to be a "source of truth" for them.
 
 - The e-mail-address is normalized (e.g. similar to Microsoft.AspNetCore.Identity with `string.Normalize().ToLowerInvariant()`).
 - There can be multiple invitations in parallel for different tenants.
 - A new invitation for a tenant overwrites the previous one and invalidates the verification code and role.
-- Invitations expire after some timeout (to be specified).
-- A new reservation overwrites the previous one and invalidates the verification code.
-- Reservations and invitations can run in parallel.
-- Accpeted invitations also confirm ongoing reservations.
-- Confirming a reservation doesn't accept invitations.
-- After abandoning an e-mail address it can be reserved/invited for a new user with a new user-id.
-- If in the "abandoned" state it can be restored for the current user.
+- Invitations expire after a timeout.
+- Registrations and invitations can run in parallel.
+- Accepted invitations also confirm ongoing registrations.
+- Confirming a registration doesn't accept invitations.
+- After closing an e-mail address it can be registered/invited for a new user with a new user-id.
+- If in the "closed" state it can be restored for the current user.
 
 ### Events
 
 Reservation:
 
-- `Reserved`
+- `Registered`
   - `NormalizedEmailAddress`
   - `EmailAddress`
-  - `ReservedAt`
+  - `RegisteredAt`
   - `ForUserId`
   - `VerificationCode`
-- `ReservationConfirmed`
+- `RegistrationConfirmed`
   - `NormalizedEmailAddress`
   - `ConfirmedAt`
   - `VerificationCode`
   - `UserDisplayName`
-- `ReservationExpired`
+- `RegistrationExpired`
   - `NormalizedEmailAddress`
   - `ExpiredAt`
   - `VerificationCode`
@@ -143,10 +228,10 @@ Invitation:
 
 Other:
 
-- `Abandoned`
+- `Closed`
   - `NormalizedEmailAddress`
-  - `AbandonedAt`
-  - `AbandonedByUserId`
+  - `ClosedAt`
+  - `ClosedByUserId`
 - `Restored`
   - `NormalizedEmailAddress`
   - `RestoredAt`
