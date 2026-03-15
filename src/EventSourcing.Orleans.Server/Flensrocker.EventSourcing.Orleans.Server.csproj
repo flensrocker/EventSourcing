@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Orleans.EventSourcing" />
     <PackageReference Include="Microsoft.Orleans.Sdk" />
+    <PackageReference Include="System.Interactive.Async" />
+    <PackageReference Include="System.Reactive" />
   </ItemGroup>
 
   <ItemGroup>

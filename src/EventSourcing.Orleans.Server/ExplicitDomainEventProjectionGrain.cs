@@ -1,4 +1,7 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.Reactive.Concurrency;
+using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
+using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Server;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +9,7 @@ using Orleans.Streams;
 
 namespace Flensrocker.ToDo.Orleans.Server;
 
-public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection> : Grain, IDomainEventProjectionGrain<TProjection>
+public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection> : Grain, IDomainEventProjectionGrain<TProjection>, IDisposable
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable, new()
 {
@@ -53,9 +56,31 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   {
     var projection = await GetOrCreateProjection(cancellationToken);
     if (projection is not null)
-      return projection.Projection;
+      return projection?.Projection;
 
     DeactivateOnIdle();
-    return default;
+    return null;
+  }
+
+  public async IAsyncEnumerable<TProjection> StreamProjection([EnumeratorCancellation] CancellationToken cancellationToken)
+  {
+    var projection = await GetOrCreateProjection(cancellationToken);
+    if (projection is not null)
+    {
+      yield return projection.Projection;
+
+      var scheduler = new TaskPoolScheduler(new TaskFactory(TaskScheduler.Current));
+      await foreach (var value in projection.AsObservable().ObserveOn(scheduler).ToAsyncEnumerable().WithCancellation(cancellationToken))
+        yield return value;
+    }
+    else
+    {
+      DeactivateOnIdle();
+    }
+  }
+
+  public void Dispose()
+  {
+    _projection?.Dispose();
   }
 }

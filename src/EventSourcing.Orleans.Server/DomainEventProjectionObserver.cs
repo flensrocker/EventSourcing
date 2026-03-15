@@ -1,14 +1,18 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using Flensrocker.EventSourcing.Abstractions;
 using Orleans.Streams;
 
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
-public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObserver<DomainEvent>
+public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObserver<DomainEvent>, IDisposable
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable, new()
 {
   private readonly IDomainEventStorage<TEventBase> _eventStore;
   private readonly Guid _projectionId;
+
+  private Subject<TProjection> _eventStream = new();
 
   public TProjection Projection { get; private set; } = default!;
 
@@ -45,11 +49,23 @@ public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObse
     }
 
     Projection.Apply(item);
+
+    _eventStream.OnNext(Projection);
   }
 
   public Task OnErrorAsync(Exception ex)
   {
     // TODO Error-Handling
     return Task.CompletedTask;
+  }
+
+  public IObservable<TProjection> AsObservable()
+  {
+    return _eventStream.AsObservable();
+  }
+
+  public void Dispose()
+  {
+    _eventStream.Dispose();
   }
 }

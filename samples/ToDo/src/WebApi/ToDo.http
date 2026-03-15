@@ -43,3 +43,6 @@ GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}
 
 ###
 GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/events
+
+###
+GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/stream

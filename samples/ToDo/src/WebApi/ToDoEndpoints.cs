@@ -132,6 +132,17 @@ public static class ToDoEndpoints
         : Results.Ok(result);
     });
 
+    builder.MapGet("/api/todo/{toDoId}/stream", static (
+      Guid toDoId,
+      [FromServices] IClusterClient client,
+      CancellationToken cancellationToken) =>
+    {
+      var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
+      var toDoStream = toDoDetails.StreamProjection(cancellationToken);
+
+      return Results.ServerSentEvents(toDoStream, eventType: nameof(ToDoView.ToDoDetails));
+    });
+
     builder.MapGet("/api/todo", static async (
       [FromServices] IViewQuery<ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos> query,
       CancellationToken cancellationToken) =>
