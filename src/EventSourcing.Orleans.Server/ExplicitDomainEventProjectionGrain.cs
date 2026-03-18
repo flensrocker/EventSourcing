@@ -69,8 +69,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     {
       yield return projection.Projection;
 
-      var scheduler = new TaskPoolScheduler(new TaskFactory(TaskScheduler.Current));
-      await foreach (var value in projection.AsObservable().ObserveOn(scheduler).ToAsyncEnumerable().WithCancellation(cancellationToken))
+      await foreach (var value in projection.AsObservable().ToAsyncEnumerable().WithCancellation(cancellationToken))
         yield return value;
     }
     else
