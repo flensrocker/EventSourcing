@@ -35,14 +35,14 @@ public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObse
 
   public async Task OnNextAsync(DomainEvent item, StreamSequenceToken? token = null)
   {
-    if (Projection is IDomainEventVersionable withVersion)
+    if (Projection is IDomainEventVersionable versionable)
     {
-      if (item.Metadata.StreamVersion <= withVersion.Version)
+      if (item.Metadata.StreamVersion <= versionable.Version)
         return;
 
-      if (item.Metadata.StreamVersion > withVersion.Version + 1)
+      if (item.Metadata.StreamVersion > versionable.Version + 1)
       {
-        var missingEvents = await _eventStore.ReadEventsFromStorage(_projectionId, withVersion.Version + 1, item.Metadata.StreamVersion, default);
+        var missingEvents = await _eventStore.ReadEventsFromStorage(_projectionId, versionable.Version + 1, item.Metadata.StreamVersion, default);
         if (missingEvents is { Count: > 0 })
           Projection.ApplyEvents(missingEvents);
       }

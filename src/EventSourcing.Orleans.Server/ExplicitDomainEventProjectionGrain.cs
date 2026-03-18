@@ -1,6 +1,4 @@
-﻿using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Server;
@@ -13,13 +11,12 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable, new()
 {
-  private readonly string _streamType = typeof(TEventBase).GetTypeName();
   private readonly IDomainEventStorage<TEventBase> _eventStore;
 
   private DomainEventProjectionObserver<TEventBase, TProjection>? _projection;
   private StreamSubscriptionHandle<DomainEvent>? _subscription;
 
-  public ExplicitDomainEventProjectionGrain()
+  protected ExplicitDomainEventProjectionGrain()
   {
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
@@ -32,50 +29,55 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
 
   public override async Task OnActivateAsync(CancellationToken cancellationToken)
   {
-    var streamProvider = this.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
-    var streamId = StreamId.Create(_streamType, this.GetPrimaryKey());
-    var stream = streamProvider.GetStream<DomainEvent>(streamId);
-
     var projection = await GetOrCreateProjection(cancellationToken);
+
     if (projection is not null)
+    {
+      var streamType = typeof(TEventBase).GetTypeName();
+      var streamKey = this.GetPrimaryKey();
+      var streamProvider = this.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
+      var streamId = StreamId.Create(streamType, streamKey);
+      var stream = streamProvider.GetStream<DomainEvent>(streamId);
+
       _subscription = await stream.SubscribeAsync(projection);
+    }
   }
 
   public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
   {
-    _projection = null;
-
     if (_subscription is not null)
     {
       await _subscription.UnsubscribeAsync();
       _subscription = null;
     }
+
+    _projection?.Dispose();
+    _projection = null;
   }
 
   public async Task<TProjection?> GetProjection(CancellationToken cancellationToken)
   {
     var projection = await GetOrCreateProjection(cancellationToken);
-    if (projection is not null)
-      return projection?.Projection;
 
-    DeactivateOnIdle();
-    return null;
+    if (projection is null)
+      DeactivateOnIdle();
+
+    return projection?.Projection;
   }
 
   public async IAsyncEnumerable<TProjection> StreamProjection([EnumeratorCancellation] CancellationToken cancellationToken)
   {
     var projection = await GetOrCreateProjection(cancellationToken);
-    if (projection is not null)
-    {
-      yield return projection.Projection;
-
-      await foreach (var value in projection.AsObservable().ToAsyncEnumerable().WithCancellation(cancellationToken))
-        yield return value;
-    }
-    else
+    if (projection is null)
     {
       DeactivateOnIdle();
+      yield break;
     }
+
+    yield return projection.Projection;
+
+    await foreach (var value in projection.AsObservable().ToAsyncEnumerable().WithCancellation(cancellationToken))
+      yield return value;
   }
 
   public void Dispose()
