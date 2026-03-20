@@ -98,7 +98,7 @@ else
 }
 
 var frontend = builder.AddJavaScriptApp("playground-frontend", "../Frontend", runScriptName: "start")
-  //.WithNpm(install: true, installCommand: "ci")
+  .WithPnpm()
   .WithReference(webApi)
   .WaitFor(webApi)
   .WithHttpEndpoint(env: "PORT")
