@@ -1,4 +1,3 @@
-using Aspire.Hosting.Orleans;
 using Playground.ServiceDefaults;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -41,7 +40,7 @@ var orleans = builder
   .AddOrleans("playground-orleans")
   .WithServiceId("playground")
   .WithClusterId("default")
-  .WithClustering(CustomProviderConfiguration.Create(garnetClusteringStorage))
+  .WithClustering(garnetClusteringStorage)
   .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, azureQueuesStreams)
   .WithMemoryGrainStorage("PubSubStore");
 
