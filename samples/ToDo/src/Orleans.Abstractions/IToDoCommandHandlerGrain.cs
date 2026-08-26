@@ -3,6 +3,6 @@ using Flensrocker.ToDo.Abstractions;
 
 namespace Flensrocker.ToDo.Orleans.Abstractions;
 
-public interface IToDoAggregateGrain : IAggegrateGrain<ToDoCommand>
+public interface IToDoCommandHandlerGrain : ICommandHandlerGrain<ToDoCommand>
 {
 }

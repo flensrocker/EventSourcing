@@ -22,9 +22,9 @@ This is an experimental playground to explore the possibilities within my requir
 ## Why Microsoft Orleans?
 
 - Grains are single-threaded (non-reentrant)  
-  ➡️ Queuing of commands sent to aggregates
+  ➡️ Queuing of commands sent to handlers
 - Grains are kept in memory for some time  
-  ➡️ Caching of active aggregates/projections
+  ➡️ Caching of active projections
 - Streaming  
   ➡️ Easy notifications of events  
   ➡️ Abstract integration with different message brokers
@@ -80,11 +80,11 @@ Angular is the framework where I'm comfortable with.
 
 - Frontend sends a command to the WebApi
 - After validating the command the WebApi forwards it to the Orleans cluster
-- Orleans activates the aggregate grain and restores its state from the event store (PostgreSQL)
-- The aggregate handles the command and returns the created events
-- Orleans stores the events in the event store and apply them to the aggregate (in memory)
+- Orleans activates the command-handler grain and restores its state from the event store (PostgreSQL)
+- It handles the command and returns the created events
+- Orleans stores the events in the event store and apply them to the state (in memory)
 - Success is reported back to the WebApi and Frontend
-- After a timeout Orleans deactivates the aggregate grain and releases its resources
+- After a timeout Orleans deactivates the grain and releases its resources
 
 ```mermaid
 sequenceDiagram
@@ -97,10 +97,10 @@ sequenceDiagram
   Note over WebApi: validate command
   WebApi->>Orleans: forward command<br/>to cluster
   activate Orleans
-  Orleans<<->>PostgreSQL: reconstruct aggregate<br/>from events
-  Note over Orleans: execute command<br/>on aggregate
+  Orleans<<->>PostgreSQL: reconstruct state<br/>from events
+  Note over Orleans: execute command<br/>on state
   Orleans->>PostgreSQL: write events
-  Note over Orleans: apply events and<br/>keep aggregate in memory
+  Note over Orleans: apply events and<br/>keep state in memory
   Orleans->>WebApi: reply to command
   WebApi->>Frontend: reply to command
   Note over Orleans: deactivate after<br/>idle timeout
@@ -109,9 +109,9 @@ sequenceDiagram
 
 ## Execute Commands In Parallel
 
-While Orleans is executing a command on a aggregate grain, incoming additional commands are queued in the inbox of the grain.
+While Orleans is executing a command on a grain, incoming additional commands are queued in the inbox of the grain.
 Only after finishing the first command, the next command will be executed.
-Since the aggregate stays in memory, restoring from the event store is not needed.
+Since the state stays in memory, restoring from the event store is not needed.
 
 ```mermaid
 sequenceDiagram
@@ -124,19 +124,19 @@ sequenceDiagram
   Note over WebApi: validate command 1
   WebApi->>Orleans: forward command 1<br/>to cluster
   activate Orleans
-  Orleans<<->>PostgreSQL: reconstruct aggregate<br/>from events
+  Orleans<<->>PostgreSQL: reconstruct state<br/>from events
   Frontend->>WebApi: send command 2
   Note over WebApi: validate command 2
   WebApi->>Orleans: forward command 2<br/>to cluster
-  Note over Orleans: queue command 2<br/>for aggregate
-  Note over Orleans: execute command 1<br/>on aggregate
+  Note over Orleans: queue command 2<br/>for state
+  Note over Orleans: execute command 1<br/>on state
   Orleans->>PostgreSQL: write events<br/>from command 1
-  Note over Orleans: apply events and<br/>keep aggregate in memory
+  Note over Orleans: apply events and<br/>keep state in memory
   Orleans->>WebApi: reply to command 1
   WebApi->>Frontend: reply to command 1
-  Note over Orleans: execute command 2<br/>on aggregate
+  Note over Orleans: execute command 2<br/>on state
   Orleans->>PostgreSQL: write events
-  Note over Orleans: apply events and<br/>keep aggregate in memory
+  Note over Orleans: apply events and<br/>keep state in memory
   Orleans->>WebApi: reply to command 2
   WebApi->>Frontend: reply to command 2
   Note over Orleans: deactivate after<br/>idle timeout

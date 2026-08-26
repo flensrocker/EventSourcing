@@ -37,7 +37,7 @@ public record DomainEvent
   /// DRAFT
   /// Used to attach "public messages" for external services to domain events.
   /// All must be stored in the same transaction.
-  /// Public messages are not applied to event-sourced aggregates/projections.
+  /// Public messages are not applied to event-sourced projections.
   /// </summary>
   [GenerateSerializer]
   public sealed record WithPublicMessages : DomainEvent

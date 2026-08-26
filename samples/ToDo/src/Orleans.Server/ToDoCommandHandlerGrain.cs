@@ -9,9 +9,9 @@ using Orleans.Providers;
 namespace Flensrocker.ToDo.Orleans.Server;
 
 [LogConsistencyProvider(ProviderName = OrleansConstants.LogStorageProviderName)]
-public class ToDoAggregateGrain : AggregateGrain<ToDoAggregate, ToDoCommand, ToDoEvent>, IToDoAggregateGrain
+public class ToDoCommandHandlerGrain : CommandHandlerGrain<ToDoEvent, ToDoCommand, ToDoCommandState>, IToDoCommandHandlerGrain
 {
-  public ToDoAggregateGrain()
+  public ToDoCommandHandlerGrain()
   {
   }
 }

@@ -6,20 +6,19 @@ using Orleans.EventSourcing.CustomStorage;
 
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
-public abstract class AggregateGrain<TState, TCommandBase, TEventBase>
-  : JournaledGrain<TState, DomainEvent>, ICustomStorageInterface<TState, DomainEvent>
-  , IAggegrateGrain<TCommandBase>
-  where TState : class, IAggregate<TCommandBase, TEventBase>, IDomainEventProjectable, new()
-  where TCommandBase : class
+public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandState>
+  : JournaledGrain<TCommandState, DomainEvent>, ICustomStorageInterface<TCommandState, DomainEvent>
+  , ICommandHandlerGrain<TCommandBase>
   where TEventBase : class
+  where TCommandBase : class
+  where TCommandState : class, IDomainEventProjectable, new()
 {
-  private readonly string _streamType = typeof(TEventBase).GetTypeName();
   private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStorage<TEventBase> _eventStore;
 
   private int _nextVersion;
 
-  protected AggregateGrain()
+  protected CommandHandlerGrain()
   {
     _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
@@ -54,7 +53,8 @@ public abstract class AggregateGrain<TState, TCommandBase, TEventBase>
 
   public async Task<bool> ExecuteCommand(TCommandBase command)
   {
-    var payloads = await State.ExecuteCommandAsync(command);
+    var commandHandler = ServiceProvider.GetRequiredService<ICommandHandler<TEventBase, TCommandBase, TCommandState>>();
+    var payloads = await commandHandler.ExecuteCommandAsync(State, command);
     if (payloads is not { Length: > 0 })
       return false;
 
@@ -64,9 +64,9 @@ public abstract class AggregateGrain<TState, TCommandBase, TEventBase>
     return true;
   }
 
-  Task<bool> ICustomStorageInterface<TState, DomainEvent>.ApplyUpdatesToStorage(IReadOnlyList<DomainEvent> updates, int expectedVersion)
+  Task<bool> ICustomStorageInterface<TCommandState, DomainEvent>.ApplyUpdatesToStorage(IReadOnlyList<DomainEvent> updates, int expectedVersion)
     => _eventStore.ApplyUpdatesToStorage(this.GetPrimaryKey(), updates, expectedVersion);
 
-  Task<KeyValuePair<int, TState>> ICustomStorageInterface<TState, DomainEvent>.ReadStateFromStorage()
-    => _eventStore.ReadStateFromStorage<TState>(this.GetPrimaryKey(), default);
+  Task<KeyValuePair<int, TCommandState>> ICustomStorageInterface<TCommandState, DomainEvent>.ReadStateFromStorage()
+    => _eventStore.ReadStateFromStorage<TCommandState>(this.GetPrimaryKey(), default);
 }

@@ -22,7 +22,7 @@ public static class ToDoEndpoints
 
   private static async Task<bool> ExecuteCommandAsync(this IClusterClient client, Guid toDoId, ToDoCommand command)
   {
-    var toDo = client.GetGrain<IToDoAggregateGrain>(toDoId);
+    var toDo = client.GetGrain<IToDoCommandHandlerGrain>(toDoId);
     var result = await toDo.ExecuteCommand(command);
     return result;
   }

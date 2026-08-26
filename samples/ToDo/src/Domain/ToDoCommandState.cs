@@ -3,9 +3,12 @@ using Flensrocker.ToDo.Abstractions;
 
 namespace Flensrocker.ToDo.Domain;
 
-public partial class ToDoAggregate : IAggregate<ToDoCommand, ToDoEvent>, IDomainEventVersionable, IToDoEventProjectable
+[GenerateSerializer]
+public class ToDoCommandState : IDomainEventVersionable, IToDoEventProjectable
 {
+  [Id(1)]
   public int Version { get; private set; }
+  [Id(2)]
   public ToDoStatus Status { get; private set; }
 
   void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
@@ -33,17 +36,5 @@ public partial class ToDoAggregate : IAggregate<ToDoCommand, ToDoEvent>, IDomain
     Version = @event.Metadata.StreamVersion;
 
     ((IToDoEventProjectable)this).ApplyToDoEvent(@event);
-  }
-
-  public ValueTask<ToDoEvent[]?> ExecuteCommandAsync(ToDoCommand command)
-  {
-    return ValueTask.FromResult(command switch
-    {
-      ToDoCommand.MemorizeToDo memorizeToDo => Memorize(memorizeToDo),
-      ToDoCommand.CompleteToDo completeToDo => Complete(completeToDo),
-      ToDoCommand.DismissToDo dismissToDo => Dismiss(dismissToDo),
-      ToDoCommand.ReopenToDo reopenToDo => Reopen(reopenToDo),
-      _ => throw new NotImplementedException($"command type {command.GetType().GetTypeName()}"),
-    });
   }
 }

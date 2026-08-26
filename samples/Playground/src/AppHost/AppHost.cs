@@ -7,7 +7,9 @@ builder.AddDockerComposeEnvironment("compose");
 var garnetClusteringStorage = builder
   .AddGarnet(ServiceKeys.OrleansClustering)
   .WithOrleansProviderType("Redis")
-  .WithDataVolume("playground-garnet-data");
+  // We don't need persistent clustering data because we always restart the whole thing and sometimes it tries to connect to the old silo
+  //.WithDataVolume("playground-garnet-data")
+  ;
 
 var nats = builder
   .AddNats("nats")

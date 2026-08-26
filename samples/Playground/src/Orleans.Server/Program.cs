@@ -4,9 +4,11 @@ using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.Measure.Orleans.Abstractions;
 using Flensrocker.Measure.Orleans.Server;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Domain;
 using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NATS.Client.Core;
 using Orleans.Streaming.NATS.Hosting;
@@ -30,10 +32,12 @@ builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEvent
   JsonOptions = globalJsonOptions,
 }).ForDomainEvents<ToDoEvent>();
 
-builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
-{
-  ConnectionName = ServiceKeys.PostgresDb,
-});
+builder.Services
+  .AddToDo()
+  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
+  {
+    ConnectionName = ServiceKeys.PostgresDb,
+  });
 
 builder.UseOrleans(siloBuilder =>
 {
