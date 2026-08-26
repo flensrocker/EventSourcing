@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,7 +24,7 @@ public static class OrleansPostgreSQLExtensions
         dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
         {
           npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-          npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+          npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
         });
       });
       services.AddEntityFrameworkCoreDbMigration<OrleansDbContext>();

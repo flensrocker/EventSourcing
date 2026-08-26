@@ -5,6 +5,7 @@ using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL.Projections;
 using Flensrocker.ToDo.Persistence.PostgreSQL.Queries;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -27,7 +28,7 @@ public static class ToDoPostgreSQLPersistenceExtensions
         dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
         {
           npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-          npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+          npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
           npgsqlOptions.EnableRetryOnFailure(
             maxRetryCount: 10,
             maxRetryDelay: TimeSpan.FromSeconds(30),

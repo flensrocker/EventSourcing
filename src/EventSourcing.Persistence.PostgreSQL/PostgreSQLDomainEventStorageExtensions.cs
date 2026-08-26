@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
-using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -49,7 +48,7 @@ public static class PostgreSQLDomainEventStorageExtensions
         dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
         {
           npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-          npgsqlOptions.MigrationsHistoryTable("__EFMigrationsHistory", Constants.SchemaName);
+          npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
           npgsqlOptions.EnableRetryOnFailure(
             maxRetryCount: 10,
             maxRetryDelay: TimeSpan.FromSeconds(30),
