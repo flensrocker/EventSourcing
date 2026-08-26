@@ -19,6 +19,40 @@ This is an experimental playground to explore the possibilities within my requir
 - **Cheap:** Low/no license costs
 - **Scalable:** If really needed - not "globally with millions of concurrent users", but maybe to hundreds or even a thousand users.
 
+## Requirements
+
+- Aspire: https://aspire.dev/
+- .NET: https://dot.net/
+- NodeJS: https://nodejs.org/
+- pnpm: https://pnpm.io/
+
+## Quickstart
+
+I try to use the latest bits, so update frequently.
+
+```sh
+aspire update --self --channel stable
+dotnet tool restore
+```
+
+Until I figure out how to do this reliable with Aspire.
+
+```sh
+cd samples/Playground/src/Frontend
+pnpm install --force
+cd ../../../..
+```
+
+Build and run.
+
+```sh
+dotnet restore --force
+dotnet build
+aspire run
+```
+
+Or use your compatible IDE of choice.
+
 ## Why Microsoft Orleans?
 
 - Grains are single-threaded (non-reentrant)  
