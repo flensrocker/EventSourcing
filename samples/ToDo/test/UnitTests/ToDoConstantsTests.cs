@@ -1,22 +1,21 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Orleans.Abstractions;
 
 namespace Flensrocker.ToDo.UnitTests;
 
 [TestClass]
-public sealed class ToDoNamesTests
+public sealed class ToDoConstantsTests
 {
   [TestMethod]
   public void ToDoEventStreamNamespaceMatchesTypeName()
   {
-    Assert.AreEqual(ToDoNames.ToDoEventStream, typeof(ToDoEvent).GetTypeName());
+    Assert.AreEqual(ToDoConstants.ToDoEventStream, typeof(ToDoEvent).GetTypeName());
   }
 
   [TestMethod]
   public void ToDoEventStreamNamespaceCanBeConvertedToType()
   {
-    var toDoEventType = EventSourcingExtensions.GetTypeFromName(ToDoNames.ToDoEventStream);
+    var toDoEventType = EventSourcingExtensions.GetTypeFromName(ToDoConstants.ToDoEventStream);
     Assert.AreEqual(typeof(ToDoEvent), toDoEventType);
   }
 }

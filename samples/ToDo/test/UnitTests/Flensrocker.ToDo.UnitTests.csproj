@@ -10,7 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Abstractions\Flensrocker.EventSourcing.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
-    <ProjectReference Include="..\..\src\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Orleans.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +22,7 @@ public static class ToDoEndpoints
 
   private static async Task<bool> ExecuteCommandAsync(this IClusterClient client, Guid toDoId, ToDoCommand command)
   {
-    var toDo = client.GetGrain<IToDoCommandHandlerGrain>(toDoId);
+    var toDo = client.GetGrain<ICommandHandlerGrain<ToDoCommand>>(toDoId);
     var result = await toDo.ExecuteCommand(command);
     return result;
   }
@@ -125,7 +125,7 @@ public static class ToDoEndpoints
       [FromServices] IClusterClient client,
       CancellationToken cancellationToken) =>
     {
-      var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
+      var toDoDetails = client.GetGrain<IDomainEventProjectionGrain<ToDoView.ToDoDetails>>(toDoId);
       var result = await toDoDetails.GetProjection(cancellationToken);
       return result is null
         ? Results.NotFound()
@@ -137,7 +137,7 @@ public static class ToDoEndpoints
       [FromServices] IClusterClient client,
       CancellationToken cancellationToken) =>
     {
-      var toDoDetails = client.GetGrain<IToDoDetailsViewGrain>(toDoId);
+      var toDoDetails = client.GetGrain<IDomainEventProjectionGrain<ToDoView.ToDoDetails>>(toDoId);
       var toDoStream = toDoDetails.StreamProjection(cancellationToken);
 
       return Results.ServerSentEvents(toDoStream, eventType: nameof(ToDoView.ToDoDetails));

@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.Abstractions\Flensrocker.EventSourcing.Orleans.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Persistence.PostgreSQL\Flensrocker.EventSourcing.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
-    <ProjectReference Include="..\..\..\ToDo\src\Orleans.Abstractions\Flensrocker.ToDo.Orleans.Abstractions.csproj" />
     <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>
 
