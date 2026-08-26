@@ -99,7 +99,7 @@ else
 }
 
 var frontend = builder.AddJavaScriptApp("playground-frontend", "../Frontend", runScriptName: "start")
-  .WithPnpm()
+  .WithPnpm(install: true, installArgs: ["--yes", "--frozen-lockfile"])
   .WithReference(webApi)
   .WaitFor(webApi)
   .WithHttpEndpoint(env: "PORT")

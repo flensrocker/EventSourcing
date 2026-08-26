@@ -35,14 +35,6 @@ aspire update --self --channel stable
 dotnet tool restore
 ```
 
-Until I figure out how to do this reliable with Aspire.
-
-```sh
-cd samples/Playground/src/Frontend
-pnpm install --force
-cd ../../../..
-```
-
 Build and run.
 
 ```sh
