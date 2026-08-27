@@ -33,6 +33,8 @@ I try to use the latest bits, so update frequently.
 ```sh
 aspire update --self --channel stable
 dotnet tool restore
+npm install --global corepack@latest
+corepack enable pnpm
 ```
 
 Build and run.
