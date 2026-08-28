@@ -5,6 +5,7 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoCommand
 {
   [GenerateSerializer]
+  [Alias("Flensrocker.ToDo.ToDoCommand.CompleteToDo")]
   public sealed record CompleteToDo : ToDoCommand
   {
     [JsonConstructor]

@@ -6,6 +6,7 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoQueryRequest
 {
   [GenerateSerializer]
+  [Alias("Flensrocker.ToDo.ToDoQueryRequest.ListToDos")]
   public sealed record ListToDos : ToDoQueryRequest
   {
     [Id(0)]
@@ -30,9 +31,11 @@ public abstract partial record ToDoQueryRequest
 public abstract partial record ToDoQueryResponse
 {
   [GenerateSerializer]
+  [Alias("Flensrocker.ToDo.ToDoQueryResponse.ListToDos")]
   public sealed record ListToDos : ToDoQueryResponse
   {
     [GenerateSerializer]
+    [Alias("Flensrocker.ToDo.ToDoQueryResponse.ListToDos.ToDoItem")]
     public sealed record ToDoItem
     {
       [Id(0)]

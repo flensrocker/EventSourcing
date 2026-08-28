@@ -4,6 +4,7 @@ using Flensrocker.ToDo.Abstractions;
 namespace Flensrocker.ToDo.Domain;
 
 [GenerateSerializer]
+[Alias("Flensrocker.ToDo.ToDoCommandState")]
 public class ToDoCommandState : IDomainEventVersionable, IToDoEventProjectable
 {
   [Id(1)]
