@@ -13,14 +13,12 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
   where TCommandBase : class
   where TCommandState : class, IDomainEventProjectable, new()
 {
-  private readonly TimeProvider _timeProvider;
   private readonly IDomainEventStorage<TEventBase> _eventStore;
 
   private int _nextVersion;
 
   protected CommandHandlerGrain()
   {
-    _timeProvider = ServiceProvider.GetRequiredService<TimeProvider>();
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
@@ -31,8 +29,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
     _nextVersion = Version + 1;
   }
 
-  protected DomainEvent[] RaiseDomainEvents<TEvent>(params IEnumerable<TEvent> payloads)
-    where TEvent : TEventBase
+  protected void RaiseDomainEvents(DateTimeOffset createdAt, TEventBase[] payloads)
   {
     var user = OrleansRequestContextExtensions.GetUser();
     var tenantId = user?.TenantId;
@@ -40,25 +37,43 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
 
     // TODO Enable adding public messages to domain events.
     var streamId = this.GetPrimaryKey();
-    var createdAt = _timeProvider.GetUtcNow();
-    var domainEvents = payloads
-      .Select((payload, index) => DomainEvent.Create<TEventBase, TEvent>(streamId, _nextVersion + index, payload, tenantId, userId, createdAt))
-      .ToArray();
-    _nextVersion += domainEvents.Length;
 
-    RaiseEvents(domainEvents);
+    if (payloads.Length == 1)
+    {
+      var domainEvent = DomainEvent.Create(streamId, _nextVersion, payloads[0], tenantId, userId, createdAt);
+      _nextVersion++;
 
-    return domainEvents;
+      RaiseEvent(domainEvent);
+    }
+    else
+    {
+      var domainEventList = new List<DomainEvent>(payloads.Length);
+      foreach (var payload in payloads)
+      {
+        var domainEvent = DomainEvent.Create(streamId, _nextVersion, payload, tenantId, userId, createdAt);
+        _nextVersion++;
+
+        domainEventList.Add(domainEvent);
+      }
+
+      RaiseEvents(domainEventList);
+    }
   }
 
   public async Task<bool> ExecuteCommand(TCommandBase command)
   {
-    var commandHandler = ServiceProvider.GetRequiredService<ICommandHandler<TEventBase, TCommandBase, TCommandState>>();
+    await using var commandScope = ServiceProvider.CreateAsyncScope();
+
+    var commandHandler = commandScope.ServiceProvider.GetRequiredService<ICommandHandler<TEventBase, TCommandBase, TCommandState>>();
+
     var payloads = await commandHandler.ExecuteCommandAsync(State, command);
     if (payloads is not { Length: > 0 })
       return false;
 
-    var domainEvents = RaiseDomainEvents(payloads);
+    var timeProvider = commandScope.ServiceProvider.GetRequiredService<TimeProvider>();
+    var createdAt = timeProvider.GetUtcNow();
+
+    RaiseDomainEvents(createdAt, payloads);
     await ConfirmEvents();
 
     return true;

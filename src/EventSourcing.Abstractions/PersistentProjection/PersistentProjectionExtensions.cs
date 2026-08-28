@@ -54,7 +54,7 @@ public static class PersistentProjectionExtensions
 
         logger.LogInformation("Projection {ProjectionTypeName}: no version yet, registering", projectionOptions.TypeName);
 
-        var projectionRegistered = DomainEvent.Create<PersistentProjectionEvent, PersistentProjectionEvent.ProjectionRegistered>(
+        var projectionRegistered = DomainEvent.Create<PersistentProjectionEvent>(
           PersistentProjectionConstants.RegistryId,
           projectionState.Version + stateVersionIndex + 1,
           new PersistentProjectionEvent.ProjectionRegistered
@@ -81,7 +81,7 @@ public static class PersistentProjectionExtensions
 
         await projection.RebuildAsync().ConfigureAwait(false);
 
-        var projectionRebuilt = DomainEvent.Create<PersistentProjectionEvent, PersistentProjectionEvent.ProjectionRebuilt>(
+        var projectionRebuilt = DomainEvent.Create<PersistentProjectionEvent>(
           PersistentProjectionConstants.RegistryId,
           projectionState.Version + stateVersionIndex + 1,
           new PersistentProjectionEvent.ProjectionRebuilt

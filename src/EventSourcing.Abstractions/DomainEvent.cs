@@ -49,8 +49,8 @@ public record DomainEvent
     public required IReadOnlyCollection<object> MessageList { get; init; }
   }
 
-  public static DomainEvent Create<TEventBase, TPayload>(Guid streamId, int streamVersion, TPayload payload, Guid? tenantId, Guid? userId, DateTimeOffset createdAt)
-    where TPayload : notnull, TEventBase
+  public static DomainEvent Create<TEventBase>(Guid streamId, int streamVersion, TEventBase payload, Guid? tenantId, Guid? userId, DateTimeOffset createdAt)
+    where TEventBase : class
   {
     byte[]? traceId = null;
     byte[]? spanId = null;
