@@ -19,7 +19,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   private readonly IDbContextFactory<EventSourcingDbContext> _dbContextFactory = dbContextFactory;
   private readonly ILogger<PostgreSQLDomainEventStorage<TEventBase>> _logger = logger;
 
-  private readonly string _streamType = typeof(TEventBase).GetTypeName();
+  public string StreamType { get; } = options.JsonOptions.GetTypeName(typeof(TEventBase));
 
   private static readonly string[] _insertColumnList =
   [
@@ -47,9 +47,9 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     var domainEventList = await dbContext
       .Set<MessageEntity>()
       .AsNoTracking()
-      .Where(e => e.StreamType == _streamType && e.StreamId == streamId && e.StreamVersion > 0)
+      .Where(e => e.StreamType == StreamType && e.StreamId == streamId && e.StreamVersion > 0)
       .OrderBy(e => e.StreamVersion)
-      .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions))
+      .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions.Options))
       .ToArrayAsync(cancellationToken)
       .ConfigureAwait(false);
 
@@ -84,7 +84,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
             new NpgsqlParameter(GetInsertParameterName(6, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid) { Value = ev.Metadata.CreatedByUserId ?? (object?)DBNull.Value },
             new NpgsqlParameter(GetInsertParameterName(7, valueIndex), NpgsqlTypes.NpgsqlDbType.Bytea) { Value = ev.Metadata.TraceId ?? (object?)DBNull.Value },
             new NpgsqlParameter(GetInsertParameterName(8, valueIndex), NpgsqlTypes.NpgsqlDbType.Bytea) { Value = ev.Metadata.SpanId ?? (object?)DBNull.Value },
-            new NpgsqlParameter(GetInsertParameterName(9, valueIndex), NpgsqlTypes.NpgsqlDbType.Jsonb) { Value = JsonSerializer.Serialize(ev.Payload, _options.JsonOptions) });
+            new NpgsqlParameter(GetInsertParameterName(9, valueIndex), NpgsqlTypes.NpgsqlDbType.Jsonb) { Value = JsonSerializer.Serialize(ev.Payload, _options.JsonOptions.Options) });
 
           return GetInsertParameterNameList(valueIndex);
         }));
@@ -100,7 +100,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex, "Failure in applying updates to storage for events of type {StreamType}, stream-id {StreamId} and expected version {ExpectedVersion}", typeof(TEventBase).GetTypeName(), streamId, expectedVersion);
+      _logger.LogError(ex, "Failure in applying updates to storage for events of type {StreamType}, stream-id {StreamId} and expected version {ExpectedVersion}", StreamType, streamId, expectedVersion);
 
       return false;
     }
@@ -115,9 +115,9 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
       var domainEventList = await dbContext
         .Set<MessageEntity>()
         .AsNoTracking()
-        .Where(e => e.StreamType == _streamType && e.StreamId == streamId && e.StreamVersion >= fromVersionIncl && (toVersionExcl <= 0 || e.StreamVersion < toVersionExcl))
+        .Where(e => e.StreamType == StreamType && e.StreamId == streamId && e.StreamVersion >= fromVersionIncl && (toVersionExcl <= 0 || e.StreamVersion < toVersionExcl))
         .OrderBy(e => e.StreamVersion)
-        .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions))
+        .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions.Options))
         .ToArrayAsync(cancellationToken)
         .ConfigureAwait(false);
 
@@ -139,9 +139,9 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     var domainEventList = dbContext
       .Set<MessageEntity>()
       .AsNoTracking()
-      .Where(e => e.StreamType == _streamType)
+      .Where(e => e.StreamType == StreamType)
       .OrderBy(e => e.GlobalIndex)
-      .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions))
+      .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions.Options))
       .AsAsyncEnumerable();
 
     await foreach (var domainEvent in domainEventList.WithCancellation(cancellationToken).ConfigureAwait(false))

@@ -33,7 +33,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
 
     if (projection is not null)
     {
-      var streamType = typeof(TEventBase).GetTypeName();
+      var streamType = _eventStore.StreamType;
       var streamKey = this.GetPrimaryKey();
       var streamProvider = this.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
       var streamId = StreamId.Create(streamType, streamKey);

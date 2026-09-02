@@ -17,7 +17,7 @@ internal partial class ToDoCommandHandler(
       ToDoCommand.CompleteToDo completeToDo => Complete(state, completeToDo),
       ToDoCommand.DismissToDo dismissToDo => Dismiss(state, dismissToDo),
       ToDoCommand.ReopenToDo reopenToDo => Reopen(state, reopenToDo),
-      _ => throw new NotImplementedException($"command type {command.GetType().GetTypeName()}"),
+      _ => throw new NotImplementedException($"command type {command.GetType().FullName}"),
     });
   }
 

@@ -16,6 +16,7 @@ public static class EventSourcingExtensions
     }
   }
 
+  [Obsolete("Will be migrated to EventSourcingJsonSerializerOptions.GetTypeName")]
   public static string GetTypeName(this Type? type)
   {
     return type is null || type.FullName is not string typeFullName || type.Assembly.GetName().Name is not string assemblyName
@@ -23,6 +24,7 @@ public static class EventSourcingExtensions
       : $"{typeFullName.Replace(".", "-")}_-_{assemblyName.Replace(".", "-")}";
   }
 
+  [Obsolete("Will be migrated to EventSourcingJsonSerializerOptions.GetTypeFromName")]
   public static Type? GetTypeFromName(string typeName)
   {
     if (string.IsNullOrWhiteSpace(typeName))

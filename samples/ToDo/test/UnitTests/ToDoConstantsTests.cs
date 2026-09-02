@@ -9,13 +9,15 @@ public sealed class ToDoConstantsTests
   [TestMethod]
   public void ToDoEventStreamNamespaceMatchesTypeName()
   {
-    Assert.AreEqual(ToDoConstants.ToDoEventStream, typeof(ToDoEvent).GetTypeName());
+    var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
+    Assert.AreEqual(ToDoConstants.ToDoEventStreamType, jsonOptions.GetTypeName(typeof(ToDoEvent)));
   }
 
   [TestMethod]
   public void ToDoEventStreamNamespaceCanBeConvertedToType()
   {
-    var toDoEventType = EventSourcingExtensions.GetTypeFromName(ToDoConstants.ToDoEventStream);
+    var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
+    var toDoEventType = jsonOptions.GetTypeFromName(ToDoConstants.ToDoEventStreamType);
     Assert.AreEqual(typeof(ToDoEvent), toDoEventType);
   }
 }

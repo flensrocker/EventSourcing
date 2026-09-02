@@ -49,7 +49,7 @@ public record DomainEvent
     public required IReadOnlyCollection<object> MessageList { get; init; }
   }
 
-  public static DomainEvent Create<TEventBase>(Guid streamId, int streamVersion, TEventBase payload, Guid? tenantId, Guid? userId, DateTimeOffset createdAt)
+  public static DomainEvent Create<TEventBase>(string streamType, Guid streamId, int streamVersion, TEventBase payload, Guid? tenantId, Guid? userId, DateTimeOffset createdAt)
     where TEventBase : class
   {
     byte[]? traceId = null;
@@ -67,7 +67,7 @@ public record DomainEvent
       Metadata = new DomainEventMetadata
       {
         EventId = Guid.CreateVersion7(),
-        StreamType = typeof(TEventBase).GetTypeName(),
+        StreamType = streamType,
         StreamId = streamId,
         StreamVersion = streamVersion,
         TenantId = tenantId,

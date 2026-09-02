@@ -3,6 +3,8 @@
 public interface IDomainEventStorage<TEventBase>
   where TEventBase : class
 {
+  string StreamType { get; }
+
   /// <returns>If the state does not exist, the result of the parameterless constructor is returned.</returns>
   Task<KeyValuePair<int, TState>> ReadStateFromStorage<TState>(Guid streamId, CancellationToken cancellationToken)
     where TState : class, IDomainEventProjectable, new();

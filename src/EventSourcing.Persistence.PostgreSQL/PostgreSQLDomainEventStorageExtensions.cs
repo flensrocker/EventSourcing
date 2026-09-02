@@ -108,7 +108,7 @@ public static class PostgreSQLDomainEventStorageExtensions
     };
   }
 
-  internal static async Task<(DomainEventMetadata Metadata, object Payload)?> ToDomainEventAsync(this InsertMessage insertMessage, JsonSerializerOptions? jsonOptions, ILogger? logger, CancellationToken cancellationToken)
+  internal static async Task<(DomainEventMetadata Metadata, object Payload)?> ToDomainEventAsync(this InsertMessage insertMessage, EventSourcingJsonSerializerOptions jsonOptions, ILogger? logger, CancellationToken cancellationToken)
   {
     Guid? eventId = default;
     string? streamType = default;
@@ -217,13 +217,13 @@ public static class PostgreSQLDomainEventStorageExtensions
       return null;
     }
 
-    if (EventSourcingExtensions.GetTypeFromName(streamType) is not Type payloadType)
+    if (jsonOptions.GetTypeFromName(streamType) is not Type payloadType)
     {
       logger?.LogError("Missing type of payload in event-id {EventId}: {PayloadType}", eventId, streamType);
       return null;
     }
 
-    if (JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions) is not object payload)
+    if (JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions.Options) is not object payload)
     {
       logger?.LogError("Payload can not be deserialized on event-id {EventId}, stream {StreamType}/{StreamId}/{StreamVersion}", eventId, streamType, streamId, streamVersion);
       return null;

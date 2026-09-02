@@ -40,7 +40,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
 
     if (payloads.Length == 1)
     {
-      var domainEvent = DomainEvent.Create(streamId, _nextVersion, payloads[0], tenantId, userId, createdAt);
+      var domainEvent = DomainEvent.Create(_eventStore.StreamType, streamId, _nextVersion, payloads[0], tenantId, userId, createdAt);
       _nextVersion++;
 
       RaiseEvent(domainEvent);
@@ -50,7 +50,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
       var domainEventList = new List<DomainEvent>(payloads.Length);
       foreach (var payload in payloads)
       {
-        var domainEvent = DomainEvent.Create(streamId, _nextVersion, payload, tenantId, userId, createdAt);
+        var domainEvent = DomainEvent.Create(_eventStore.StreamType, streamId, _nextVersion, payload, tenantId, userId, createdAt);
         _nextVersion++;
 
         domainEventList.Add(domainEvent);

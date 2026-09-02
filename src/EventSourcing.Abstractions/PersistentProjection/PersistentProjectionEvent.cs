@@ -3,7 +3,7 @@
 namespace Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 
 [GenerateSerializer]
-[Alias("Flensrocker.EventSourcing.PersistentProjection.PersistentProjectionEvent")]
+[Alias(PersistentProjectionConstants.PersistentProjectionEventTypeName)]
 [JsonDerivedType(typeof(ProjectionRegistered), nameof(ProjectionRegistered))]
 [JsonDerivedType(typeof(ProjectionRebuilt), nameof(ProjectionRebuilt))]
 public abstract record PersistentProjectionEvent
@@ -11,7 +11,7 @@ public abstract record PersistentProjectionEvent
   private PersistentProjectionEvent() { }
 
   [GenerateSerializer]
-  [Alias("Flensrocker.EventSourcing.PersistentProjection.PersistentProjectionEvent.ProjectionRegistered")]
+  [Alias($"{PersistentProjectionConstants.PersistentProjectionEventTypeName}.ProjectionRegistered")]
   public sealed record ProjectionRegistered : PersistentProjectionEvent
   {
     [Id(0)]
@@ -19,7 +19,7 @@ public abstract record PersistentProjectionEvent
   }
 
   [GenerateSerializer]
-  [Alias("Flensrocker.EventSourcing.PersistentProjection.PersistentProjectionEvent.ProjectionRebuilt")]
+  [Alias($"{PersistentProjectionConstants.PersistentProjectionEventTypeName}.ProjectionRebuilt")]
   public sealed record ProjectionRebuilt : PersistentProjectionEvent
   {
     [Id(0)]
