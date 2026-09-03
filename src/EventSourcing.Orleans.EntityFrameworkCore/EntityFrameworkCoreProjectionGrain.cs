@@ -1,4 +1,5 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,13 +17,15 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
 {
   private readonly OrleansEntityFrameworkCoreProjectionMetrics _metrics;
   private readonly ILogger _logger;
+  private readonly PersistentProjectionOptions _projectionOptions;
 
   private TEntity? _projection;
 
-  protected EntityFrameworkCoreProjectionGrain()
+  protected EntityFrameworkCoreProjectionGrain(string projectionTypeName)
   {
     _metrics = ServiceProvider.GetRequiredService<OrleansEntityFrameworkCoreProjectionMetrics>();
     _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
+    _projectionOptions = ServiceProvider.GetRequiredKeyedService<PersistentProjectionOptions>(projectionTypeName);
   }
 
   public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
@@ -47,7 +50,7 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
     var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
     var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
 
-    _projection = await dbContext.UpdateProjectionAsync(eventStore, domainEvent, _projection, _logger);
+    _projection = await dbContext.UpdateProjectionAsync(eventStore, domainEvent, _projection, _projectionOptions, _logger);
 
     _metrics.ProjectionMessagesSaved();
   }

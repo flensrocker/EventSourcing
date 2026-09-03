@@ -5,11 +5,12 @@ namespace Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 
 public static class PersistentProjectionExtensions
 {
-  public static IServiceCollection AddPersistentProjection<TProjection>(this IServiceCollection services, int currentVersion)
+  public static IServiceCollection AddPersistentProjection<TProjection>(this IServiceCollection services, string projectionTypeName, int currentVersion)
     where TProjection : class, IPersistentProjection
   {
-    var options = PersistentProjectionOptions.Create<TProjection>(currentVersion);
+    var options = PersistentProjectionOptions.Create<TProjection>(projectionTypeName, currentVersion);
     services.AddSingleton(options);
+    services.AddKeyedSingleton(projectionTypeName, options);
 
     services.AddKeyedScoped<TProjection>(options.TypeName);
     services.AddKeyedScoped<IPersistentProjection>(options.TypeName, (sp, key) => sp.GetRequiredKeyedService<TProjection>(key));

@@ -13,12 +13,12 @@ public static class EntityFrameworkCoreExtensions
     public IServiceCollection AddEntityFrameworkCoreDbMigration<TDbContext>() where TDbContext : DbContext
       => services.AddDbMigration<EntityFrameworkCoreDbMigration<TDbContext>>();
 
-    public IServiceCollection AddEntityFrameworkCorePersistentProjection<TProjection, TDbContext, TEntity, TEventBase>(int currentVersion)
+    public IServiceCollection AddEntityFrameworkCorePersistentProjection<TProjection, TDbContext, TEntity, TEventBase>(string projectionTypeName, int currentVersion)
       where TProjection : EntityFrameworkCorePersistentProjection<TDbContext, TEntity, TEventBase>
       where TDbContext : DbContext
       where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
       where TEventBase : class
-      => services.AddPersistentProjection<TProjection>(currentVersion);
+      => services.AddPersistentProjection<TProjection>(projectionTypeName, currentVersion);
   }
 
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
@@ -26,12 +26,12 @@ public static class EntityFrameworkCoreExtensions
     IDomainEventStorage<TEventBase> eventStore,
     DomainEvent domainEvent,
     TEntity? projection,
+    PersistentProjectionOptions projectionOptions,
     ILogger logger)
     where TDbContext : DbContext
     where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
     where TEventBase : class
   {
-    var entityTypeName = typeof(TEntity).GetTypeName();
     var entityId = domainEvent.Metadata.StreamId;
     var expectedVersion = domainEvent.Metadata.StreamVersion - 1;
 
@@ -52,13 +52,13 @@ public static class EntityFrameworkCoreExtensions
 
       if (projection is IDomainEventVersionable withVersion && withVersion.Version < expectedVersion)
       {
-        logger.LogWarning("Entity {EntityType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}", entityTypeName, entityId, expectedVersion, withVersion.Version);
+        logger.LogWarning("Entity {ProjectionType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}", projectionOptions.TypeName, entityId, expectedVersion, withVersion.Version);
 
         var fromVersion = Math.Max(1, withVersion.Version);
         var itemEvents = await eventStore.ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default).ConfigureAwait(false);
         if (itemEvents is null)
         {
-          logger.LogError("Failure in retrieving missing events from storage for type {EntityType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}", entityTypeName, entityId, fromVersion, expectedVersion);
+          logger.LogError("Failure in retrieving missing events from storage for type {ProjectionType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}", projectionOptions.TypeName, entityId, fromVersion, expectedVersion);
           return projection;
         }
 
@@ -75,7 +75,7 @@ public static class EntityFrameworkCoreExtensions
     }
     catch (Exception ex)
     {
-      logger.LogError(ex, "Failure in applying updates to projection of type {EntityType}, entity-id {EntityId} and expected version {ExpectedVersion}", entityTypeName, entityId, expectedVersion);
+      logger.LogError(ex, "Failure in applying updates to projection of type {ProjectionType}, entity-id {EntityId} and expected version {ExpectedVersion}", projectionOptions.TypeName, entityId, expectedVersion);
     }
 
     return projection;
@@ -85,14 +85,14 @@ public static class EntityFrameworkCoreExtensions
     this IDbContextFactory<TDbContext> dbContextFactory,
     IDomainEventStorage<TEventBase> eventStore,
     ILogger logger,
+    PersistentProjectionOptions projectionOptions,
     CancellationToken cancellationToken)
     where TDbContext : DbContext
     where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
     where TEventBase : class
   {
     var batchSize = 1000;
-    var entityTypeName = typeof(TEntity).GetTypeName();
-    logger.LogInformation("Rebuilding projection {EntityType}", entityTypeName);
+    logger.LogInformation("Rebuilding projection {ProjectionType}", projectionOptions.TypeName);
 
     TDbContext? dbContext = null;
     try
@@ -126,7 +126,7 @@ public static class EntityFrameworkCoreExtensions
             projection = await dbContext.Set<TEntity>().Where(TEntity.GetWhereId(domainEvent.Metadata.StreamId)).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             if (projection is null)
             {
-              logger.LogWarning("Missing projection {EntityType}, entity-id {EntityId}, version {EntityVersion}", entityTypeName, domainEvent.Metadata.StreamId, domainEvent.Metadata.StreamVersion);
+              logger.LogWarning("Missing projection {ProjectionType}, entity-id {EntityId}, version {EntityVersion}", projectionOptions.TypeName, domainEvent.Metadata.StreamId, domainEvent.Metadata.StreamVersion);
 
               projection = new();
               entity = dbContext.Attach(projection);

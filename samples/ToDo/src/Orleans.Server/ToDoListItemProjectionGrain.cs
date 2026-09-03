@@ -7,4 +7,8 @@ namespace Flensrocker.ToDo.Orleans.Server;
 [ImplicitStreamSubscription(ToDoConstants.ToDoEventStreamType)]
 public class ToDoListItemProjectionGrain : EntityFrameworkCoreProjectionGrain<ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>
 {
+  public ToDoListItemProjectionGrain()
+    : base(ToDoConstants.ToDoListItemProjectionType)
+  {
+  }
 }
