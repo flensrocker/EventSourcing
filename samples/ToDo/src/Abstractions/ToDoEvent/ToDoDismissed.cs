@@ -2,11 +2,11 @@
 
 namespace Flensrocker.ToDo.Abstractions;
 
-[JsonDerivedType(typeof(ToDoDismissed), nameof(ToDoDismissed))]
+[JsonDerivedType(typeof(ToDoDismissed), ToDoConstants.ToDoEvent.ToDoDismissed)]
 public abstract partial record ToDoEvent
 {
   [GenerateSerializer]
-  [Alias("ToDo.ToDoEvent.ToDoDismissed")]
+  [Alias(ToDoConstants.ToDoEvent.ToDoDismissed)]
   public sealed record ToDoDismissed : ToDoEvent
   {
     [Id(0)]

@@ -6,7 +6,7 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoView
 {
   [GenerateSerializer]
-  [Alias(ToDoConstants.ToDoListItemProjectionType)]
+  [Alias(ToDoConstants.ToDoView.ToDoListItem)]
   public sealed record ToDoListItem : ToDoView, IDomainEventVersionable, IToDoEventProjectable, IWhereId<ToDoListItem>
   {
     public const int ProjectionVersion = 1;

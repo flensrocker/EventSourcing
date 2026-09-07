@@ -10,14 +10,14 @@ public sealed class ToDoConstantsTests
   public void ToDoEventStreamNamespaceMatchesTypeName()
   {
     var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
-    Assert.AreEqual(ToDoConstants.ToDoEventStreamType, jsonOptions.GetTypeName(typeof(ToDoEvent)));
+    Assert.AreEqual(ToDoConstants.ToDoEvent.Base, jsonOptions.GetTypeName(typeof(ToDoEvent)));
   }
 
   [TestMethod]
   public void ToDoEventStreamNamespaceCanBeConvertedToType()
   {
     var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
-    var toDoEventType = jsonOptions.GetTypeFromName(ToDoConstants.ToDoEventStreamType);
+    var toDoEventType = jsonOptions.GetTypeFromName(ToDoConstants.ToDoEvent.Base);
     Assert.AreEqual(typeof(ToDoEvent), toDoEventType);
   }
 }

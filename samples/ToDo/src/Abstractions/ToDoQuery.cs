@@ -1,14 +1,14 @@
 ﻿namespace Flensrocker.ToDo.Abstractions;
 
 [GenerateSerializer]
-[Alias("ToDo.ToDoQueryRequest")]
+[Alias(ToDoConstants.ToDoQueryRequest.Base)]
 public abstract partial record ToDoQueryRequest
 {
   private ToDoQueryRequest() { }
 }
 
 [GenerateSerializer]
-[Alias("ToDo.ToDoQueryResponse")]
+[Alias(ToDoConstants.ToDoQueryResponse.Base)]
 public abstract partial record ToDoQueryResponse
 {
   private ToDoQueryResponse() { }

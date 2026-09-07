@@ -2,11 +2,11 @@
 
 namespace Flensrocker.ToDo.Abstractions;
 
-[JsonDerivedType(typeof(ListToDos), nameof(ListToDos))]
+[JsonDerivedType(typeof(ListToDos), ToDoConstants.ToDoQueryRequest.Base)]
 public abstract partial record ToDoQueryRequest
 {
   [GenerateSerializer]
-  [Alias("ToDo.ToDoQueryRequest.ListToDos")]
+  [Alias(ToDoConstants.ToDoQueryRequest.ListToDos)]
   public sealed record ListToDos : ToDoQueryRequest
   {
     [Id(0)]
@@ -27,15 +27,15 @@ public abstract partial record ToDoQueryRequest
 }
 
 
-[JsonDerivedType(typeof(ListToDos), nameof(ListToDos))]
+[JsonDerivedType(typeof(ListToDos), ToDoConstants.ToDoQueryResponse.ListToDos)]
 public abstract partial record ToDoQueryResponse
 {
   [GenerateSerializer]
-  [Alias("ToDo.ToDoQueryResponse.ListToDos")]
+  [Alias(ToDoConstants.ToDoQueryResponse.ListToDos)]
   public sealed record ListToDos : ToDoQueryResponse
   {
     [GenerateSerializer]
-    [Alias("ToDo.ToDoQueryResponse.ListToDos.ToDoItem")]
+    [Alias(ToDoConstants.ToDoQueryResponse.ListToDos_ToDoItem)]
     public sealed record ToDoItem
     {
       [Id(0)]

@@ -8,6 +8,6 @@ public static class ToDoExtensions
   {
     public EventSourcingJsonSerializerOptions AddToDoJsonOptions() => jsonOptions
       .Add(ToDoJsonSerializerContext.Default)
-      .Add<ToDoEvent>(ToDoConstants.ToDoEventStreamType);
+      .Add<ToDoEvent>(ToDoConstants.ToDoEvent.Base);
   }
 }

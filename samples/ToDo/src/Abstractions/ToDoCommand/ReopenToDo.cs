@@ -5,7 +5,7 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoCommand
 {
   [GenerateSerializer]
-  [Alias("ToDo.ToDoCommand.ReopenToDo")]
+  [Alias(ToDoConstants.ToDoCommand.ReopenToDo)]
   public sealed record ReopenToDo : ToDoCommand
   {
     [JsonConstructor]
