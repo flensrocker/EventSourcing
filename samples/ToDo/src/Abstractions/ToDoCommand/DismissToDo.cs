@@ -5,7 +5,7 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoCommand
 {
   [GenerateSerializer]
-  [Alias("Flensrocker.ToDo.ToDoCommand.DismissToDo")]
+  [Alias("ToDo.ToDoCommand.DismissToDo")]
   public sealed record DismissToDo : ToDoCommand
   {
     [Id(0)]

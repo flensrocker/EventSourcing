@@ -6,6 +6,6 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoEvent
 {
   [GenerateSerializer]
-  [Alias("Flensrocker.ToDo.ToDoEvent.ToDoReopened")]
+  [Alias("ToDo.ToDoEvent.ToDoReopened")]
   public sealed record ToDoReopened : ToDoEvent { }
 }

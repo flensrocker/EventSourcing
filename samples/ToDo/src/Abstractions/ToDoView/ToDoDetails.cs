@@ -5,7 +5,7 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoView
 {
   [GenerateSerializer]
-  [Alias("Flensrocker.ToDo.ToDoView.ToDoDetails")]
+  [Alias("ToDo.ToDoView.ToDoDetails")]
   public sealed record ToDoDetails : ToDoView, IDomainEventVersionable, IToDoEventProjectable
   {
     [Id(0)]

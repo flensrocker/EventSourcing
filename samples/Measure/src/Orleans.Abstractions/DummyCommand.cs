@@ -1,7 +1,7 @@
 ﻿namespace Flensrocker.Measure.Orleans.Abstractions;
 
 [GenerateSerializer]
-[Alias("Flensrocker.Measure.DummyCommand")]
+[Alias("Measure.DummyCommand")]
 public record DummyCommand
 {
   [Id(0)]

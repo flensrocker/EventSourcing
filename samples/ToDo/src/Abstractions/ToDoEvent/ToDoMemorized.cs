@@ -6,7 +6,7 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoEvent
 {
   [GenerateSerializer]
-  [Alias("Flensrocker.ToDo.ToDoEvent.ToDoMemorized")]
+  [Alias("ToDo.ToDoEvent.ToDoMemorized")]
   public sealed record ToDoMemorized : ToDoEvent
   {
     [Id(0)]
