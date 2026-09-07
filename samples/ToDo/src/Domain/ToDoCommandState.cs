@@ -7,9 +7,9 @@ namespace Flensrocker.ToDo.Domain;
 [Alias("ToDo.ToDoCommandState")]
 public class ToDoCommandState : IDomainEventVersionable, IToDoEventProjectable
 {
-  [Id(1)]
+  [Id(0)]
   public int Version { get; private set; }
-  [Id(2)]
+  [Id(1)]
   public ToDoStatus Status { get; private set; }
 
   void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
