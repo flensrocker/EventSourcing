@@ -1,11 +1,12 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Flensrocker.EventSourcing.Abstractions;
+using Microsoft.Extensions.Logging;
 using Orleans.Streams;
 
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
-public class DomainEventProjectionObserver<TEventBase, TProjection>
+public partial class DomainEventProjectionObserver<TEventBase, TProjection>
   : IAsyncObserver<DomainEvent>,
     IDisposable
   where TEventBase : class
@@ -13,6 +14,7 @@ public class DomainEventProjectionObserver<TEventBase, TProjection>
 {
   private readonly IDomainEventStorage<TEventBase> _eventStore;
   private readonly Guid _projectionId;
+  private readonly ILogger _logger;
 
   private Subject<TProjection> _eventStream = new();
 
@@ -20,22 +22,26 @@ public class DomainEventProjectionObserver<TEventBase, TProjection>
 
   private DomainEventProjectionObserver(
     IDomainEventStorage<TEventBase> eventStore,
-    Guid projectionId
+    Guid projectionId,
+    ILogger logger
   )
   {
     _eventStore = eventStore;
     _projectionId = projectionId;
+    _logger = logger;
   }
 
   public static async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> Create(
     IDomainEventStorage<TEventBase> eventStore,
     Guid projectionId,
+    ILogger logger,
     CancellationToken cancellationToken
   )
   {
     var observer = new DomainEventProjectionObserver<TEventBase, TProjection>(
       eventStore,
-      projectionId
+      projectionId,
+      logger
     );
 
     (var version, observer.Projection) = await eventStore.ReadStateFromStorage<TProjection>(
@@ -43,7 +49,13 @@ public class DomainEventProjectionObserver<TEventBase, TProjection>
       cancellationToken
     );
 
-    return version == 0 ? null : observer;
+    if (version == 0)
+    {
+      observer.Dispose();
+      return null;
+    }
+
+    return observer;
   }
 
   public async Task OnNextAsync(DomainEvent item, StreamSequenceToken? token = null)
@@ -73,7 +85,7 @@ public class DomainEventProjectionObserver<TEventBase, TProjection>
 
   public Task OnErrorAsync(Exception ex)
   {
-    // TODO Error-Handling
+    LogObserverError(_logger, ex);
     return Task.CompletedTask;
   }
 
@@ -86,4 +98,7 @@ public class DomainEventProjectionObserver<TEventBase, TProjection>
   {
     _eventStream.Dispose();
   }
+
+  [LoggerMessage(LogLevel.Error, Message = "Observer Error")]
+  internal static partial void LogObserverError(ILogger logger, Exception ex);
 }

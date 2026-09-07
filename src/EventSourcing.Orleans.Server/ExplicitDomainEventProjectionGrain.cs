@@ -3,6 +3,7 @@ using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Server;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Orleans.Streams;
 
 namespace Flensrocker.ToDo.Orleans.Server;
@@ -15,6 +16,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   where TProjection : class, IDomainEventProjectable, new()
 {
   private readonly IDomainEventStorage<TEventBase> _eventStore;
+  private readonly ILogger _logger;
 
   private DomainEventProjectionObserver<TEventBase, TProjection>? _projection;
   private StreamSubscriptionHandle<DomainEvent>? _subscription;
@@ -22,6 +24,9 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   protected ExplicitDomainEventProjectionGrain()
   {
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+    _logger = ServiceProvider.GetRequiredService<
+      ILogger<ExplicitDomainEventProjectionGrain<TEventBase, TProjection>>
+    >();
   }
 
   private async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> GetOrCreateProjection(
@@ -31,6 +36,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     _projection ??= await DomainEventProjectionObserver<TEventBase, TProjection>.Create(
       _eventStore,
       this.GetPrimaryKey(),
+      _logger,
       cancellationToken
     );
     return _projection;
