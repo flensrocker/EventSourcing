@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -15,5 +14,4 @@
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.Server\Flensrocker.EventSourcing.Orleans.Server.csproj" />
     <ProjectReference Include="..\Orleans.Abstractions\Flensrocker.Measure.Orleans.Abstractions.csproj" />
   </ItemGroup>
-
 </Project>

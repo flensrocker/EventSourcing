@@ -16,6 +16,6 @@ internal class PersistentProjectionState : IDomainEventProjectable, IDomainEvent
       _typeNameVersionMap[rebuilt.TypeName] = rebuilt.Version;
   }
 
-  internal bool TryGetProjectionVersion(string typeName, out int projectionVersion)
-    => _typeNameVersionMap.TryGetValue(typeName, out projectionVersion);
+  internal bool TryGetProjectionVersion(string typeName, out int projectionVersion) =>
+    _typeNameVersionMap.TryGetValue(typeName, out projectionVersion);
 }

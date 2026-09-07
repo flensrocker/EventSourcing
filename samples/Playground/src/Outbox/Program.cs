@@ -12,8 +12,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
-  .AddToDoJsonOptions();
+var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);

@@ -19,10 +19,7 @@ public abstract partial record ToDoCommand
       if (string.IsNullOrWhiteSpace(title) || title.Length > ToDoConstants.TitleMaxLength)
         return null;
 
-      return new MemorizeToDo
-      {
-        Title = title,
-      };
+      return new MemorizeToDo { Title = title };
     }
   }
 }

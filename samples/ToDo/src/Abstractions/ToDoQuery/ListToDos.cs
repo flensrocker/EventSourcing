@@ -11,6 +11,7 @@ public abstract partial record ToDoQueryRequest
   {
     [Id(0)]
     public Guid? TenantId { get; init; }
+
     // TODO add filter, order, page-size etc.
 
     [JsonConstructor]
@@ -18,14 +19,10 @@ public abstract partial record ToDoQueryRequest
 
     public static ListToDos? Create(Guid? tenantId)
     {
-      return new ListToDos
-      {
-        TenantId = tenantId,
-      };
+      return new ListToDos { TenantId = tenantId };
     }
   }
 }
-
 
 [JsonDerivedType(typeof(ListToDos), ToDoConstants.ToDoQueryResponse.ListToDos)]
 public abstract partial record ToDoQueryResponse
@@ -40,12 +37,16 @@ public abstract partial record ToDoQueryResponse
     {
       [Id(0)]
       public required Guid ToDoId { get; init; }
+
       [Id(1)]
       public required int Version { get; init; }
+
       [Id(2)]
       public required DateTimeOffset CreatedAt { get; init; }
+
       [Id(3)]
       public required string Title { get; init; }
+
       [Id(4)]
       public required ToDoStatus Status { get; init; }
     }

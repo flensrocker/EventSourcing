@@ -7,9 +7,9 @@ builder.AddDockerComposeEnvironment("compose");
 var garnetClusteringStorage = builder
   .AddGarnet(ServiceKeys.OrleansClustering)
   .WithOrleansProviderType("Redis")
-  // We don't need persistent clustering data because we always restart the whole thing and sometimes it tries to connect to the old silo
-  //.WithDataVolume("playground-garnet-data")
-  ;
+// We don't need persistent clustering data because we always restart the whole thing and sometimes it tries to connect to the old silo
+//.WithDataVolume("playground-garnet-data")
+;
 
 var nats = builder
   .AddNats("nats")
@@ -17,11 +17,8 @@ var nats = builder
   .WithJetStream()
   .WithDataVolume("playground-nats-data");
 
-var azure = builder
-  .AddAzureStorage("azure")
-  .RunAsEmulator();
-var azureQueuesStreams = azure
-  .AddQueues(ServiceKeys.OrleansStreaming);
+var azure = builder.AddAzureStorage("azure").RunAsEmulator();
+var azureQueuesStreams = azure.AddQueues(ServiceKeys.OrleansStreaming);
 
 var postgres = builder
   .AddPostgres("postgres")
@@ -43,7 +40,10 @@ var orleans = builder
   .WithServiceId("playground")
   .WithClusterId("default")
   .WithClustering(garnetClusteringStorage)
-  .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, azureQueuesStreams)
+  .WithStreaming(
+    Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName,
+    azureQueuesStreams
+  )
   .WithMemoryGrainStorage("PubSubStore");
 
 IResourceBuilder<IResourceWithServiceDiscovery> webApi;
@@ -98,7 +98,8 @@ else
     .WaitFor(silo);
 }
 
-var frontend = builder.AddJavaScriptApp("playground-frontend", "../Frontend", runScriptName: "start")
+var frontend = builder
+  .AddJavaScriptApp("playground-frontend", "../Frontend", runScriptName: "start")
   .WithPnpm(install: true, installArgs: ["--yes", "--frozen-lockfile"])
   .WithReference(webApi)
   .WaitFor(webApi)

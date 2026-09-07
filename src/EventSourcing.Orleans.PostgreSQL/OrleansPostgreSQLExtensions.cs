@@ -16,17 +16,27 @@ public static class OrleansPostgreSQLExtensions
       var storageOptions = configureOptions();
       services.AddSingleton(storageOptions);
 
-      services.AddPooledDbContextFactory<OrleansDbContext>((serviceProvider, dbOptions) =>
-      {
-        var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-        var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
-
-        dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+      services.AddPooledDbContextFactory<OrleansDbContext>(
+        (serviceProvider, dbOptions) =>
         {
-          npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-          npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
-        });
-      });
+          var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+          var connectionString = rootConfiguration.GetConnectionString(
+            storageOptions.ConnectionName
+          );
+
+          dbOptions.UseNpgsql(
+            connectionString,
+            npgsqlOptions =>
+            {
+              npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+              npgsqlOptions.MigrationsHistoryTable(
+                HistoryRepository.DefaultTableName,
+                Constants.SchemaName
+              );
+            }
+          );
+        }
+      );
       services.AddEntityFrameworkCoreDbMigration<OrleansDbContext>();
 
       return services;

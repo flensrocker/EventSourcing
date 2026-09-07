@@ -7,8 +7,9 @@ using Orleans.EventSourcing.CustomStorage;
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
 public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandState>
-  : JournaledGrain<TCommandState, DomainEvent>, ICustomStorageInterface<TCommandState, DomainEvent>
-  , ICommandHandlerGrain<TCommandBase>
+  : JournaledGrain<TCommandState, DomainEvent>,
+    ICustomStorageInterface<TCommandState, DomainEvent>,
+    ICommandHandlerGrain<TCommandBase>
   where TEventBase : class
   where TCommandBase : class
   where TCommandState : class, IDomainEventProjectable, new()
@@ -40,7 +41,15 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
 
     if (payloads.Length == 1)
     {
-      var domainEvent = DomainEvent.Create(_eventStore.StreamType, streamId, _nextVersion, payloads[0], tenantId, userId, createdAt);
+      var domainEvent = DomainEvent.Create(
+        _eventStore.StreamType,
+        streamId,
+        _nextVersion,
+        payloads[0],
+        tenantId,
+        userId,
+        createdAt
+      );
       _nextVersion++;
 
       RaiseEvent(domainEvent);
@@ -50,7 +59,15 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
       var domainEventList = new List<DomainEvent>(payloads.Length);
       foreach (var payload in payloads)
       {
-        var domainEvent = DomainEvent.Create(_eventStore.StreamType, streamId, _nextVersion, payload, tenantId, userId, createdAt);
+        var domainEvent = DomainEvent.Create(
+          _eventStore.StreamType,
+          streamId,
+          _nextVersion,
+          payload,
+          tenantId,
+          userId,
+          createdAt
+        );
         _nextVersion++;
 
         domainEventList.Add(domainEvent);
@@ -64,7 +81,9 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
   {
     await using var commandScope = ServiceProvider.CreateAsyncScope();
 
-    var commandHandler = commandScope.ServiceProvider.GetRequiredService<ICommandHandler<TEventBase, TCommandBase, TCommandState>>();
+    var commandHandler = commandScope.ServiceProvider.GetRequiredService<
+      ICommandHandler<TEventBase, TCommandBase, TCommandState>
+    >();
 
     var payloads = await commandHandler.ExecuteCommandAsync(State, command);
     if (payloads is not { Length: > 0 })
@@ -79,9 +98,14 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
     return true;
   }
 
-  Task<bool> ICustomStorageInterface<TCommandState, DomainEvent>.ApplyUpdatesToStorage(IReadOnlyList<DomainEvent> updates, int expectedVersion)
-    => _eventStore.ApplyUpdatesToStorage(this.GetPrimaryKey(), updates, expectedVersion);
+  Task<bool> ICustomStorageInterface<TCommandState, DomainEvent>.ApplyUpdatesToStorage(
+    IReadOnlyList<DomainEvent> updates,
+    int expectedVersion
+  ) => _eventStore.ApplyUpdatesToStorage(this.GetPrimaryKey(), updates, expectedVersion);
 
-  Task<KeyValuePair<int, TCommandState>> ICustomStorageInterface<TCommandState, DomainEvent>.ReadStateFromStorage()
-    => _eventStore.ReadStateFromStorage<TCommandState>(this.GetPrimaryKey(), default);
+  Task<KeyValuePair<int, TCommandState>> ICustomStorageInterface<
+    TCommandState,
+    DomainEvent
+  >.ReadStateFromStorage() =>
+    _eventStore.ReadStateFromStorage<TCommandState>(this.GetPrimaryKey(), default);
 }

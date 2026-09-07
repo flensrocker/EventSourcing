@@ -27,7 +27,9 @@ public static class PostgreSQLDomainEventStorageExtensions
       where TEventBase : class
     {
       _services.AddScoped<PostgreSQLDomainEventStorage<TEventBase>>();
-      _services.AddScoped<IDomainEventStorage<TEventBase>>(sp => sp.GetRequiredService<PostgreSQLDomainEventStorage<TEventBase>>());
+      _services.AddScoped<IDomainEventStorage<TEventBase>>(sp =>
+        sp.GetRequiredService<PostgreSQLDomainEventStorage<TEventBase>>()
+      );
 
       return this;
     }
@@ -35,33 +37,49 @@ public static class PostgreSQLDomainEventStorageExtensions
 
   extension(IServiceCollection services)
   {
-    public PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(Func<PostgreSQLDomainEventStorageOptions> configureOptions)
+    public PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(
+      Func<PostgreSQLDomainEventStorageOptions> configureOptions
+    )
     {
       var storageOptions = configureOptions();
       services.TryAddSingleton(storageOptions);
 
-      services.AddPooledDbContextFactory<EventSourcingDbContext>((serviceProvider, dbOptions) =>
-      {
-        var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-        var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
-
-        dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+      services.AddPooledDbContextFactory<EventSourcingDbContext>(
+        (serviceProvider, dbOptions) =>
         {
-          npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-          npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
-          npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 10,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorCodesToAdd: null);
-        });
-      });
+          var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+          var connectionString = rootConfiguration.GetConnectionString(
+            storageOptions.ConnectionName
+          );
+
+          dbOptions.UseNpgsql(
+            connectionString,
+            npgsqlOptions =>
+            {
+              npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+              npgsqlOptions.MigrationsHistoryTable(
+                HistoryRepository.DefaultTableName,
+                Constants.SchemaName
+              );
+              npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 10,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorCodesToAdd: null
+              );
+            }
+          );
+        }
+      );
       services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
 
-      return new PostgreSQLDomainEventStorageBuilder(services)
-        .ForDomainEvents<PersistentProjectionEvent>();
+      return new PostgreSQLDomainEventStorageBuilder(
+        services
+      ).ForDomainEvents<PersistentProjectionEvent>();
     }
 
-    public IServiceCollection AddPostgreSQLDomainMessageSubscriber(Func<PostgreSQLMessageSubscriberOptions> configureOptions)
+    public IServiceCollection AddPostgreSQLDomainMessageSubscriber(
+      Func<PostgreSQLMessageSubscriberOptions> configureOptions
+    )
     {
       services.AddSingleton<PostgreSQLMessageSubscriberMetrics>();
 
@@ -78,7 +96,9 @@ public static class PostgreSQLDomainEventStorageExtensions
   {
     internal void CreatePublication()
     {
-      migrationBuilder.Sql($"CREATE PUBLICATION {Constants.PublicationName} FOR TABLE \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" WITH (publish = 'insert');");
+      migrationBuilder.Sql(
+        $"CREATE PUBLICATION {Constants.PublicationName} FOR TABLE \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" WITH (publish = 'insert');"
+      );
     }
 
     internal void DropPublication()
@@ -87,7 +107,10 @@ public static class PostgreSQLDomainEventStorageExtensions
     }
   }
 
-  internal static DomainEvent ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
+  internal static DomainEvent ToDomainEvent<TEventBase>(
+    this MessageEntity entity,
+    JsonSerializerOptions? jsonOptions
+  )
     where TEventBase : class
   {
     return new DomainEvent
@@ -104,11 +127,19 @@ public static class PostgreSQLDomainEventStorageExtensions
         TraceId = entity.TraceId,
         SpanId = entity.SpanId,
       },
-      Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions) is TEventBase p ? p : default!,
+      Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions)
+        is TEventBase p
+        ? p
+        : default!,
     };
   }
 
-  internal static async Task<(DomainEventMetadata Metadata, object Payload)?> ToDomainEventAsync(this InsertMessage insertMessage, EventSourcingJsonSerializerOptions jsonOptions, ILogger? logger, CancellationToken cancellationToken)
+  internal static async Task<(DomainEventMetadata Metadata, object Payload)?> ToDomainEventAsync(
+    this InsertMessage insertMessage,
+    EventSourcingJsonSerializerOptions jsonOptions,
+    ILogger? logger,
+    CancellationToken cancellationToken
+  )
   {
     Guid? eventId = default;
     string? streamType = default;
@@ -126,106 +157,139 @@ public static class PostgreSQLDomainEventStorageExtensions
       switch (column.GetFieldName())
       {
         case nameof(MessageEntity.Id):
-          {
-            eventId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          eventId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+          break;
+        }
         case nameof(MessageEntity.GlobalIndex):
-          {
-            break;
-          }
+        {
+          break;
+        }
         case nameof(MessageEntity.StreamType):
-          {
-            streamType = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          streamType = await column
+            .GetTextReader()
+            .ReadToEndAsync(cancellationToken)
+            .ConfigureAwait(false);
+          break;
+        }
         case nameof(MessageEntity.StreamId):
-          {
-            streamId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          streamId = await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+          break;
+        }
         case nameof(MessageEntity.StreamVersion):
-          {
-            streamVersion = await column.Get<int>(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          streamVersion = await column.Get<int>(cancellationToken).ConfigureAwait(false);
+          break;
+        }
         case nameof(MessageEntity.TenantId):
-          {
-            tenantId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          tenantId = column.IsDBNull
+            ? null
+            : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+          break;
+        }
         case nameof(MessageEntity.CreatedAt):
-          {
-            createdAt = await column.Get<DateTimeOffset>(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          createdAt = await column.Get<DateTimeOffset>(cancellationToken).ConfigureAwait(false);
+          break;
+        }
         case nameof(MessageEntity.CreatedByUserId):
-          {
-            createdByUserId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          createdByUserId = column.IsDBNull
+            ? null
+            : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+          break;
+        }
         case nameof(MessageEntity.TraceId):
+        {
+          if (column.IsDBNull)
+            traceId = null;
+          else
           {
-            if (column.IsDBNull)
-              traceId = null;
-            else
-            {
-              traceId = new byte[16];
-              await column.GetStream().ReadExactlyAsync(traceId, 0, traceId.Length, cancellationToken).ConfigureAwait(false);
-            }
-            break;
+            traceId = new byte[16];
+            await column
+              .GetStream()
+              .ReadExactlyAsync(traceId, 0, traceId.Length, cancellationToken)
+              .ConfigureAwait(false);
           }
+          break;
+        }
         case nameof(MessageEntity.SpanId):
+        {
+          if (column.IsDBNull)
+            spanId = null;
+          else
           {
-            if (column.IsDBNull)
-              spanId = null;
-            else
-            {
-              spanId = new byte[8];
-              await column.GetStream().ReadExactlyAsync(spanId, 0, spanId.Length, cancellationToken).ConfigureAwait(false);
-            }
-            break;
+            spanId = new byte[8];
+            await column
+              .GetStream()
+              .ReadExactlyAsync(spanId, 0, spanId.Length, cancellationToken)
+              .ConfigureAwait(false);
           }
+          break;
+        }
         case nameof(MessageEntity.PayloadJson):
-          {
-            payloadJson = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-            break;
-          }
+        {
+          payloadJson = await column
+            .GetTextReader()
+            .ReadToEndAsync(cancellationToken)
+            .ConfigureAwait(false);
+          break;
+        }
       }
     }
 
-    if (eventId.HasValue is false
+    if (
+      eventId.HasValue is false
       || string.IsNullOrEmpty(streamType)
       || streamId.HasValue is false
       || streamVersion.HasValue is false
       || createdAt.HasValue is false
-      || payloadJson is null)
+      || payloadJson is null
+    )
     {
-      logger?.LogError("""
-            Some properties are missing:
-            EventId: {EventId}
-            StreamType: {StreamType}
-            StreamId: {StreamId}
-            StreamVersion: {StreamVersion}
-            CreatedAt: {CreatedAt}
-            """,
+      logger?.LogError(
+        """
+        Some properties are missing:
+        EventId: {EventId}
+        StreamType: {StreamType}
+        StreamId: {StreamId}
+        StreamVersion: {StreamVersion}
+        CreatedAt: {CreatedAt}
+        """,
         eventId,
         streamType,
         streamId,
         streamVersion,
-        createdAt);
+        createdAt
+      );
       return null;
     }
 
     if (jsonOptions.GetTypeFromName(streamType) is not Type payloadType)
     {
-      logger?.LogError("Missing type of payload in event-id {EventId}: {PayloadType}", eventId, streamType);
+      logger?.LogError(
+        "Missing type of payload in event-id {EventId}: {PayloadType}",
+        eventId,
+        streamType
+      );
       return null;
     }
 
-    if (JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions.Options) is not object payload)
+    if (
+      JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions.Options)
+      is not object payload
+    )
     {
-      logger?.LogError("Payload can not be deserialized on event-id {EventId}, stream {StreamType}/{StreamId}/{StreamVersion}", eventId, streamType, streamId, streamVersion);
+      logger?.LogError(
+        "Payload can not be deserialized on event-id {EventId}, stream {StreamType}/{StreamId}/{StreamVersion}",
+        eventId,
+        streamType,
+        streamId,
+        streamVersion
+      );
       return null;
     }
 

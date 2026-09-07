@@ -10,7 +10,5 @@ namespace Flensrocker.ToDo.Orleans.Server;
 [LogConsistencyProvider(ProviderName = OrleansConstants.LogStorageProviderName)]
 public class ToDoCommandHandlerGrain : CommandHandlerGrain<ToDoEvent, ToDoCommand, ToDoCommandState>
 {
-  public ToDoCommandHandlerGrain()
-  {
-  }
+  public ToDoCommandHandlerGrain() { }
 }

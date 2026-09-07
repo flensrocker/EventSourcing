@@ -6,12 +6,13 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL;
 
 public class ToDoDbContext : DbContext
 {
-  public DbSet<ToDoView.ToDoListItem> ListItem { get => Set<ToDoView.ToDoListItem>(); }
+  public DbSet<ToDoView.ToDoListItem> ListItem
+  {
+    get => Set<ToDoView.ToDoListItem>();
+  }
 
   public ToDoDbContext(DbContextOptions<ToDoDbContext> options)
-    : base(options)
-  {
-  }
+    : base(options) { }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

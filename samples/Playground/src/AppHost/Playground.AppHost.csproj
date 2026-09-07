@@ -1,5 +1,4 @@
 <Project Sdk="Aspire.AppHost.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -21,13 +20,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.Abstractions\Flensrocker.EventSourcing.Orleans.Abstractions.csproj" IsAspireProjectResource="false" />
+    <ProjectReference
+      Include="..\..\..\..\src\EventSourcing.Orleans.Abstractions\Flensrocker.EventSourcing.Orleans.Abstractions.csproj"
+      IsAspireProjectResource="false"
+    />
     <ProjectReference Include="..\AllInOne\Playground.AllInOne.csproj" />
     <ProjectReference Include="..\Orleans.Server\Playground.Orleans.Server.csproj" />
     <ProjectReference Include="..\Migration\Playground.Migration.csproj" />
     <ProjectReference Include="..\Outbox\Playground.Outbox.csproj" />
-    <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" IsAspireProjectResource="false" />
+    <ProjectReference
+      Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj"
+      IsAspireProjectResource="false"
+    />
     <ProjectReference Include="..\WebApi\Playground.WebApi.csproj" />
   </ItemGroup>
-
 </Project>

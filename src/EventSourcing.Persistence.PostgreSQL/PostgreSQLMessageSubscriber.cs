@@ -17,8 +17,8 @@ internal partial class PostgreSQLMessageSubscriber(
   EventSourcingActivitySource activitySource,
   IDomainEventPublisher publisher,
   PostgreSQLMessageSubscriberMetrics metrics,
-  ILogger<PostgreSQLMessageSubscriber> logger)
-  : BackgroundService
+  ILogger<PostgreSQLMessageSubscriber> logger
+) : BackgroundService
 {
   private readonly IConfiguration _configuration = configuration;
   private readonly PostgreSQLMessageSubscriberOptions _options = options;
@@ -38,63 +38,110 @@ internal partial class PostgreSQLMessageSubscriber(
     var connectionString = _configuration.GetConnectionString(_options.ConnectionName);
 
     var pipeline = new ResiliencePipelineBuilder()
-      .AddRetry(new RetryStrategyOptions
-      {
-        Name = nameof(PostgreSQLMessageSubscriber),
-        Delay = TimeSpan.FromSeconds(2),
-        MaxRetryAttempts = int.MaxValue,
-        BackoffType = DelayBackoffType.Exponential,
-        MaxDelay = TimeSpan.FromMinutes(1),
-        UseJitter = true,
-      })
+      .AddRetry(
+        new RetryStrategyOptions
+        {
+          Name = nameof(PostgreSQLMessageSubscriber),
+          Delay = TimeSpan.FromSeconds(2),
+          MaxRetryAttempts = int.MaxValue,
+          BackoffType = DelayBackoffType.Exponential,
+          MaxDelay = TimeSpan.FromMinutes(1),
+          UseJitter = true,
+        }
+      )
       .Build();
 
     while (stoppingToken.IsCancellationRequested is false)
     {
       try
       {
-        await pipeline.ExecuteAsync(static async (state, cancellationToken) =>
-        {
-          LogConnecting(state.Logger);
-          await using var conn = new LogicalReplicationConnection(state.ConnectionString);
-          await conn.Open(cancellationToken).ConfigureAwait(false);
-
-          var slot = new PgOutputReplicationSlot(Constants.PublicationSlotName);
-
-          await foreach (var message in conn.StartReplication(slot, new PgOutputReplicationOptions(Constants.PublicationName, PgOutputProtocolVersion.V4, binary: true), cancellationToken).ConfigureAwait(false))
-          {
-            using var activity = state.ActivitySource.StartActivity("PublishMessage");
-
-            LogReceivedReplicationMessage(state.Logger, message.GetType());
-            state.Metrics.MessageReceived();
-
-            if (message is InsertMessage insertMessage)
+        await pipeline
+          .ExecuteAsync(
+            static async (state, cancellationToken) =>
             {
-              state.Metrics.InsertReceived();
-              var startingTimestamp = Stopwatch.GetTimestamp();
+              LogConnecting(state.Logger);
+              await using var conn = new LogicalReplicationConnection(state.ConnectionString);
+              await conn.Open(cancellationToken).ConfigureAwait(false);
 
-              var domainEvent = await insertMessage.ToDomainEventAsync(state.JsonOptions, state.Logger, cancellationToken).ConfigureAwait(false);
-              if (domainEvent.HasValue)
+              var slot = new PgOutputReplicationSlot(Constants.PublicationSlotName);
+
+              await foreach (
+                var message in conn.StartReplication(
+                    slot,
+                    new PgOutputReplicationOptions(
+                      Constants.PublicationName,
+                      PgOutputProtocolVersion.V4,
+                      binary: true
+                    ),
+                    cancellationToken
+                  )
+                  .ConfigureAwait(false)
+              )
               {
-                LogPublishingInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
-                state.Metrics.InsertSent();
+                using var activity = state.ActivitySource.StartActivity("PublishMessage");
 
-                if (activity is not null && domainEvent.Value.Metadata.TraceId is byte[] traceId && domainEvent.Value.Metadata.SpanId is byte[] spanId)
-                  activity.AddLink(new ActivityLink(new ActivityContext(ActivityTraceId.CreateFromBytes(traceId), ActivitySpanId.CreateFromBytes(spanId), ActivityTraceFlags.None)));
+                LogReceivedReplicationMessage(state.Logger, message.GetType());
+                state.Metrics.MessageReceived();
 
-                await state.Publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken).ConfigureAwait(false);
+                if (message is InsertMessage insertMessage)
+                {
+                  state.Metrics.InsertReceived();
+                  var startingTimestamp = Stopwatch.GetTimestamp();
 
-                state.Metrics.ProcessInsertMessageDuration(startingTimestamp);
-                LogPublishedInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
+                  var domainEvent = await insertMessage
+                    .ToDomainEventAsync(state.JsonOptions, state.Logger, cancellationToken)
+                    .ConfigureAwait(false);
+                  if (domainEvent.HasValue)
+                  {
+                    LogPublishingInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
+                    state.Metrics.InsertSent();
+
+                    if (
+                      activity is not null
+                      && domainEvent.Value.Metadata.TraceId is byte[] traceId
+                      && domainEvent.Value.Metadata.SpanId is byte[] spanId
+                    )
+                      activity.AddLink(
+                        new ActivityLink(
+                          new ActivityContext(
+                            ActivityTraceId.CreateFromBytes(traceId),
+                            ActivitySpanId.CreateFromBytes(spanId),
+                            ActivityTraceFlags.None
+                          )
+                        )
+                      );
+
+                    await state
+                      .Publisher.PublishAsync(
+                        domainEvent.Value.Metadata,
+                        domainEvent.Value.Payload,
+                        cancellationToken
+                      )
+                      .ConfigureAwait(false);
+
+                    state.Metrics.ProcessInsertMessageDuration(startingTimestamp);
+                    LogPublishedInsertMessage(state.Logger, domainEvent.Value.Payload.GetType());
+                  }
+                }
+
+                conn.SetReplicationStatus(message.WalEnd);
+                LogAcknowledgedReplicationMessage(state.Logger);
               }
-            }
-
-            conn.SetReplicationStatus(message.WalEnd);
-            LogAcknowledgedReplicationMessage(state.Logger);
-          }
-        }, (ActivitySource: _activitySource.Source, ConnectionString: connectionString, _options.JsonOptions, Publisher: _publisher, Metrics: _metrics, Logger: _logger), stoppingToken).ConfigureAwait(false);
+            },
+            (
+              ActivitySource: _activitySource.Source,
+              ConnectionString: connectionString,
+              _options.JsonOptions,
+              Publisher: _publisher,
+              Metrics: _metrics,
+              Logger: _logger
+            ),
+            stoppingToken
+          )
+          .ConfigureAwait(false);
       }
-      catch (OperationCanceledException opex) when (opex.CancellationToken == stoppingToken && stoppingToken.IsCancellationRequested)
+      catch (OperationCanceledException opex)
+        when (opex.CancellationToken == stoppingToken && stoppingToken.IsCancellationRequested)
       {
         LogStoppingSubscriber(_logger);
       }
@@ -108,8 +155,14 @@ internal partial class PostgreSQLMessageSubscriber(
   [LoggerMessage(LogLevel.Information, Message = "Connecting to PostgreSQL")]
   internal static partial void LogConnecting(ILogger logger);
 
-  [LoggerMessage(LogLevel.Information, Message = "Received replication message {ReplicationMessageType}")]
-  internal static partial void LogReceivedReplicationMessage(ILogger logger, Type replicationMessageType);
+  [LoggerMessage(
+    LogLevel.Information,
+    Message = "Received replication message {ReplicationMessageType}"
+  )]
+  internal static partial void LogReceivedReplicationMessage(
+    ILogger logger,
+    Type replicationMessageType
+  );
 
   [LoggerMessage(LogLevel.Information, Message = "Publishing insert message {InsertMessageType}")]
   internal static partial void LogPublishingInsertMessage(ILogger logger, Type insertMessageType);
@@ -123,7 +176,10 @@ internal partial class PostgreSQLMessageSubscriber(
   [LoggerMessage(LogLevel.Information, Message = "Starting PostgreSQL Message Subscriber")]
   internal static partial void LogStartingSubscriber(ILogger logger);
 
-  [LoggerMessage(LogLevel.Information, Message = "Stopping PostgreSQL Message Subscriber as requested")]
+  [LoggerMessage(
+    LogLevel.Information,
+    Message = "Stopping PostgreSQL Message Subscriber as requested"
+  )]
   internal static partial void LogStoppingSubscriber(ILogger logger);
 
   [LoggerMessage(LogLevel.Error, Message = "Reconnecting PostgreSQL Message Subscriber")]

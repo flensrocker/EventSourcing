@@ -5,7 +5,9 @@ using Orleans.Streams;
 
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
-public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObserver<DomainEvent>, IDisposable
+public class DomainEventProjectionObserver<TEventBase, TProjection>
+  : IAsyncObserver<DomainEvent>,
+    IDisposable
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable, new()
 {
@@ -16,21 +18,32 @@ public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObse
 
   public TProjection Projection { get; private set; } = default!;
 
-  private DomainEventProjectionObserver(IDomainEventStorage<TEventBase> eventStore, Guid projectionId)
+  private DomainEventProjectionObserver(
+    IDomainEventStorage<TEventBase> eventStore,
+    Guid projectionId
+  )
   {
     _eventStore = eventStore;
     _projectionId = projectionId;
   }
 
-  public static async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> Create(IDomainEventStorage<TEventBase> eventStore, Guid projectionId, CancellationToken cancellationToken)
+  public static async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> Create(
+    IDomainEventStorage<TEventBase> eventStore,
+    Guid projectionId,
+    CancellationToken cancellationToken
+  )
   {
-    var observer = new DomainEventProjectionObserver<TEventBase, TProjection>(eventStore, projectionId);
+    var observer = new DomainEventProjectionObserver<TEventBase, TProjection>(
+      eventStore,
+      projectionId
+    );
 
-    (var version, observer.Projection) = await eventStore.ReadStateFromStorage<TProjection>(projectionId, cancellationToken);
+    (var version, observer.Projection) = await eventStore.ReadStateFromStorage<TProjection>(
+      projectionId,
+      cancellationToken
+    );
 
-    return version == 0
-      ? null
-      : observer;
+    return version == 0 ? null : observer;
   }
 
   public async Task OnNextAsync(DomainEvent item, StreamSequenceToken? token = null)
@@ -42,7 +55,12 @@ public class DomainEventProjectionObserver<TEventBase, TProjection> : IAsyncObse
 
       if (item.Metadata.StreamVersion > versionable.Version + 1)
       {
-        var missingEvents = await _eventStore.ReadEventsFromStorage(_projectionId, versionable.Version + 1, item.Metadata.StreamVersion, default);
+        var missingEvents = await _eventStore.ReadEventsFromStorage(
+          _projectionId,
+          versionable.Version + 1,
+          item.Metadata.StreamVersion,
+          default
+        );
         if (missingEvents is { Count: > 0 })
           Projection.ApplyEvents(missingEvents);
       }

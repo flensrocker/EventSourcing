@@ -2,5 +2,8 @@
 
 public interface IViewQuery<TQueryRequest, TQueryResponse>
 {
-  ValueTask<TQueryResponse> ExecuteQueryAsync(TQueryRequest request, CancellationToken cancellationToken);
+  ValueTask<TQueryResponse> ExecuteQueryAsync(
+    TQueryRequest request,
+    CancellationToken cancellationToken
+  );
 }

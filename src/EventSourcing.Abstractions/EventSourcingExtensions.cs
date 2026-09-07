@@ -19,7 +19,10 @@ public static class EventSourcingExtensions
   [Obsolete("Will be migrated to EventSourcingJsonSerializerOptions.GetTypeName")]
   public static string GetTypeName(this Type? type)
   {
-    return type is null || type.FullName is not string typeFullName || type.Assembly.GetName().Name is not string assemblyName
+    return
+      type is null
+      || type.FullName is not string typeFullName
+      || type.Assembly.GetName().Name is not string assemblyName
       ? ""
       : $"{typeFullName.Replace(".", "-")}_-_{assemblyName.Replace(".", "-")}";
   }
@@ -43,10 +46,12 @@ public static class EventSourcingExtensions
     }
 
     public IServiceCollection AddViewQuery<TViewQuery, TQueryRequest, TQueryResponse>()
-    where TViewQuery : class, IViewQuery<TQueryRequest, TQueryResponse>
+      where TViewQuery : class, IViewQuery<TQueryRequest, TQueryResponse>
     {
       services.AddScoped<TViewQuery>();
-      services.AddScoped<IViewQuery<TQueryRequest, TQueryResponse>>(sp => sp.GetRequiredService<TViewQuery>());
+      services.AddScoped<IViewQuery<TQueryRequest, TQueryResponse>>(sp =>
+        sp.GetRequiredService<TViewQuery>()
+      );
 
       return services;
     }
@@ -60,7 +65,9 @@ public static class EventSourcingExtensions
       return services;
     }
 
-    public IServiceCollection AddDomainEventPublisher<TPublisher, TPublisherOptions>(Func<TPublisherOptions> configureOptions)
+    public IServiceCollection AddDomainEventPublisher<TPublisher, TPublisherOptions>(
+      Func<TPublisherOptions> configureOptions
+    )
       where TPublisher : class, IDomainEventPublisher
       where TPublisherOptions : class
     {
@@ -70,8 +77,8 @@ public static class EventSourcingExtensions
       return services.AddDomainEventPublisher<TPublisher>();
     }
 
-    public IServiceCollection AddNoopDomainEventPublisher()
-      => services.AddDomainEventPublisher<NoopDomainEventPublisher>();
+    public IServiceCollection AddNoopDomainEventPublisher() =>
+      services.AddDomainEventPublisher<NoopDomainEventPublisher>();
 
     public IServiceCollection AddDbMigration<TDbMigration>()
       where TDbMigration : class, IDbMigration

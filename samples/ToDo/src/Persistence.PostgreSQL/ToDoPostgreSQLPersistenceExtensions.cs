@@ -15,31 +15,53 @@ public static class ToDoPostgreSQLPersistenceExtensions
 {
   extension(IServiceCollection services)
   {
-    public IServiceCollection AddToDoPostgreSQLPersistence(Func<ToDoPostgreSQLPersistenceOptions> configureOptions)
+    public IServiceCollection AddToDoPostgreSQLPersistence(
+      Func<ToDoPostgreSQLPersistenceOptions> configureOptions
+    )
     {
       var storageOptions = configureOptions();
       services.AddSingleton(storageOptions);
 
-      services.AddPooledDbContextFactory<ToDoDbContext>((serviceProvider, dbOptions) =>
-      {
-        var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-        var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
-
-        dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+      services.AddPooledDbContextFactory<ToDoDbContext>(
+        (serviceProvider, dbOptions) =>
         {
-          npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-          npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
-          npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 10,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorCodesToAdd: null);
-        });
-      });
+          var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+          var connectionString = rootConfiguration.GetConnectionString(
+            storageOptions.ConnectionName
+          );
+
+          dbOptions.UseNpgsql(
+            connectionString,
+            npgsqlOptions =>
+            {
+              npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+              npgsqlOptions.MigrationsHistoryTable(
+                HistoryRepository.DefaultTableName,
+                Constants.SchemaName
+              );
+              npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 10,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorCodesToAdd: null
+              );
+            }
+          );
+        }
+      );
 
       services.AddEntityFrameworkCoreDbMigration<ToDoDbContext>();
-      services.AddEntityFrameworkCorePersistentProjection<ToDoListItemProjection, ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(ToDoConstants.ToDoView.ToDoListItem, ToDoView.ToDoListItem.ProjectionVersion);
+      services.AddEntityFrameworkCorePersistentProjection<
+        ToDoListItemProjection,
+        ToDoDbContext,
+        ToDoView.ToDoListItem,
+        ToDoEvent
+      >(ToDoConstants.ToDoView.ToDoListItem, ToDoView.ToDoListItem.ProjectionVersion);
 
-      services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>();
+      services.AddViewQuery<
+        ListToDosViewQuery,
+        ToDoQueryRequest.ListToDos,
+        ToDoQueryResponse.ListToDos
+      >();
 
       return services;
     }

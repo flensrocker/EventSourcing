@@ -41,6 +41,7 @@ public static class ToDoConstants
     public const string ToDoDetails = $"{Base}_ToDoDetails";
     public const string ToDoListItem = $"{Base}_ToDoListItem";
   }
+
   // End of "type names"
 
   public const int TitleMaxLength = 100;

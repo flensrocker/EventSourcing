@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -15,5 +14,4 @@
     <ProjectReference Include="..\EventSourcing.Abstractions\Flensrocker.EventSourcing.Abstractions.csproj" />
     <ProjectReference Include="..\EventSourcing.Extensions.EntityFrameworkCore\Flensrocker.EventSourcing.Extension.EntityFrameworkCore.csproj" />
   </ItemGroup>
-
 </Project>

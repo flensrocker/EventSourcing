@@ -8,20 +8,28 @@ public sealed record DomainEventMetadata
 {
   [Id(0)]
   public required Guid EventId { get; init; }
+
   [Id(1)]
   public required string StreamType { get; init; }
+
   [Id(2)]
   public required Guid StreamId { get; init; }
+
   [Id(3)]
   public required int StreamVersion { get; init; }
+
   [Id(4)]
   public required Guid? TenantId { get; init; }
+
   [Id(5)]
   public required DateTimeOffset CreatedAt { get; init; }
+
   [Id(6)]
   public required Guid? CreatedByUserId { get; init; }
+
   [Id(7)]
   public byte[]? TraceId { get; init; }
+
   [Id(8)]
   public byte[]? SpanId { get; init; }
 }
@@ -32,6 +40,7 @@ public record DomainEvent
 {
   [Id(0)]
   public required DomainEventMetadata Metadata { get; init; }
+
   [Id(1)]
   public required object Payload { get; init; }
 
@@ -49,7 +58,15 @@ public record DomainEvent
     public required IReadOnlyCollection<object> MessageList { get; init; }
   }
 
-  public static DomainEvent Create<TEventBase>(string streamType, Guid streamId, int streamVersion, TEventBase payload, Guid? tenantId, Guid? userId, DateTimeOffset createdAt)
+  public static DomainEvent Create<TEventBase>(
+    string streamType,
+    Guid streamId,
+    int streamVersion,
+    TEventBase payload,
+    Guid? tenantId,
+    Guid? userId,
+    DateTimeOffset createdAt
+  )
     where TEventBase : class
   {
     byte[]? traceId = null;

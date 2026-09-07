@@ -12,11 +12,15 @@ namespace Flensrocker.ToDo.Abstractions;
 [JsonSerializable(typeof(ToDoEvent.ToDoDismissed))]
 [JsonSerializable(typeof(ToDoEvent.ToDoMemorized))]
 [JsonSerializable(typeof(ToDoEvent.ToDoReopened))]
-[JsonSerializable(typeof(ToDoQueryRequest.ListToDos), TypeInfoPropertyName = ToDoConstants.ToDoQueryRequest.ListToDos)]
-[JsonSerializable(typeof(ToDoQueryResponse.ListToDos), TypeInfoPropertyName = ToDoConstants.ToDoQueryResponse.ListToDos)]
+[JsonSerializable(
+  typeof(ToDoQueryRequest.ListToDos),
+  TypeInfoPropertyName = ToDoConstants.ToDoQueryRequest.ListToDos
+)]
+[JsonSerializable(
+  typeof(ToDoQueryResponse.ListToDos),
+  TypeInfoPropertyName = ToDoConstants.ToDoQueryResponse.ListToDos
+)]
 [JsonSerializable(typeof(ToDoView.ToDoDetails))]
 [JsonSerializable(typeof(ToDoView.ToDoListItem))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
-public partial class ToDoJsonSerializerContext : JsonSerializerContext
-{
-}
+public partial class ToDoJsonSerializerContext : JsonSerializerContext { }

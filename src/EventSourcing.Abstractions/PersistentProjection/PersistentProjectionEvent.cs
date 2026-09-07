@@ -4,8 +4,14 @@ namespace Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 
 [GenerateSerializer]
 [Alias(PersistentProjectionConstants.PersistentProjectionEvent.Base)]
-[JsonDerivedType(typeof(ProjectionRegistered), PersistentProjectionConstants.PersistentProjectionEvent.ProjectionRegistered)]
-[JsonDerivedType(typeof(ProjectionRebuilt), PersistentProjectionConstants.PersistentProjectionEvent.ProjectionRebuilt)]
+[JsonDerivedType(
+  typeof(ProjectionRegistered),
+  PersistentProjectionConstants.PersistentProjectionEvent.ProjectionRegistered
+)]
+[JsonDerivedType(
+  typeof(ProjectionRebuilt),
+  PersistentProjectionConstants.PersistentProjectionEvent.ProjectionRebuilt
+)]
 public abstract record PersistentProjectionEvent
 {
   private PersistentProjectionEvent() { }

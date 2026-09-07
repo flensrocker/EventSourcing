@@ -18,36 +18,44 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
-  .AddMeasureJsonOptions()
+var globalJsonOptions = EventSourcingJsonSerializerOptions
+  .Default.AddMeasureJsonOptions()
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
-builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
-{
-  ConnectionName = ServiceKeys.PostgresDb,
-  JsonOptions = globalJsonOptions,
-}).ForDomainEvents<ToDoEvent>();
+builder
+  .Services.AddPostgreSQLDomainEventStorage(() =>
+    new PostgreSQLDomainEventStorageOptions
+    {
+      ConnectionName = ServiceKeys.PostgresDb,
+      JsonOptions = globalJsonOptions,
+    }
+  )
+  .ForDomainEvents<ToDoEvent>();
 
-builder.Services
-  .AddToDo()
-  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
-  {
-    ConnectionName = ServiceKeys.PostgresDb,
-  });
+builder
+  .Services.AddToDo()
+  .AddToDoPostgreSQLPersistence(() =>
+    new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb }
+  );
 
 builder.UseOrleans(siloBuilder =>
 {
-  var npgsqlConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb) ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  var npgsqlConnectionString =
+    builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb)
+    ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
-  siloBuilder.AddAdoNetGrainStorage("Default", options =>
-  {
-    options.Invariant = "Npgsql";
-    options.ConnectionString = npgsqlConnectionString;
-  });
+  siloBuilder.AddAdoNetGrainStorage(
+    "Default",
+    options =>
+    {
+      options.Invariant = "Npgsql";
+      options.ConnectionString = npgsqlConnectionString;
+    }
+  );
 
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider(OrleansConstants.LogStorageProviderName);
 

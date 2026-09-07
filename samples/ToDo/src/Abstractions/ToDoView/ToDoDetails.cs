@@ -10,10 +10,13 @@ public abstract partial record ToDoView
   {
     [Id(0)]
     public int Version { get; private set; }
+
     [Id(1)]
     public string Title { get; private set; } = "";
+
     [Id(2)]
     public ToDoStatus Status { get; private set; }
+
     [Id(3)]
     public string? DismissReason { get; private set; }
 

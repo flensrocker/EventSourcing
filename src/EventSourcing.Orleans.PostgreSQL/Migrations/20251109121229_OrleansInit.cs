@@ -22,7 +22,9 @@ namespace Flensrocker.EventSourcing.Orleans.PostgreSQL.Migrations
 
       foreach (var sqlScriptName in sqlScriptNames)
       {
-        using var sqlStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(sqlScriptName);
+        using var sqlStream = Assembly
+          .GetExecutingAssembly()
+          .GetManifestResourceStream(sqlScriptName);
         using var scriptReader = new StreamReader(sqlStream);
         var sqlScript = scriptReader.ReadToEnd();
 
@@ -31,8 +33,6 @@ namespace Flensrocker.EventSourcing.Orleans.PostgreSQL.Migrations
     }
 
     /// <inheritdoc />
-    protected override void Down(MigrationBuilder migrationBuilder)
-    {
-    }
+    protected override void Down(MigrationBuilder migrationBuilder) { }
   }
 }

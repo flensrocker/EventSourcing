@@ -7,13 +7,16 @@ internal class MessageEntity
 {
   // Primary Key
   internal Guid Id { get; set; }
+
   // Unique
   internal long GlobalIndex { get; set; }
+
   // Unique (StreamType, StreamId, StreamVersion)
   // StreamType = typeof(TEventBase).GetTypeName() for a DomainEvent
   // Namespace of the Orleans Stream
   internal string StreamType { get; set; } = "";
   internal Guid StreamId { get; set; }
+
   // if > 0 => DomainEvent
   // if == 0 => public message
   internal int StreamVersion { get; set; }
@@ -30,7 +33,8 @@ internal class MessageEntity
   internal string PayloadJson { get; set; } = "";
 }
 
-internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTypeConfiguration<MessageEntity>
+internal class MessageEntiyConfiguration(ModelBuilder modelBuilder)
+  : IEntityTypeConfiguration<MessageEntity>
 {
   private readonly ModelBuilder _modelBuilder = modelBuilder;
 
@@ -46,11 +50,11 @@ internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTyp
 
     builder
       .Property(e => e.GlobalIndex)
-      .HasDefaultValueSql($"nextval('\"{Constants.SchemaName}\".\"{Constants.GlobalMessageIndexSequenceName}\"')");
+      .HasDefaultValueSql(
+        $"nextval('\"{Constants.SchemaName}\".\"{Constants.GlobalMessageIndexSequenceName}\"')"
+      );
 
-    builder
-      .Property(e => e.StreamType)
-      .HasMaxLength(Constants.MaxLengthStreamType);
+    builder.Property(e => e.StreamType).HasMaxLength(Constants.MaxLengthStreamType);
 
     builder.Property(e => e.TenantId);
     builder.Property(e => e.CreatedAt);
@@ -59,19 +63,19 @@ internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTyp
     builder.Property(e => e.TraceId).HasMaxLength(16);
     builder.Property(e => e.SpanId).HasMaxLength(8);
 
-    builder
-      .Property(e => e.PayloadJson)
-      .HasColumnType("jsonb");
+    builder.Property(e => e.PayloadJson).HasColumnType("jsonb");
+
+    builder.HasIndex(e => e.GlobalIndex).IsUnique();
+
+    builder.HasIndex(e => new { e.StreamType, e.GlobalIndex });
 
     builder
-      .HasIndex(e => e.GlobalIndex)
-      .IsUnique();
-
-    builder
-      .HasIndex(e => new { e.StreamType, e.GlobalIndex });
-
-    builder
-      .HasIndex(e => new { e.StreamType, e.StreamId, e.StreamVersion })
+      .HasIndex(e => new
+      {
+        e.StreamType,
+        e.StreamId,
+        e.StreamVersion,
+      })
       .IncludeProperties(e => new { e.TenantId })
       .IsUnique();
   }

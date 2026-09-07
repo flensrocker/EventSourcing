@@ -7,7 +7,11 @@ internal class NoopDomainEventPublisher : IDomainEventPublisher
     return Task.CompletedTask;
   }
 
-  public Task PublishAsync(DomainEventMetadata metadata, object payload, CancellationToken cancellationToken)
+  public Task PublishAsync(
+    DomainEventMetadata metadata,
+    object payload,
+    CancellationToken cancellationToken
+  )
   {
     // TODO update metrics
     return Task.CompletedTask;

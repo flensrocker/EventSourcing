@@ -14,24 +14,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
-  .AddMeasureJsonOptions()
+var globalJsonOptions = EventSourcingJsonSerializerOptions
+  .Default.AddMeasureJsonOptions()
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
-builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
-{
-  ConnectionName = ServiceKeys.PostgresDb,
-  JsonOptions = globalJsonOptions,
-}).ForDomainEvents<ToDoEvent>();
+builder
+  .Services.AddPostgreSQLDomainEventStorage(() =>
+    new PostgreSQLDomainEventStorageOptions
+    {
+      ConnectionName = ServiceKeys.PostgresDb,
+      JsonOptions = globalJsonOptions,
+    }
+  )
+  .ForDomainEvents<ToDoEvent>();
 
-builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
-{
-  ConnectionName = ServiceKeys.PostgresDb,
-});
+builder.Services.AddToDoPostgreSQLPersistence(() =>
+  new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb }
+);
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {
@@ -57,8 +60,12 @@ builder.Host.UseOrleansClient(clientBuilder =>
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 {
-  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = globalJsonOptions.Options.AllowOutOfOrderMetadataProperties;
-  jsonOptions.SerializerOptions.PropertyNamingPolicy = globalJsonOptions.Options.PropertyNamingPolicy;
+  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = globalJsonOptions
+    .Options
+    .AllowOutOfOrderMetadataProperties;
+  jsonOptions.SerializerOptions.PropertyNamingPolicy = globalJsonOptions
+    .Options
+    .PropertyNamingPolicy;
   foreach (var typeResolver in globalJsonOptions.Options.TypeInfoResolverChain)
     jsonOptions.SerializerOptions.TypeInfoResolverChain.Add(typeResolver);
 });

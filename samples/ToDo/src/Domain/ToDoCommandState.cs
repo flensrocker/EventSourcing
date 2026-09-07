@@ -9,6 +9,7 @@ public class ToDoCommandState : IDomainEventVersionable, IToDoEventProjectable
 {
   [Id(0)]
   public int Version { get; private set; }
+
   [Id(1)]
   public ToDoStatus Status { get; private set; }
 

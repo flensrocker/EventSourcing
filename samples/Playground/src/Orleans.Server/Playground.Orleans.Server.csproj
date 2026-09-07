@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -33,5 +32,4 @@
     <ProjectReference Include="..\..\..\ToDo\src\Orleans.Server\Flensrocker.ToDo.Orleans.Server.csproj" />
     <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>
-
 </Project>

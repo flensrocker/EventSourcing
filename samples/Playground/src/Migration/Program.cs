@@ -11,33 +11,28 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
-  .AddToDoJsonOptions();
+var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
 
 builder.Services.AddOrleansPostgreSQL(() =>
 {
-  return new OrleansPostgreSQLOptions
-  {
-    ConnectionName = ServiceKeys.PostgresDb,
-  };
+  return new OrleansPostgreSQLOptions { ConnectionName = ServiceKeys.PostgresDb };
 });
 
 builder.Services.AddFlensrockerEventSourcingCore();
-builder.Services.AddPostgreSQLDomainEventStorage(() =>
-{
-  return new PostgreSQLDomainEventStorageOptions
+builder
+  .Services.AddPostgreSQLDomainEventStorage(() =>
   {
-    ConnectionName = ServiceKeys.PostgresDb,
-    JsonOptions = globalJsonOptions,
-  };
-}).ForDomainEvents<ToDoEvent>();
+    return new PostgreSQLDomainEventStorageOptions
+    {
+      ConnectionName = ServiceKeys.PostgresDb,
+      JsonOptions = globalJsonOptions,
+    };
+  })
+  .ForDomainEvents<ToDoEvent>();
 
 builder.Services.AddToDoPostgreSQLPersistence(() =>
 {
-  return new ToDoPostgreSQLPersistenceOptions
-  {
-    ConnectionName = ServiceKeys.PostgresDb,
-  };
+  return new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb };
 });
 
 builder.Services.AddHostedService<MigrationService>();

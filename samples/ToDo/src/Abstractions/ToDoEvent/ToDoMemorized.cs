@@ -11,6 +11,7 @@ public abstract partial record ToDoEvent
   {
     [Id(0)]
     public required DateTimeOffset CreatedAt { get; init; }
+
     [Id(1)]
     public required string Title { get; init; }
   }

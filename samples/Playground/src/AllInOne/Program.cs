@@ -16,24 +16,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions.Default
-  .AddMeasureJsonOptions()
+var globalJsonOptions = EventSourcingJsonSerializerOptions
+  .Default.AddMeasureJsonOptions()
   .AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
-builder.Services.AddPostgreSQLDomainEventStorage(() => new PostgreSQLDomainEventStorageOptions
-{
-  ConnectionName = ServiceKeys.PostgresDb,
-  JsonOptions = globalJsonOptions,
-}).ForDomainEvents<ToDoEvent>();
+builder
+  .Services.AddPostgreSQLDomainEventStorage(() =>
+    new PostgreSQLDomainEventStorageOptions
+    {
+      ConnectionName = ServiceKeys.PostgresDb,
+      JsonOptions = globalJsonOptions,
+    }
+  )
+  .ForDomainEvents<ToDoEvent>();
 
-builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions
-{
-  ConnectionName = ServiceKeys.PostgresDb,
-});
+builder.Services.AddToDoPostgreSQLPersistence(() =>
+  new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb }
+);
 
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
@@ -46,13 +49,18 @@ builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 
 builder.UseOrleans(siloBuilder =>
 {
-  var npgsqlConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb) ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  var npgsqlConnectionString =
+    builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb)
+    ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
-  siloBuilder.AddAdoNetGrainStorage("Default", options =>
-  {
-    options.Invariant = "Npgsql";
-    options.ConnectionString = npgsqlConnectionString;
-  });
+  siloBuilder.AddAdoNetGrainStorage(
+    "Default",
+    options =>
+    {
+      options.Invariant = "Npgsql";
+      options.ConnectionString = npgsqlConnectionString;
+    }
+  );
 
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider(OrleansConstants.LogStorageProviderName);
 
@@ -81,8 +89,12 @@ builder.Services.AddOrleansDomainEventStreamPublisher();
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 {
-  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = globalJsonOptions.Options.AllowOutOfOrderMetadataProperties;
-  jsonOptions.SerializerOptions.PropertyNamingPolicy = globalJsonOptions.Options.PropertyNamingPolicy;
+  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = globalJsonOptions
+    .Options
+    .AllowOutOfOrderMetadataProperties;
+  jsonOptions.SerializerOptions.PropertyNamingPolicy = globalJsonOptions
+    .Options
+    .PropertyNamingPolicy;
   foreach (var typeResolver in globalJsonOptions.Options.TypeInfoResolverChain)
     jsonOptions.SerializerOptions.TypeInfoResolverChain.Add(typeResolver);
 });

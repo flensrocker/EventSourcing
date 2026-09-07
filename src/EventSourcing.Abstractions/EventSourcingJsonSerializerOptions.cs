@@ -9,9 +9,7 @@ namespace Flensrocker.EventSourcing.Abstractions;
 [JsonSerializable(typeof(PersistentProjectionEvent.ProjectionRegistered))]
 [JsonSerializable(typeof(PersistentProjectionEvent.ProjectionRebuilt))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
-internal partial class EventSourcingJsonSerializerContext : JsonSerializerContext
-{
-}
+internal partial class EventSourcingJsonSerializerContext : JsonSerializerContext { }
 
 public class EventSourcingJsonSerializerOptions
 {
@@ -20,11 +18,12 @@ public class EventSourcingJsonSerializerOptions
 
   public static EventSourcingJsonSerializerOptions Default { get; } = new();
 
-  public JsonSerializerOptions Options { get; } = new JsonSerializerOptions
-  {
-    AllowOutOfOrderMetadataProperties = true,
-    PropertyNamingPolicy = null,
-  };
+  public JsonSerializerOptions Options { get; } =
+    new JsonSerializerOptions
+    {
+      AllowOutOfOrderMetadataProperties = true,
+      PropertyNamingPolicy = null,
+    };
 
   public EventSourcingJsonSerializerOptions()
   {
@@ -35,7 +34,9 @@ public class EventSourcingJsonSerializerOptions
   public EventSourcingJsonSerializerOptions Add(JsonSerializerContext context)
   {
     if (Options.IsReadOnly)
-      throw new InvalidOperationException($"{nameof(EventSourcingJsonSerializerOptions)} is already readonly");
+      throw new InvalidOperationException(
+        $"{nameof(EventSourcingJsonSerializerOptions)} is already readonly"
+      );
 
     Options.WithTypeResolversOf(context);
     return this;
@@ -44,7 +45,9 @@ public class EventSourcingJsonSerializerOptions
   public EventSourcingJsonSerializerOptions Add<T>(string typeName)
   {
     if (Options.IsReadOnly)
-      throw new InvalidOperationException($"{nameof(EventSourcingJsonSerializerOptions)} is already readonly");
+      throw new InvalidOperationException(
+        $"{nameof(EventSourcingJsonSerializerOptions)} is already readonly"
+      );
 
     _nameToType.TryAdd(typeName, typeof(T));
     _typeToName.TryAdd(typeof(T), typeName);
@@ -56,16 +59,12 @@ public class EventSourcingJsonSerializerOptions
     if (string.IsNullOrWhiteSpace(typeName))
       return null;
 
-    return _nameToType.TryGetValue(typeName, out var type)
-      ? type
-      : null;
+    return _nameToType.TryGetValue(typeName, out var type) ? type : null;
   }
 
   public string GetTypeName(Type? type)
   {
-    return type is not null && _typeToName.TryGetValue(type, out var typeName)
-      ? typeName
-      : "";
+    return type is not null && _typeToName.TryGetValue(type, out var typeName) ? typeName : "";
   }
 
   public EventSourcingJsonSerializerOptions MakeReadOnly()

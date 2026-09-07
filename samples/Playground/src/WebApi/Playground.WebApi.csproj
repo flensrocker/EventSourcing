@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -25,5 +24,4 @@
     <ProjectReference Include="..\..\..\ToDo\src\WebApi\Flensrocker.ToDo.WebApi.csproj" />
     <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>
-
 </Project>

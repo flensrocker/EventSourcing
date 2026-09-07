@@ -10,7 +10,10 @@ using Orleans.Streams.Core;
 namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 
 public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TEventBase>
-  : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent>
+  : Grain,
+    IGrainWithGuidKey,
+    IStreamSubscriptionObserver,
+    IAsyncObserver<DomainEvent>
   where TDbContext : DbContext
   where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
   where TEventBase : class
@@ -25,7 +28,9 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
   {
     _metrics = ServiceProvider.GetRequiredService<OrleansEntityFrameworkCoreProjectionMetrics>();
     _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
-    _projectionOptions = ServiceProvider.GetRequiredKeyedService<PersistentProjectionOptions>(projectionTypeName);
+    _projectionOptions = ServiceProvider.GetRequiredKeyedService<PersistentProjectionOptions>(
+      projectionTypeName
+    );
   }
 
   public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
@@ -50,7 +55,13 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
     var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
     var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
 
-    _projection = await dbContext.UpdateProjectionAsync(eventStore, domainEvent, _projection, _projectionOptions, _logger);
+    _projection = await dbContext.UpdateProjectionAsync(
+      eventStore,
+      domainEvent,
+      _projection,
+      _projectionOptions,
+      _logger
+    );
 
     _metrics.ProjectionMessagesSaved();
   }

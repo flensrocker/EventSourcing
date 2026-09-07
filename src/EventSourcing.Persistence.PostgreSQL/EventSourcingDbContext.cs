@@ -5,9 +5,7 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 internal class EventSourcingDbContext : DbContext
 {
   public EventSourcingDbContext(DbContextOptions<EventSourcingDbContext> options)
-    : base(options)
-  {
-  }
+    : base(options) { }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {

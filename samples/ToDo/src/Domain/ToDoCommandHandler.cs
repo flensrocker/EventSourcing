@@ -3,22 +3,23 @@ using Flensrocker.ToDo.Abstractions;
 
 namespace Flensrocker.ToDo.Domain;
 
-internal partial class ToDoCommandHandler(
-  TimeProvider timeProvider)
+internal partial class ToDoCommandHandler(TimeProvider timeProvider)
   : ICommandHandler<ToDoEvent, ToDoCommand, ToDoCommandState>
 {
   private readonly TimeProvider _timeProvider = timeProvider;
 
   public ValueTask<ToDoEvent[]?> ExecuteCommandAsync(ToDoCommandState state, ToDoCommand command)
   {
-    return ValueTask.FromResult(command switch
-    {
-      ToDoCommand.MemorizeToDo memorizeToDo => Memorize(state, memorizeToDo),
-      ToDoCommand.CompleteToDo completeToDo => Complete(state, completeToDo),
-      ToDoCommand.DismissToDo dismissToDo => Dismiss(state, dismissToDo),
-      ToDoCommand.ReopenToDo reopenToDo => Reopen(state, reopenToDo),
-      _ => throw new NotImplementedException($"command type {command.GetType().FullName}"),
-    });
+    return ValueTask.FromResult(
+      command switch
+      {
+        ToDoCommand.MemorizeToDo memorizeToDo => Memorize(state, memorizeToDo),
+        ToDoCommand.CompleteToDo completeToDo => Complete(state, completeToDo),
+        ToDoCommand.DismissToDo dismissToDo => Dismiss(state, dismissToDo),
+        ToDoCommand.ReopenToDo reopenToDo => Reopen(state, reopenToDo),
+        _ => throw new NotImplementedException($"command type {command.GetType().FullName}"),
+      }
+    );
   }
 
   private ToDoEvent[]? Memorize(ToDoCommandState state, ToDoCommand.MemorizeToDo command)
@@ -28,11 +29,7 @@ internal partial class ToDoCommandHandler(
 
     return
     [
-      new ToDoEvent.ToDoMemorized
-      {
-        CreatedAt = _timeProvider.GetUtcNow(),
-        Title = command.Title,
-      },
+      new ToDoEvent.ToDoMemorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title },
     ];
   }
 
@@ -43,12 +40,7 @@ internal partial class ToDoCommandHandler(
     if (state.Status != ToDoStatus.Open)
       return null;
 
-    return
-    [
-      new ToDoEvent.ToDoCompleted
-      {
-      },
-    ];
+    return [new ToDoEvent.ToDoCompleted { }];
   }
 
   private ToDoEvent[]? Dismiss(ToDoCommandState state, ToDoCommand.DismissToDo command)
@@ -58,13 +50,7 @@ internal partial class ToDoCommandHandler(
     if (state.Status != ToDoStatus.Open)
       return null;
 
-    return
-    [
-      new ToDoEvent.ToDoDismissed
-      {
-        Reason = command.Reason,
-      },
-    ];
+    return [new ToDoEvent.ToDoDismissed { Reason = command.Reason }];
   }
 
   private ToDoEvent[]? Reopen(ToDoCommandState state, ToDoCommand.ReopenToDo command)
@@ -74,11 +60,6 @@ internal partial class ToDoCommandHandler(
     if (state.Status == ToDoStatus.Open)
       return null;
 
-    return
-    [
-      new ToDoEvent.ToDoReopened
-      {
-      },
-    ];
+    return [new ToDoEvent.ToDoReopened { }];
   }
 }

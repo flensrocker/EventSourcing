@@ -7,7 +7,10 @@ using Orleans.Streams;
 
 namespace Flensrocker.ToDo.Orleans.Server;
 
-public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection> : Grain, IDomainEventProjectionGrain<TProjection>, IDisposable
+public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection>
+  : Grain,
+    IDomainEventProjectionGrain<TProjection>,
+    IDisposable
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable, new()
 {
@@ -21,9 +24,15 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
   }
 
-  private async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> GetOrCreateProjection(CancellationToken cancellationToken)
+  private async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> GetOrCreateProjection(
+    CancellationToken cancellationToken
+  )
   {
-    _projection ??= await DomainEventProjectionObserver<TEventBase, TProjection>.Create(_eventStore, this.GetPrimaryKey(), cancellationToken);
+    _projection ??= await DomainEventProjectionObserver<TEventBase, TProjection>.Create(
+      _eventStore,
+      this.GetPrimaryKey(),
+      cancellationToken
+    );
     return _projection;
   }
 
@@ -43,7 +52,10 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     }
   }
 
-  public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
+  public override async Task OnDeactivateAsync(
+    DeactivationReason reason,
+    CancellationToken cancellationToken
+  )
   {
     if (_subscription is not null)
     {
@@ -65,7 +77,9 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     return projection?.Projection;
   }
 
-  public async IAsyncEnumerable<TProjection> StreamProjection([EnumeratorCancellation] CancellationToken cancellationToken)
+  public async IAsyncEnumerable<TProjection> StreamProjection(
+    [EnumeratorCancellation] CancellationToken cancellationToken
+  )
   {
     var projection = await GetOrCreateProjection(cancellationToken);
     if (projection is null)
@@ -76,7 +90,9 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
 
     yield return projection.Projection;
 
-    await foreach (var value in projection.AsObservable().ToAsyncEnumerable().WithCancellation(cancellationToken))
+    await foreach (
+      var value in projection.AsObservable().ToAsyncEnumerable().WithCancellation(cancellationToken)
+    )
       yield return value;
   }
 

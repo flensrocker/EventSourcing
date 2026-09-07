@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
@@ -22,5 +21,4 @@
     <ProjectReference Include="..\..\..\ToDo\src\Persistence.PostgreSQL\Flensrocker.ToDo.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\ServiceDefaults\Playground.ServiceDefaults.csproj" />
   </ItemGroup>
-
 </Project>

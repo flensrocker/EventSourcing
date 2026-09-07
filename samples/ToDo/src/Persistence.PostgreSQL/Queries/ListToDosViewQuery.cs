@@ -9,12 +9,15 @@ internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
 {
   private readonly IDbContextFactory<ToDoDbContext> _dbContextFactory = dbContextFactory;
 
-  public async ValueTask<ToDoQueryResponse.ListToDos> ExecuteQueryAsync(ToDoQueryRequest.ListToDos request, CancellationToken cancellationToken)
+  public async ValueTask<ToDoQueryResponse.ListToDos> ExecuteQueryAsync(
+    ToDoQueryRequest.ListToDos request,
+    CancellationToken cancellationToken
+  )
   {
     using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-    var listItems = await dbContext.ListItem
-      .AsNoTracking()
+    var listItems = await dbContext
+      .ListItem.AsNoTracking()
       .Where(e => e.TenantId == request.TenantId)
       .OrderBy(e => e.Status)
       .ThenByDescending(e => e.CreatedAt)
@@ -28,9 +31,6 @@ internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
       })
       .ToArrayAsync(cancellationToken);
 
-    return new ToDoQueryResponse.ListToDos
-    {
-      ToDoItemList = listItems,
-    };
+    return new ToDoQueryResponse.ListToDos { ToDoItemList = listItems };
   }
 }

@@ -19,10 +19,7 @@ public abstract partial record ToDoCommand
       if (string.IsNullOrWhiteSpace(reason))
         return null;
 
-      return new DismissToDo
-      {
-        Reason = reason,
-      };
+      return new DismissToDo { Reason = reason };
     }
   }
 }

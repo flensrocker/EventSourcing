@@ -5,47 +5,86 @@ namespace Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 
 public static class PersistentProjectionExtensions
 {
-  public static IServiceCollection AddPersistentProjection<TProjection>(this IServiceCollection services, string projectionTypeName, int currentVersion)
+  public static IServiceCollection AddPersistentProjection<TProjection>(
+    this IServiceCollection services,
+    string projectionTypeName,
+    int currentVersion
+  )
     where TProjection : class, IPersistentProjection
   {
-    var options = PersistentProjectionOptions.Create<TProjection>(projectionTypeName, currentVersion);
+    var options = PersistentProjectionOptions.Create<TProjection>(
+      projectionTypeName,
+      currentVersion
+    );
     services.AddSingleton(options);
     services.AddKeyedSingleton(projectionTypeName, options);
 
     services.AddKeyedScoped<TProjection>(options.TypeName);
-    services.AddKeyedScoped<IPersistentProjection>(options.TypeName, (sp, key) => sp.GetRequiredKeyedService<TProjection>(key));
+    services.AddKeyedScoped<IPersistentProjection>(
+      options.TypeName,
+      (sp, key) => sp.GetRequiredKeyedService<TProjection>(key)
+    );
 
     return services;
   }
 
-  public static async Task RebuildOutdatedPersistentProjectionsAsync(this IServiceProvider serviceProvider)
+  public static async Task RebuildOutdatedPersistentProjectionsAsync(
+    this IServiceProvider serviceProvider
+  )
   {
-    var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(PersistentProjection));
+    var logger = serviceProvider
+      .GetRequiredService<ILoggerFactory>()
+      .CreateLogger(nameof(PersistentProjection));
 
     var timeProvider = serviceProvider.GetRequiredService<TimeProvider>();
 
-    var projectionEventStore = serviceProvider.GetRequiredService<IDomainEventStorage<PersistentProjectionEvent>>();
-    var (_, projectionState) = await projectionEventStore.ReadStateFromStorage<PersistentProjectionState>(PersistentProjectionConstants.RegistryId, default).ConfigureAwait(false);
+    var projectionEventStore = serviceProvider.GetRequiredService<
+      IDomainEventStorage<PersistentProjectionEvent>
+    >();
+    var (_, projectionState) = await projectionEventStore
+      .ReadStateFromStorage<PersistentProjectionState>(
+        PersistentProjectionConstants.RegistryId,
+        default
+      )
+      .ConfigureAwait(false);
     var stateVersionIndex = 0;
 
-    var projectionOptionsList = serviceProvider.GetServices<PersistentProjectionOptions>().ToArray();
+    var projectionOptionsList = serviceProvider
+      .GetServices<PersistentProjectionOptions>()
+      .ToArray();
 
     foreach (var projectionOptions in projectionOptionsList)
     {
       var expectedVersion = projectionOptions.CurrentVersion;
-      logger.LogInformation("Projection {ProjectionTypeName}: version {ExpectedVersion}", projectionOptions.TypeName, expectedVersion);
+      logger.LogInformation(
+        "Projection {ProjectionTypeName}: version {ExpectedVersion}",
+        projectionOptions.TypeName,
+        expectedVersion
+      );
 
-      if (projectionState.TryGetProjectionVersion(projectionOptions.TypeName, out var actualVersion))
+      if (
+        projectionState.TryGetProjectionVersion(projectionOptions.TypeName, out var actualVersion)
+      )
       {
         if (expectedVersion < actualVersion)
         {
-          logger.LogError("Projection {ProjectionTypeName}: actual version {ActualVersion} is higher than expected version {ExpectedVersion}", projectionOptions.TypeName, actualVersion, expectedVersion);
+          logger.LogError(
+            "Projection {ProjectionTypeName}: actual version {ActualVersion} is higher than expected version {ExpectedVersion}",
+            projectionOptions.TypeName,
+            actualVersion,
+            expectedVersion
+          );
           continue;
         }
 
         if (expectedVersion == actualVersion)
         {
-          logger.LogInformation("Projection {ProjectionTypeName}: actual version {ActualVersion} equals expected version {ExpectedVersion}", projectionOptions.TypeName, actualVersion, expectedVersion);
+          logger.LogInformation(
+            "Projection {ProjectionTypeName}: actual version {ActualVersion} equals expected version {ExpectedVersion}",
+            projectionOptions.TypeName,
+            actualVersion,
+            expectedVersion
+          );
           continue;
         }
       }
@@ -53,7 +92,10 @@ public static class PersistentProjectionExtensions
       {
         actualVersion = 0;
 
-        logger.LogInformation("Projection {ProjectionTypeName}: no version yet, registering", projectionOptions.TypeName);
+        logger.LogInformation(
+          "Projection {ProjectionTypeName}: no version yet, registering",
+          projectionOptions.TypeName
+        );
 
         var projectionRegistered = DomainEvent.Create<PersistentProjectionEvent>(
           PersistentProjectionConstants.PersistentProjectionEvent.Base,
@@ -65,21 +107,42 @@ public static class PersistentProjectionExtensions
           },
           tenantId: null,
           userId: null,
-          timeProvider.GetUtcNow());
+          timeProvider.GetUtcNow()
+        );
 
-        if (await projectionEventStore.ApplyUpdatesToStorage(PersistentProjectionConstants.RegistryId, [projectionRegistered], projectionState.Version + stateVersionIndex).ConfigureAwait(false))
+        if (
+          await projectionEventStore
+            .ApplyUpdatesToStorage(
+              PersistentProjectionConstants.RegistryId,
+              [projectionRegistered],
+              projectionState.Version + stateVersionIndex
+            )
+            .ConfigureAwait(false)
+        )
           stateVersionIndex++;
         else
-          logger.LogError("Projection {ProjectionTypeName}: error on storing event {EventName}", projectionOptions.TypeName, nameof(PersistentProjectionEvent.ProjectionRegistered));
+          logger.LogError(
+            "Projection {ProjectionTypeName}: error on storing event {EventName}",
+            projectionOptions.TypeName,
+            nameof(PersistentProjectionEvent.ProjectionRegistered)
+          );
       }
 
-      logger.LogInformation("Projection {ProjectionTypeName}: rebuilding, because actual version {ActualVersion} is less than expected version {ExpectedVersion}", projectionOptions.TypeName, actualVersion, expectedVersion);
+      logger.LogInformation(
+        "Projection {ProjectionTypeName}: rebuilding, because actual version {ActualVersion} is less than expected version {ExpectedVersion}",
+        projectionOptions.TypeName,
+        actualVersion,
+        expectedVersion
+      );
 
       try
       {
         await using var rebuildScope = serviceProvider.CreateAsyncScope();
 
-        var projection = rebuildScope.ServiceProvider.GetRequiredKeyedService<IPersistentProjection>(projectionOptions.TypeName);
+        var projection =
+          rebuildScope.ServiceProvider.GetRequiredKeyedService<IPersistentProjection>(
+            projectionOptions.TypeName
+          );
 
         await projection.RebuildAsync().ConfigureAwait(false);
 
@@ -94,16 +157,33 @@ public static class PersistentProjectionExtensions
           },
           tenantId: null,
           userId: null,
-          timeProvider.GetUtcNow());
+          timeProvider.GetUtcNow()
+        );
 
-        if (await projectionEventStore.ApplyUpdatesToStorage(PersistentProjectionConstants.RegistryId, [projectionRebuilt], projectionState.Version + stateVersionIndex).ConfigureAwait(false))
+        if (
+          await projectionEventStore
+            .ApplyUpdatesToStorage(
+              PersistentProjectionConstants.RegistryId,
+              [projectionRebuilt],
+              projectionState.Version + stateVersionIndex
+            )
+            .ConfigureAwait(false)
+        )
           stateVersionIndex++;
         else
-          logger.LogError("Projection {ProjectionTypeName}: error on storing event {EventName}", projectionOptions.TypeName, nameof(PersistentProjectionEvent.ProjectionRebuilt));
+          logger.LogError(
+            "Projection {ProjectionTypeName}: error on storing event {EventName}",
+            projectionOptions.TypeName,
+            nameof(PersistentProjectionEvent.ProjectionRebuilt)
+          );
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, "Projection {ProjectionTypeName}: rebuild failed", projectionOptions.TypeName);
+        logger.LogError(
+          ex,
+          "Projection {ProjectionTypeName}: rebuild failed",
+          projectionOptions.TypeName
+        );
       }
     }
 

@@ -11,8 +11,8 @@ using Microsoft.Extensions.Logging;
 internal class MigrationService(
   IServiceScopeFactory scopeFactory,
   IHostApplicationLifetime hostLifetime,
-  ILogger<MigrationService> logger)
-  : BackgroundService
+  ILogger<MigrationService> logger
+) : BackgroundService
 {
   private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
   private readonly IHostApplicationLifetime _hostLifetime = hostLifetime;

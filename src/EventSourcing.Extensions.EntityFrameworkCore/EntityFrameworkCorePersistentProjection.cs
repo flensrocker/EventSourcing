@@ -9,8 +9,8 @@ public abstract class EntityFrameworkCorePersistentProjection<TDbContext, TEntit
   IDbContextFactory<TDbContext> dbContextFactory,
   IDomainEventStorage<TEventBase> eventStore,
   ILogger logger,
-  PersistentProjectionOptions projectionOptions)
-  : IPersistentProjection
+  PersistentProjectionOptions projectionOptions
+) : IPersistentProjection
   where TDbContext : DbContext
   where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
   where TEventBase : class
@@ -22,10 +22,27 @@ public abstract class EntityFrameworkCorePersistentProjection<TDbContext, TEntit
 
   public async Task RebuildAsync()
   {
-    _logger.LogInformation("Rebuild starting on DbContext {DbContext}, entity {Entity} on events {EventBase}", typeof(TDbContext), typeof(TEntity), typeof(TEventBase));
+    _logger.LogInformation(
+      "Rebuild starting on DbContext {DbContext}, entity {Entity} on events {EventBase}",
+      typeof(TDbContext),
+      typeof(TEntity),
+      typeof(TEventBase)
+    );
 
-    await _dbContextFactory.RebuildProjectionAsync<TDbContext, TEntity, TEventBase>(_eventStore, _logger, _projectionOptions, default).ConfigureAwait(false);
+    await _dbContextFactory
+      .RebuildProjectionAsync<TDbContext, TEntity, TEventBase>(
+        _eventStore,
+        _logger,
+        _projectionOptions,
+        default
+      )
+      .ConfigureAwait(false);
 
-    _logger.LogInformation("Rebuild finished on DbContext {DbContext}, entity {Entity} on events {EventBase}", typeof(TDbContext), typeof(TEntity), typeof(TEventBase));
+    _logger.LogInformation(
+      "Rebuild finished on DbContext {DbContext}, entity {Entity} on events {EventBase}",
+      typeof(TDbContext),
+      typeof(TEntity),
+      typeof(TEventBase)
+    );
   }
 }

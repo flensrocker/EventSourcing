@@ -6,7 +6,5 @@ namespace Flensrocker.EventSourcing.Orleans.PostgreSQL;
 internal class OrleansDbContext : DbContext
 {
   public OrleansDbContext(DbContextOptions<OrleansDbContext> options)
-    : base(options)
-  {
-  }
+    : base(options) { }
 }

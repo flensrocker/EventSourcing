@@ -4,6 +4,4 @@ namespace Flensrocker.Measure.Orleans.Abstractions;
 
 [JsonSerializable(typeof(DummyCommand))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
-public partial class MeasureJsonSerializerContext : JsonSerializerContext
-{
-}
+public partial class MeasureJsonSerializerContext : JsonSerializerContext { }

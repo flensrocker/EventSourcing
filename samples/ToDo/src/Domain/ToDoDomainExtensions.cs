@@ -11,7 +11,9 @@ public static class ToDoDomainExtensions
     public IServiceCollection AddToDo()
     {
       services.AddTransient<ToDoCommandHandler>();
-      services.AddTransient<ICommandHandler<ToDoEvent, ToDoCommand, ToDoCommandState>>(sp => sp.GetRequiredService<ToDoCommandHandler>());
+      services.AddTransient<ICommandHandler<ToDoEvent, ToDoCommand, ToDoCommandState>>(sp =>
+        sp.GetRequiredService<ToDoCommandHandler>()
+      );
 
       return services;
     }
