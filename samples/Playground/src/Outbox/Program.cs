@@ -20,11 +20,7 @@ builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
-  return new PostgreSQLMessageSubscriberOptions
-  {
-    ConnectionName = ServiceKeys.PostgresDb,
-    JsonOptions = globalJsonOptions,
-  };
+  return new PostgreSQLMessageSubscriberOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions };
 });
 
 builder.UseOrleansClient(clientBuilder =>

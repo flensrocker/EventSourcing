@@ -68,11 +68,7 @@ internal partial class PostgreSQLMessageSubscriber(
               await foreach (
                 var message in conn.StartReplication(
                     slot,
-                    new PgOutputReplicationOptions(
-                      Constants.PublicationName,
-                      PgOutputProtocolVersion.V4,
-                      binary: true
-                    ),
+                    new PgOutputReplicationOptions(Constants.PublicationName, PgOutputProtocolVersion.V4, binary: true),
                     cancellationToken
                   )
                   .ConfigureAwait(false)
@@ -112,11 +108,7 @@ internal partial class PostgreSQLMessageSubscriber(
                       );
 
                     await state
-                      .Publisher.PublishAsync(
-                        domainEvent.Value.Metadata,
-                        domainEvent.Value.Payload,
-                        cancellationToken
-                      )
+                      .Publisher.PublishAsync(domainEvent.Value.Metadata, domainEvent.Value.Payload, cancellationToken)
                       .ConfigureAwait(false);
 
                     state.Metrics.ProcessInsertMessageDuration(startingTimestamp);
@@ -140,8 +132,7 @@ internal partial class PostgreSQLMessageSubscriber(
           )
           .ConfigureAwait(false);
       }
-      catch (OperationCanceledException opex)
-        when (opex.CancellationToken == stoppingToken && stoppingToken.IsCancellationRequested)
+      catch (OperationCanceledException opex) when (opex.CancellationToken == stoppingToken && stoppingToken.IsCancellationRequested)
       {
         LogStoppingSubscriber(_logger);
       }
@@ -155,14 +146,8 @@ internal partial class PostgreSQLMessageSubscriber(
   [LoggerMessage(LogLevel.Information, Message = "Connecting to PostgreSQL")]
   internal static partial void LogConnecting(ILogger logger);
 
-  [LoggerMessage(
-    LogLevel.Information,
-    Message = "Received replication message {ReplicationMessageType}"
-  )]
-  internal static partial void LogReceivedReplicationMessage(
-    ILogger logger,
-    Type replicationMessageType
-  );
+  [LoggerMessage(LogLevel.Information, Message = "Received replication message {ReplicationMessageType}")]
+  internal static partial void LogReceivedReplicationMessage(ILogger logger, Type replicationMessageType);
 
   [LoggerMessage(LogLevel.Information, Message = "Publishing insert message {InsertMessageType}")]
   internal static partial void LogPublishingInsertMessage(ILogger logger, Type insertMessageType);
@@ -176,10 +161,7 @@ internal partial class PostgreSQLMessageSubscriber(
   [LoggerMessage(LogLevel.Information, Message = "Starting PostgreSQL Message Subscriber")]
   internal static partial void LogStartingSubscriber(ILogger logger);
 
-  [LoggerMessage(
-    LogLevel.Information,
-    Message = "Stopping PostgreSQL Message Subscriber as requested"
-  )]
+  [LoggerMessage(LogLevel.Information, Message = "Stopping PostgreSQL Message Subscriber as requested")]
   internal static partial void LogStoppingSubscriber(ILogger logger);
 
   [LoggerMessage(LogLevel.Error, Message = "Reconnecting PostgreSQL Message Subscriber")]

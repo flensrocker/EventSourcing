@@ -20,19 +20,14 @@ public static class OrleansPostgreSQLExtensions
         (serviceProvider, dbOptions) =>
         {
           var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-          var connectionString = rootConfiguration.GetConnectionString(
-            storageOptions.ConnectionName
-          );
+          var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
 
           dbOptions.UseNpgsql(
             connectionString,
             npgsqlOptions =>
             {
               npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-              npgsqlOptions.MigrationsHistoryTable(
-                HistoryRepository.DefaultTableName,
-                Constants.SchemaName
-              );
+              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
             }
           );
         }

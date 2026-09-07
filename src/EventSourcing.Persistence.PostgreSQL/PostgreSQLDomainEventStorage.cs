@@ -34,20 +34,13 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     nameof(MessageEntity.SpanId),
     nameof(MessageEntity.PayloadJson),
   ];
-  private static readonly string _insertColumnNameList = string.Join(
-    ", ",
-    _insertColumnList.Select(n => $"\"{n}\"")
-  );
+  private static readonly string _insertColumnNameList = string.Join(", ", _insertColumnList.Select(n => $"\"{n}\""));
 
-  private static string GetInsertParameterName(int columnIndex, int valueIndex) =>
-    $"@{_insertColumnList[columnIndex]}{valueIndex}";
+  private static string GetInsertParameterName(int columnIndex, int valueIndex) => $"@{_insertColumnList[columnIndex]}{valueIndex}";
 
-  private static string GetInsertParameterNameList(int index) =>
-    $"({string.Join(", ", _insertColumnList.Select(n => $"@{n}{index}"))})";
+  private static string GetInsertParameterNameList(int index) => $"({string.Join(", ", _insertColumnList.Select(n => $"@{n}{index}"))})";
 
-  async Task<
-    KeyValuePair<int, TState>
-  > IDomainEventStorage<TEventBase>.ReadStateFromStorage<TState>(
+  async Task<KeyValuePair<int, TState>> IDomainEventStorage<TEventBase>.ReadStateFromStorage<TState>(
     Guid streamId,
     CancellationToken cancellationToken
   )
@@ -69,10 +62,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     {
       state.ApplyEvents(domainEventList);
 
-      return new KeyValuePair<int, TState>(
-        domainEventList[domainEventList.Length - 1].Metadata.StreamVersion,
-        state
-      );
+      return new KeyValuePair<int, TState>(domainEventList[domainEventList.Length - 1].Metadata.StreamVersion, state);
     }
 
     return new KeyValuePair<int, TState>(0, state);
@@ -88,9 +78,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     {
       var parameters = new List<NpgsqlParameter>();
       var insertSql = new StringBuilder();
-      insertSql.Append(
-        $"INSERT INTO \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" ({_insertColumnNameList}) VALUES "
-      );
+      insertSql.Append($"INSERT INTO \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" ({_insertColumnNameList}) VALUES ");
 
       var valueSql = string.Join(
         ", ",
@@ -98,73 +86,37 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
           (ev, valueIndex) =>
           {
             parameters.AddRange(
-              new NpgsqlParameter(
-                GetInsertParameterName(0, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Uuid
-              )
-              {
-                Value = ev.Metadata.EventId,
-              },
-              new NpgsqlParameter(
-                GetInsertParameterName(1, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Varchar
-              )
+              new NpgsqlParameter(GetInsertParameterName(0, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid) { Value = ev.Metadata.EventId },
+              new NpgsqlParameter(GetInsertParameterName(1, valueIndex), NpgsqlTypes.NpgsqlDbType.Varchar)
               {
                 Value = ev.Metadata.StreamType,
               },
-              new NpgsqlParameter(
-                GetInsertParameterName(2, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Uuid
-              )
-              {
-                Value = ev.Metadata.StreamId,
-              },
-              new NpgsqlParameter(
-                GetInsertParameterName(3, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Integer
-              )
+              new NpgsqlParameter(GetInsertParameterName(2, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid) { Value = ev.Metadata.StreamId },
+              new NpgsqlParameter(GetInsertParameterName(3, valueIndex), NpgsqlTypes.NpgsqlDbType.Integer)
               {
                 Value = ev.Metadata.StreamVersion,
               },
-              new NpgsqlParameter(
-                GetInsertParameterName(4, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Uuid
-              )
+              new NpgsqlParameter(GetInsertParameterName(4, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid)
               {
                 Value = ev.Metadata.TenantId ?? (object?)DBNull.Value,
               },
-              new NpgsqlParameter(
-                GetInsertParameterName(5, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.TimestampTz
-              )
+              new NpgsqlParameter(GetInsertParameterName(5, valueIndex), NpgsqlTypes.NpgsqlDbType.TimestampTz)
               {
                 Value = ev.Metadata.CreatedAt,
               },
-              new NpgsqlParameter(
-                GetInsertParameterName(6, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Uuid
-              )
+              new NpgsqlParameter(GetInsertParameterName(6, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid)
               {
                 Value = ev.Metadata.CreatedByUserId ?? (object?)DBNull.Value,
               },
-              new NpgsqlParameter(
-                GetInsertParameterName(7, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Bytea
-              )
+              new NpgsqlParameter(GetInsertParameterName(7, valueIndex), NpgsqlTypes.NpgsqlDbType.Bytea)
               {
                 Value = ev.Metadata.TraceId ?? (object?)DBNull.Value,
               },
-              new NpgsqlParameter(
-                GetInsertParameterName(8, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Bytea
-              )
+              new NpgsqlParameter(GetInsertParameterName(8, valueIndex), NpgsqlTypes.NpgsqlDbType.Bytea)
               {
                 Value = ev.Metadata.SpanId ?? (object?)DBNull.Value,
               },
-              new NpgsqlParameter(
-                GetInsertParameterName(9, valueIndex),
-                NpgsqlTypes.NpgsqlDbType.Jsonb
-              )
+              new NpgsqlParameter(GetInsertParameterName(9, valueIndex), NpgsqlTypes.NpgsqlDbType.Jsonb)
               {
                 Value = JsonSerializer.Serialize(ev.Payload, _options.JsonOptions.Options),
               }
@@ -180,9 +132,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
 
       await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-      var insertedCount = await dbContext
-        .Database.ExecuteSqlRawAsync(insertSql.ToString(), parameters)
-        .ConfigureAwait(false);
+      var insertedCount = await dbContext.Database.ExecuteSqlRawAsync(insertSql.ToString(), parameters).ConfigureAwait(false);
 
       return insertedCount == updates.Count;
     }
@@ -252,9 +202,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
       .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions.Options))
       .AsAsyncEnumerable();
 
-    await foreach (
-      var domainEvent in domainEventList.WithCancellation(cancellationToken).ConfigureAwait(false)
-    )
+    await foreach (var domainEvent in domainEventList.WithCancellation(cancellationToken).ConfigureAwait(false))
       yield return domainEvent;
   }
 }

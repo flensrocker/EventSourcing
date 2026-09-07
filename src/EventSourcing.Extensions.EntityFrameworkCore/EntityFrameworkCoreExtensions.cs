@@ -11,20 +11,16 @@ public static class EntityFrameworkCoreExtensions
   extension(IServiceCollection services)
   {
     public IServiceCollection AddEntityFrameworkCoreDbMigration<TDbContext>()
-      where TDbContext : DbContext =>
-      services.AddDbMigration<EntityFrameworkCoreDbMigration<TDbContext>>();
+      where TDbContext : DbContext => services.AddDbMigration<EntityFrameworkCoreDbMigration<TDbContext>>();
 
-    public IServiceCollection AddEntityFrameworkCorePersistentProjection<
-      TProjection,
-      TDbContext,
-      TEntity,
-      TEventBase
-    >(string projectionTypeName, int currentVersion)
+    public IServiceCollection AddEntityFrameworkCorePersistentProjection<TProjection, TDbContext, TEntity, TEventBase>(
+      string projectionTypeName,
+      int currentVersion
+    )
       where TProjection : EntityFrameworkCorePersistentProjection<TDbContext, TEntity, TEventBase>
       where TDbContext : DbContext
       where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
-      where TEventBase : class =>
-      services.AddPersistentProjection<TProjection>(projectionTypeName, currentVersion);
+      where TEventBase : class => services.AddPersistentProjection<TProjection>(projectionTypeName, currentVersion);
   }
 
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
@@ -62,10 +58,7 @@ public static class EntityFrameworkCoreExtensions
 
       var entity = dbContext.Attach(projection);
 
-      if (
-        projection is IDomainEventVersionable withVersion
-        && withVersion.Version < expectedVersion
-      )
+      if (projection is IDomainEventVersionable withVersion && withVersion.Version < expectedVersion)
       {
         logger.LogWarning(
           "Entity {ProjectionType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}",
@@ -76,9 +69,7 @@ public static class EntityFrameworkCoreExtensions
         );
 
         var fromVersion = Math.Max(1, withVersion.Version);
-        var itemEvents = await eventStore
-          .ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default)
-          .ConfigureAwait(false);
+        var itemEvents = await eventStore.ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default).ConfigureAwait(false);
         if (itemEvents is null)
         {
           logger.LogError(
@@ -142,11 +133,7 @@ public static class EntityFrameworkCoreExtensions
       var domainEventCount = 0;
       var domainEventTotalCount = 0;
 
-      await foreach (
-        var domainEvent in eventStore
-          .ReadAllEventsFromStorage(cancellationToken)
-          .ConfigureAwait(false)
-      )
+      await foreach (var domainEvent in eventStore.ReadAllEventsFromStorage(cancellationToken).ConfigureAwait(false))
       {
         TEntity? projection;
 
@@ -193,11 +180,7 @@ public static class EntityFrameworkCoreExtensions
 
         if (batchCount >= batchSize)
         {
-          logger.LogInformation(
-            "Batch save after {BatchCount} projections with {DomainEventCount} events",
-            batchCount,
-            domainEventCount
-          );
+          logger.LogInformation("Batch save after {BatchCount} projections with {DomainEventCount} events", batchCount, domainEventCount);
           await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
           await dbContext.DisposeAsync().ConfigureAwait(false);
@@ -210,11 +193,7 @@ public static class EntityFrameworkCoreExtensions
         }
       }
 
-      logger.LogInformation(
-        "Final save after {BatchCount} projections with {DomainEventCount} events",
-        batchCount,
-        domainEventCount
-      );
+      logger.LogInformation("Final save after {BatchCount} projections with {DomainEventCount} events", batchCount, domainEventCount);
       await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
       batchTotalCount += batchCount;

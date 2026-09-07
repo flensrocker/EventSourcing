@@ -12,16 +12,9 @@ public class OrleansDomainEventStreamPublisherMetrics
 
   public OrleansDomainEventStreamPublisherMetrics(IMeterFactory meterFactory)
   {
-    var meter = meterFactory.Create(
-      EventSourcingConstants.MeterName,
-      EventSourcingConstants.MeterVersion
-    );
+    var meter = meterFactory.Create(EventSourcingConstants.MeterName, EventSourcingConstants.MeterVersion);
 
-    _publishedMessages = meter.CreateCounter<long>(
-      "messages-published",
-      "Messages",
-      "The number of messages published to Orleans"
-    );
+    _publishedMessages = meter.CreateCounter<long>("messages-published", "Messages", "The number of messages published to Orleans");
     _publishedDomainEvents = meter.CreateCounter<long>(
       "domainevents-published",
       "Domain-Events",

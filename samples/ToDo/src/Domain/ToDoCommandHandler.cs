@@ -3,8 +3,7 @@ using Flensrocker.ToDo.Abstractions;
 
 namespace Flensrocker.ToDo.Domain;
 
-internal partial class ToDoCommandHandler(TimeProvider timeProvider)
-  : ICommandHandler<ToDoEvent, ToDoCommand, ToDoCommandState>
+internal partial class ToDoCommandHandler(TimeProvider timeProvider) : ICommandHandler<ToDoEvent, ToDoCommand, ToDoCommandState>
 {
   private readonly TimeProvider _timeProvider = timeProvider;
 
@@ -27,10 +26,7 @@ internal partial class ToDoCommandHandler(TimeProvider timeProvider)
     if (state.Version > 0)
       return null;
 
-    return
-    [
-      new ToDoEvent.ToDoMemorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title },
-    ];
+    return [new ToDoEvent.ToDoMemorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
   }
 
   private ToDoEvent[]? Complete(ToDoCommandState state, ToDoCommand.CompleteToDo command)

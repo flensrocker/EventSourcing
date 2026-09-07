@@ -41,15 +41,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
 
     if (payloads.Length == 1)
     {
-      var domainEvent = DomainEvent.Create(
-        _eventStore.StreamType,
-        streamId,
-        _nextVersion,
-        payloads[0],
-        tenantId,
-        userId,
-        createdAt
-      );
+      var domainEvent = DomainEvent.Create(_eventStore.StreamType, streamId, _nextVersion, payloads[0], tenantId, userId, createdAt);
       _nextVersion++;
 
       RaiseEvent(domainEvent);
@@ -59,15 +51,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
       var domainEventList = new List<DomainEvent>(payloads.Length);
       foreach (var payload in payloads)
       {
-        var domainEvent = DomainEvent.Create(
-          _eventStore.StreamType,
-          streamId,
-          _nextVersion,
-          payload,
-          tenantId,
-          userId,
-          createdAt
-        );
+        var domainEvent = DomainEvent.Create(_eventStore.StreamType, streamId, _nextVersion, payload, tenantId, userId, createdAt);
         _nextVersion++;
 
         domainEventList.Add(domainEvent);
@@ -81,9 +65,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
   {
     await using var commandScope = ServiceProvider.CreateAsyncScope();
 
-    var commandHandler = commandScope.ServiceProvider.GetRequiredService<
-      ICommandHandler<TEventBase, TCommandBase, TCommandState>
-    >();
+    var commandHandler = commandScope.ServiceProvider.GetRequiredService<ICommandHandler<TEventBase, TCommandBase, TCommandState>>();
 
     var payloads = await commandHandler.ExecuteCommandAsync(State, command);
     if (payloads is not { Length: > 0 })
@@ -103,9 +85,6 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
     int expectedVersion
   ) => _eventStore.ApplyUpdatesToStorage(this.GetPrimaryKey(), updates, expectedVersion);
 
-  Task<KeyValuePair<int, TCommandState>> ICustomStorageInterface<
-    TCommandState,
-    DomainEvent
-  >.ReadStateFromStorage() =>
+  Task<KeyValuePair<int, TCommandState>> ICustomStorageInterface<TCommandState, DomainEvent>.ReadStateFromStorage() =>
     _eventStore.ReadStateFromStorage<TCommandState>(this.GetPrimaryKey(), default);
 }

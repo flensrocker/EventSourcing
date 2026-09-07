@@ -18,9 +18,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions
-  .Default.AddMeasureJsonOptions()
-  .AddToDoJsonOptions();
+var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddMeasureJsonOptions().AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
@@ -28,19 +26,13 @@ builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 builder.Services.AddFlensrockerEventSourcingCore();
 builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
-    new PostgreSQLDomainEventStorageOptions
-    {
-      ConnectionName = ServiceKeys.PostgresDb,
-      JsonOptions = globalJsonOptions,
-    }
+    new PostgreSQLDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions }
   )
   .ForDomainEvents<ToDoEvent>();
 
 builder
   .Services.AddToDo()
-  .AddToDoPostgreSQLPersistence(() =>
-    new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb }
-  );
+  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
 
 builder.UseOrleans(siloBuilder =>
 {

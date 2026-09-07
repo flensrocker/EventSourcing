@@ -16,9 +16,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions
-  .Default.AddMeasureJsonOptions()
-  .AddToDoJsonOptions();
+var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddMeasureJsonOptions().AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
@@ -26,25 +24,15 @@ builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 builder.Services.AddFlensrockerEventSourcingCore();
 builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
-    new PostgreSQLDomainEventStorageOptions
-    {
-      ConnectionName = ServiceKeys.PostgresDb,
-      JsonOptions = globalJsonOptions,
-    }
+    new PostgreSQLDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions }
   )
   .ForDomainEvents<ToDoEvent>();
 
-builder.Services.AddToDoPostgreSQLPersistence(() =>
-  new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb }
-);
+builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
 
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
-  return new PostgreSQLMessageSubscriberOptions
-  {
-    ConnectionName = ServiceKeys.PostgresDb,
-    JsonOptions = globalJsonOptions,
-  };
+  return new PostgreSQLMessageSubscriberOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions };
 });
 
 builder.UseOrleans(siloBuilder =>
@@ -89,12 +77,8 @@ builder.Services.AddOrleansDomainEventStreamPublisher();
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 {
-  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = globalJsonOptions
-    .Options
-    .AllowOutOfOrderMetadataProperties;
-  jsonOptions.SerializerOptions.PropertyNamingPolicy = globalJsonOptions
-    .Options
-    .PropertyNamingPolicy;
+  jsonOptions.SerializerOptions.AllowOutOfOrderMetadataProperties = globalJsonOptions.Options.AllowOutOfOrderMetadataProperties;
+  jsonOptions.SerializerOptions.PropertyNamingPolicy = globalJsonOptions.Options.PropertyNamingPolicy;
   foreach (var typeResolver in globalJsonOptions.Options.TypeInfoResolverChain)
     jsonOptions.SerializerOptions.TypeInfoResolverChain.Add(typeResolver);
 });

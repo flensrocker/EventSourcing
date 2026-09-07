@@ -19,11 +19,7 @@ public class EventSourcingJsonSerializerOptions
   public static EventSourcingJsonSerializerOptions Default { get; } = new();
 
   public JsonSerializerOptions Options { get; } =
-    new JsonSerializerOptions
-    {
-      AllowOutOfOrderMetadataProperties = true,
-      PropertyNamingPolicy = null,
-    };
+    new JsonSerializerOptions { AllowOutOfOrderMetadataProperties = true, PropertyNamingPolicy = null };
 
   public EventSourcingJsonSerializerOptions()
   {
@@ -34,9 +30,7 @@ public class EventSourcingJsonSerializerOptions
   public EventSourcingJsonSerializerOptions Add(JsonSerializerContext context)
   {
     if (Options.IsReadOnly)
-      throw new InvalidOperationException(
-        $"{nameof(EventSourcingJsonSerializerOptions)} is already readonly"
-      );
+      throw new InvalidOperationException($"{nameof(EventSourcingJsonSerializerOptions)} is already readonly");
 
     Options.WithTypeResolversOf(context);
     return this;
@@ -45,9 +39,7 @@ public class EventSourcingJsonSerializerOptions
   public EventSourcingJsonSerializerOptions Add<T>(string typeName)
   {
     if (Options.IsReadOnly)
-      throw new InvalidOperationException(
-        $"{nameof(EventSourcingJsonSerializerOptions)} is already readonly"
-      );
+      throw new InvalidOperationException($"{nameof(EventSourcingJsonSerializerOptions)} is already readonly");
 
     _nameToType.TryAdd(typeName, typeof(T));
     _typeToName.TryAdd(typeof(T), typeName);

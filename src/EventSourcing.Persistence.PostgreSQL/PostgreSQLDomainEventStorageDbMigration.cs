@@ -14,10 +14,7 @@ internal class PostgreSQLDomainEventStorageDbMigration(
 
   public async Task MigrateAsync()
   {
-    _logger.LogInformation(
-      "Migration starting on DbContext {DbContext}",
-      typeof(EventSourcingDbContext)
-    );
+    _logger.LogInformation("Migration starting on DbContext {DbContext}", typeof(EventSourcingDbContext));
 
     using (var migrationDbContext = _dbContextFactory.CreateDbContext())
       await migrationDbContext.Database.MigrateAsync().ConfigureAwait(false);
@@ -35,9 +32,6 @@ internal class PostgreSQLDomainEventStorageDbMigration(
       await slotDbContext.Database.ExecuteSqlRawAsync(createSlot).ConfigureAwait(false);
     }
 
-    _logger.LogInformation(
-      "Migration finished on DbContext {DbContext}",
-      typeof(EventSourcingDbContext)
-    );
+    _logger.LogInformation("Migration finished on DbContext {DbContext}", typeof(EventSourcingDbContext));
   }
 }

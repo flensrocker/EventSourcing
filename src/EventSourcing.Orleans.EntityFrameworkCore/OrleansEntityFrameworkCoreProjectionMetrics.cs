@@ -12,10 +12,7 @@ public class OrleansEntityFrameworkCoreProjectionMetrics
 
   public OrleansEntityFrameworkCoreProjectionMetrics(IMeterFactory meterFactory)
   {
-    var meter = meterFactory.Create(
-      EventSourcingConstants.MeterName,
-      EventSourcingConstants.MeterVersion
-    );
+    var meter = meterFactory.Create(EventSourcingConstants.MeterName, EventSourcingConstants.MeterVersion);
 
     _receivedProjectionMessages = meter.CreateCounter<long>(
       "projection-messages-received",

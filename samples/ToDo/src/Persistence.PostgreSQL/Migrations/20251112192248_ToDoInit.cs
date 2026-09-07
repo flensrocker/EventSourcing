@@ -20,15 +20,8 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
           ToDoId = table.Column<Guid>(type: "uuid", nullable: false),
           Version = table.Column<int>(type: "integer", nullable: false),
           TenantId = table.Column<Guid>(type: "uuid", nullable: true),
-          CreatedAt = table.Column<DateTimeOffset>(
-            type: "timestamp with time zone",
-            nullable: false
-          ),
-          Title = table.Column<string>(
-            type: "character varying(100)",
-            maxLength: 100,
-            nullable: false
-          ),
+          CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+          Title = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
           Status = table.Column<int>(type: "integer", nullable: false),
         },
         constraints: table =>

@@ -4,18 +4,12 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 builder.AddDockerComposeEnvironment("compose");
 
-var garnetClusteringStorage = builder
-  .AddGarnet(ServiceKeys.OrleansClustering)
-  .WithOrleansProviderType("Redis")
+var garnetClusteringStorage = builder.AddGarnet(ServiceKeys.OrleansClustering).WithOrleansProviderType("Redis")
 // We don't need persistent clustering data because we always restart the whole thing and sometimes it tries to connect to the old silo
 //.WithDataVolume("playground-garnet-data")
 ;
 
-var nats = builder
-  .AddNats("nats")
-  .WithImageTag("2")
-  .WithJetStream()
-  .WithDataVolume("playground-nats-data");
+var nats = builder.AddNats("nats").WithImageTag("2").WithJetStream().WithDataVolume("playground-nats-data");
 
 var azure = builder.AddAzureStorage("azure").RunAsEmulator();
 var azureQueuesStreams = azure.AddQueues(ServiceKeys.OrleansStreaming);
@@ -40,10 +34,7 @@ var orleans = builder
   .WithServiceId("playground")
   .WithClusterId("default")
   .WithClustering(garnetClusteringStorage)
-  .WithStreaming(
-    Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName,
-    azureQueuesStreams
-  )
+  .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, azureQueuesStreams)
   .WithMemoryGrainStorage("PubSubStore");
 
 IResourceBuilder<IResourceWithServiceDiscovery> webApi;

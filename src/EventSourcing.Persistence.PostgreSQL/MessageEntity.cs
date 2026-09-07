@@ -33,8 +33,7 @@ internal class MessageEntity
   internal string PayloadJson { get; set; } = "";
 }
 
-internal class MessageEntiyConfiguration(ModelBuilder modelBuilder)
-  : IEntityTypeConfiguration<MessageEntity>
+internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTypeConfiguration<MessageEntity>
 {
   private readonly ModelBuilder _modelBuilder = modelBuilder;
 
@@ -44,15 +43,11 @@ internal class MessageEntiyConfiguration(ModelBuilder modelBuilder)
 
     builder.HasKey(e => e.Id);
 
-    _modelBuilder
-      .HasSequence(Constants.GlobalMessageIndexSequenceName, Constants.SchemaName)
-      .StartsAt(1L);
+    _modelBuilder.HasSequence(Constants.GlobalMessageIndexSequenceName, Constants.SchemaName).StartsAt(1L);
 
     builder
       .Property(e => e.GlobalIndex)
-      .HasDefaultValueSql(
-        $"nextval('\"{Constants.SchemaName}\".\"{Constants.GlobalMessageIndexSequenceName}\"')"
-      );
+      .HasDefaultValueSql($"nextval('\"{Constants.SchemaName}\".\"{Constants.GlobalMessageIndexSequenceName}\"')");
 
     builder.Property(e => e.StreamType).HasMaxLength(Constants.MaxLengthStreamType);
 

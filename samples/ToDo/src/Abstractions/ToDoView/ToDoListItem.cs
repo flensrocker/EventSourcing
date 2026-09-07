@@ -7,11 +7,7 @@ public abstract partial record ToDoView
 {
   [GenerateSerializer]
   [Alias(ToDoConstants.ToDoView.ToDoListItem)]
-  public sealed record ToDoListItem
-    : ToDoView,
-      IDomainEventVersionable,
-      IToDoEventProjectable,
-      IWhereId<ToDoListItem>
+  public sealed record ToDoListItem : ToDoView, IDomainEventVersionable, IToDoEventProjectable, IWhereId<ToDoListItem>
   {
     public const int ProjectionVersion = 1;
 
@@ -33,8 +29,7 @@ public abstract partial record ToDoView
     [Id(5)]
     public ToDoStatus Status { get; private set; }
 
-    static Expression<Func<ToDoListItem, bool>> IWhereId<ToDoListItem>.GetWhereId(Guid id) =>
-      item => item.ToDoId == id;
+    static Expression<Func<ToDoListItem, bool>> IWhereId<ToDoListItem>.GetWhereId(Guid id) => item => item.ToDoId == id;
 
     void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
     {

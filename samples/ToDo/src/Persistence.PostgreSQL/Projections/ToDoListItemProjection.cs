@@ -12,8 +12,7 @@ internal class ToDoListItemProjection(
   IDbContextFactory<ToDoDbContext> dbContextFactory,
   IDomainEventStorage<ToDoEvent> eventStore,
   ILogger<ToDoListItemProjection> logger,
-  [FromKeyedServices(ToDoConstants.ToDoView.ToDoListItem)]
-    PersistentProjectionOptions projectionOptions
+  [FromKeyedServices(ToDoConstants.ToDoView.ToDoListItem)] PersistentProjectionOptions projectionOptions
 )
   : EntityFrameworkCorePersistentProjection<ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(
     dbContextFactory,

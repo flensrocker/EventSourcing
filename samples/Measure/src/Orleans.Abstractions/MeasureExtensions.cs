@@ -6,7 +6,6 @@ public static class MeasureExtensions
 {
   extension(EventSourcingJsonSerializerOptions jsonOptions)
   {
-    public EventSourcingJsonSerializerOptions AddMeasureJsonOptions() =>
-      jsonOptions.Add(MeasureJsonSerializerContext.Default);
+    public EventSourcingJsonSerializerOptions AddMeasureJsonOptions() => jsonOptions.Add(MeasureJsonSerializerContext.Default);
   }
 }

@@ -30,12 +30,7 @@ public abstract class EntityFrameworkCorePersistentProjection<TDbContext, TEntit
     );
 
     await _dbContextFactory
-      .RebuildProjectionAsync<TDbContext, TEntity, TEventBase>(
-        _eventStore,
-        _logger,
-        _projectionOptions,
-        default
-      )
+      .RebuildProjectionAsync<TDbContext, TEntity, TEventBase>(_eventStore, _logger, _projectionOptions, default)
       .ConfigureAwait(false);
 
     _logger.LogInformation(

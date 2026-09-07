@@ -25,18 +25,11 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL.Migrations
             nullable: false,
             defaultValueSql: "nextval('\"EventSourcing\".\"GlobalMessageIndex\"')"
           ),
-          StreamType = table.Column<string>(
-            type: "character varying(250)",
-            maxLength: 250,
-            nullable: false
-          ),
+          StreamType = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
           StreamId = table.Column<Guid>(type: "uuid", nullable: false),
           StreamVersion = table.Column<int>(type: "integer", nullable: false),
           TenantId = table.Column<Guid>(type: "uuid", nullable: true),
-          CreatedAt = table.Column<DateTimeOffset>(
-            type: "timestamp with time zone",
-            nullable: false
-          ),
+          CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
           CreatedByUserId = table.Column<Guid>(type: "uuid", nullable: true),
           TraceId = table.Column<byte[]>(type: "bytea", maxLength: 16, nullable: true),
           SpanId = table.Column<byte[]>(type: "bytea", maxLength: 8, nullable: true),

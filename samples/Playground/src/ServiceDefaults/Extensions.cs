@@ -93,9 +93,7 @@ public static class Extensions
   private static TBuilder AddOpenTelemetryExporters<TBuilder>(this TBuilder builder)
     where TBuilder : IHostApplicationBuilder
   {
-    var useOtlpExporter = !string.IsNullOrWhiteSpace(
-      builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]
-    );
+    var useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]);
 
     if (useOtlpExporter)
     {
@@ -133,10 +131,7 @@ public static class Extensions
       app.MapHealthChecks(HealthEndpointPath);
 
       // Only health checks tagged with the "live" tag must pass for app to be considered alive
-      app.MapHealthChecks(
-        AlivenessEndpointPath,
-        new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") }
-      );
+      app.MapHealthChecks(AlivenessEndpointPath, new HealthCheckOptions { Predicate = r => r.Tags.Contains("live") });
     }
 
     return app;

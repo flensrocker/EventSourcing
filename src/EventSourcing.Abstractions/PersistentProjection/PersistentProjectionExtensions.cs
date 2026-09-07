@@ -12,59 +12,36 @@ public static class PersistentProjectionExtensions
   )
     where TProjection : class, IPersistentProjection
   {
-    var options = PersistentProjectionOptions.Create<TProjection>(
-      projectionTypeName,
-      currentVersion
-    );
+    var options = PersistentProjectionOptions.Create<TProjection>(projectionTypeName, currentVersion);
     services.AddSingleton(options);
     services.AddKeyedSingleton(projectionTypeName, options);
 
     services.AddKeyedScoped<TProjection>(options.TypeName);
-    services.AddKeyedScoped<IPersistentProjection>(
-      options.TypeName,
-      (sp, key) => sp.GetRequiredKeyedService<TProjection>(key)
-    );
+    services.AddKeyedScoped<IPersistentProjection>(options.TypeName, (sp, key) => sp.GetRequiredKeyedService<TProjection>(key));
 
     return services;
   }
 
-  public static async Task RebuildOutdatedPersistentProjectionsAsync(
-    this IServiceProvider serviceProvider
-  )
+  public static async Task RebuildOutdatedPersistentProjectionsAsync(this IServiceProvider serviceProvider)
   {
-    var logger = serviceProvider
-      .GetRequiredService<ILoggerFactory>()
-      .CreateLogger(nameof(PersistentProjection));
+    var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(PersistentProjection));
 
     var timeProvider = serviceProvider.GetRequiredService<TimeProvider>();
 
-    var projectionEventStore = serviceProvider.GetRequiredService<
-      IDomainEventStorage<PersistentProjectionEvent>
-    >();
+    var projectionEventStore = serviceProvider.GetRequiredService<IDomainEventStorage<PersistentProjectionEvent>>();
     var (_, projectionState) = await projectionEventStore
-      .ReadStateFromStorage<PersistentProjectionState>(
-        PersistentProjectionConstants.RegistryId,
-        default
-      )
+      .ReadStateFromStorage<PersistentProjectionState>(PersistentProjectionConstants.RegistryId, default)
       .ConfigureAwait(false);
     var stateVersionIndex = 0;
 
-    var projectionOptionsList = serviceProvider
-      .GetServices<PersistentProjectionOptions>()
-      .ToArray();
+    var projectionOptionsList = serviceProvider.GetServices<PersistentProjectionOptions>().ToArray();
 
     foreach (var projectionOptions in projectionOptionsList)
     {
       var expectedVersion = projectionOptions.CurrentVersion;
-      logger.LogInformation(
-        "Projection {ProjectionTypeName}: version {ExpectedVersion}",
-        projectionOptions.TypeName,
-        expectedVersion
-      );
+      logger.LogInformation("Projection {ProjectionTypeName}: version {ExpectedVersion}", projectionOptions.TypeName, expectedVersion);
 
-      if (
-        projectionState.TryGetProjectionVersion(projectionOptions.TypeName, out var actualVersion)
-      )
+      if (projectionState.TryGetProjectionVersion(projectionOptions.TypeName, out var actualVersion))
       {
         if (expectedVersion < actualVersion)
         {
@@ -92,19 +69,13 @@ public static class PersistentProjectionExtensions
       {
         actualVersion = 0;
 
-        logger.LogInformation(
-          "Projection {ProjectionTypeName}: no version yet, registering",
-          projectionOptions.TypeName
-        );
+        logger.LogInformation("Projection {ProjectionTypeName}: no version yet, registering", projectionOptions.TypeName);
 
         var projectionRegistered = DomainEvent.Create<PersistentProjectionEvent>(
           PersistentProjectionConstants.PersistentProjectionEvent.Base,
           PersistentProjectionConstants.RegistryId,
           projectionState.Version + stateVersionIndex + 1,
-          new PersistentProjectionEvent.ProjectionRegistered
-          {
-            TypeName = projectionOptions.TypeName,
-          },
+          new PersistentProjectionEvent.ProjectionRegistered { TypeName = projectionOptions.TypeName },
           tenantId: null,
           userId: null,
           timeProvider.GetUtcNow()
@@ -139,10 +110,7 @@ public static class PersistentProjectionExtensions
       {
         await using var rebuildScope = serviceProvider.CreateAsyncScope();
 
-        var projection =
-          rebuildScope.ServiceProvider.GetRequiredKeyedService<IPersistentProjection>(
-            projectionOptions.TypeName
-          );
+        var projection = rebuildScope.ServiceProvider.GetRequiredKeyedService<IPersistentProjection>(projectionOptions.TypeName);
 
         await projection.RebuildAsync().ConfigureAwait(false);
 
@@ -179,11 +147,7 @@ public static class PersistentProjectionExtensions
       }
       catch (Exception ex)
       {
-        logger.LogError(
-          ex,
-          "Projection {ProjectionTypeName}: rebuild failed",
-          projectionOptions.TypeName
-        );
+        logger.LogError(ex, "Projection {ProjectionTypeName}: rebuild failed", projectionOptions.TypeName);
       }
     }
 

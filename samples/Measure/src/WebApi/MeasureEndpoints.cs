@@ -14,13 +14,9 @@ public static class MeasureEndpoints
     public string? Content { get; init; }
   }
 
-  private static readonly Guid[] _grainIds = Enumerable
-    .Range(0, 50)
-    .Select(_ => Guid.NewGuid())
-    .ToArray();
+  private static readonly Guid[] _grainIds = Enumerable.Range(0, 50).Select(_ => Guid.NewGuid()).ToArray();
 
-  private static Guid GetRandomGrainId() =>
-    _grainIds[DateTime.UtcNow.Microsecond % _grainIds.Length];
+  private static Guid GetRandomGrainId() => _grainIds[DateTime.UtcNow.Microsecond % _grainIds.Length];
 
   public static IEndpointRouteBuilder MapMeasure(this IEndpointRouteBuilder builder)
   {

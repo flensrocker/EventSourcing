@@ -14,19 +14,14 @@ internal partial class OrleansDomainEventStreamPublisher(
   EventSourcingActivitySource activitySource,
   OrleansDomainEventStreamPublisherMetrics metrics,
   ILogger<OrleansDomainEventStreamPublisher> logger
-)
-  : IDomainEventPublisher,
-    ILifecycleParticipant<IClusterClientLifecycle>,
-    ILifecycleParticipant<ISiloLifecycle>
+) : IDomainEventPublisher, ILifecycleParticipant<IClusterClientLifecycle>, ILifecycleParticipant<ISiloLifecycle>
 {
   private readonly IServiceProvider _serviceProvider = serviceProvider;
   private readonly EventSourcingActivitySource _activitySource = activitySource;
   private readonly OrleansDomainEventStreamPublisherMetrics _metrics = metrics;
   private readonly ILogger<OrleansDomainEventStreamPublisher> _logger = logger;
 
-  private readonly TaskCompletionSource<IStreamProvider> _initialized = new(
-    TaskCreationOptions.RunContinuationsAsynchronously
-  );
+  private readonly TaskCompletionSource<IStreamProvider> _initialized = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
   // will be set before use, if not let it crash!
   private IStreamProvider _streamProvider = default!;
@@ -50,9 +45,7 @@ internal partial class OrleansDomainEventStreamPublisher(
     LogRetrievingOrleansStreamProvider(_logger);
 
     var clusterClient = _serviceProvider.GetRequiredService<IClusterClient>();
-    var streamProvider = clusterClient.GetStreamProvider(
-      OrleansConstants.DomainEventStreamProviderName
-    );
+    var streamProvider = clusterClient.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
     _initialized.TrySetResult(streamProvider);
     return Task.CompletedTask;
   }
@@ -61,20 +54,14 @@ internal partial class OrleansDomainEventStreamPublisher(
   {
     LogSubscribingOrleansLifecycle(_logger, typeof(IClusterClientLifecycle));
 
-    lifecycle.Subscribe<OrleansDomainEventStreamPublisher>(
-      ServiceLifecycleStage.Active,
-      _ => InitializeStreamProvider()
-    );
+    lifecycle.Subscribe<OrleansDomainEventStreamPublisher>(ServiceLifecycleStage.Active, _ => InitializeStreamProvider());
   }
 
   void ILifecycleParticipant<ISiloLifecycle>.Participate(ISiloLifecycle lifecycle)
   {
     LogSubscribingOrleansLifecycle(_logger, typeof(ISiloLifecycle));
 
-    lifecycle.Subscribe<OrleansDomainEventStreamPublisher>(
-      ServiceLifecycleStage.Active,
-      _ => InitializeStreamProvider()
-    );
+    lifecycle.Subscribe<OrleansDomainEventStreamPublisher>(ServiceLifecycleStage.Active, _ => InitializeStreamProvider());
   }
 
   async Task IDomainEventPublisher.InitializeAsync(CancellationToken cancellationToken)
@@ -89,11 +76,7 @@ internal partial class OrleansDomainEventStreamPublisher(
     LogInitializedStreamProvider(_logger);
   }
 
-  async Task IDomainEventPublisher.PublishAsync(
-    DomainEventMetadata metadata,
-    object payload,
-    CancellationToken cancellationToken
-  )
+  async Task IDomainEventPublisher.PublishAsync(DomainEventMetadata metadata, object payload, CancellationToken cancellationToken)
   {
     await _pipeline
       .ExecuteAsync(
@@ -110,10 +93,7 @@ internal partial class OrleansDomainEventStreamPublisher(
             LogPublishingPublicMessage(_logger, payload.GetType());
 
             var startingTimestamp = Stopwatch.GetTimestamp();
-            var streamId = StreamId.Create(
-              OrleansConstants.PublicMessageStreamNamespace,
-              metadata.StreamType
-            );
+            var streamId = StreamId.Create(OrleansConstants.PublicMessageStreamNamespace, metadata.StreamType);
             var stream = _streamProvider.GetStream<object>(streamId);
             await stream.OnNextAsync(payload).ConfigureAwait(false);
             _metrics.PublishToStreamDuration(startingTimestamp);
@@ -145,10 +125,7 @@ internal partial class OrleansDomainEventStreamPublisher(
   [LoggerMessage(LogLevel.Information, Message = "Initializing Orleans Stream Provider")]
   internal static partial void LogInitializingStreamProvider(ILogger logger);
 
-  [LoggerMessage(
-    LogLevel.Information,
-    Message = "Subscribing to Orleans lifecycle {LifecycleType}"
-  )]
+  [LoggerMessage(LogLevel.Information, Message = "Subscribing to Orleans lifecycle {LifecycleType}")]
   internal static partial void LogSubscribingOrleansLifecycle(ILogger logger, Type lifecycleType);
 
   [LoggerMessage(LogLevel.Information, Message = "Retrieving Orleans Stream Provider")]

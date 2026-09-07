@@ -8,11 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-internal class MigrationService(
-  IServiceScopeFactory scopeFactory,
-  IHostApplicationLifetime hostLifetime,
-  ILogger<MigrationService> logger
-) : BackgroundService
+internal class MigrationService(IServiceScopeFactory scopeFactory, IHostApplicationLifetime hostLifetime, ILogger<MigrationService> logger)
+  : BackgroundService
 {
   private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
   private readonly IHostApplicationLifetime _hostLifetime = hostLifetime;

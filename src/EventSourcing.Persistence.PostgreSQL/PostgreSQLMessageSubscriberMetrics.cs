@@ -13,26 +13,11 @@ public class PostgreSQLMessageSubscriberMetrics
 
   public PostgreSQLMessageSubscriberMetrics(IMeterFactory meterFactory)
   {
-    var meter = meterFactory.Create(
-      EventSourcingConstants.MeterName,
-      EventSourcingConstants.MeterVersion
-    );
+    var meter = meterFactory.Create(EventSourcingConstants.MeterName, EventSourcingConstants.MeterVersion);
 
-    _receivedMessages = meter.CreateCounter<long>(
-      "messages-received",
-      "Messages",
-      "The number of messages received from PostgreSQL"
-    );
-    _receivedInserts = meter.CreateCounter<long>(
-      "inserts-received",
-      "Messages",
-      "The number of insert-messages received from PostgreSQL"
-    );
-    _sentInserts = meter.CreateCounter<long>(
-      "inserts-sent",
-      "Messages",
-      "The number of insert-messages sent to publisher"
-    );
+    _receivedMessages = meter.CreateCounter<long>("messages-received", "Messages", "The number of messages received from PostgreSQL");
+    _receivedInserts = meter.CreateCounter<long>("inserts-received", "Messages", "The number of insert-messages received from PostgreSQL");
+    _sentInserts = meter.CreateCounter<long>("inserts-sent", "Messages", "The number of insert-messages sent to publisher");
     _processInsertMessageDurations = meter.CreateHistogram<double>(
       "process-insert-message-duration",
       "ms",
@@ -47,7 +32,5 @@ public class PostgreSQLMessageSubscriberMetrics
   public void InsertSent() => _sentInserts.Add(1L);
 
   public void ProcessInsertMessageDuration(long startingTimestamp) =>
-    _processInsertMessageDurations.Record(
-      Stopwatch.GetElapsedTime(startingTimestamp).TotalMilliseconds
-    );
+    _processInsertMessageDurations.Record(Stopwatch.GetElapsedTime(startingTimestamp).TotalMilliseconds);
 }

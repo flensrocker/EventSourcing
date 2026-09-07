@@ -27,9 +27,7 @@ public static class PostgreSQLDomainEventStorageExtensions
       where TEventBase : class
     {
       _services.AddScoped<PostgreSQLDomainEventStorage<TEventBase>>();
-      _services.AddScoped<IDomainEventStorage<TEventBase>>(sp =>
-        sp.GetRequiredService<PostgreSQLDomainEventStorage<TEventBase>>()
-      );
+      _services.AddScoped<IDomainEventStorage<TEventBase>>(sp => sp.GetRequiredService<PostgreSQLDomainEventStorage<TEventBase>>());
 
       return this;
     }
@@ -37,9 +35,7 @@ public static class PostgreSQLDomainEventStorageExtensions
 
   extension(IServiceCollection services)
   {
-    public PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(
-      Func<PostgreSQLDomainEventStorageOptions> configureOptions
-    )
+    public PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(Func<PostgreSQLDomainEventStorageOptions> configureOptions)
     {
       var storageOptions = configureOptions();
       services.TryAddSingleton(storageOptions);
@@ -48,38 +44,25 @@ public static class PostgreSQLDomainEventStorageExtensions
         (serviceProvider, dbOptions) =>
         {
           var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-          var connectionString = rootConfiguration.GetConnectionString(
-            storageOptions.ConnectionName
-          );
+          var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
 
           dbOptions.UseNpgsql(
             connectionString,
             npgsqlOptions =>
             {
               npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-              npgsqlOptions.MigrationsHistoryTable(
-                HistoryRepository.DefaultTableName,
-                Constants.SchemaName
-              );
-              npgsqlOptions.EnableRetryOnFailure(
-                maxRetryCount: 10,
-                maxRetryDelay: TimeSpan.FromSeconds(30),
-                errorCodesToAdd: null
-              );
+              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
+              npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
             }
           );
         }
       );
       services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
 
-      return new PostgreSQLDomainEventStorageBuilder(
-        services
-      ).ForDomainEvents<PersistentProjectionEvent>();
+      return new PostgreSQLDomainEventStorageBuilder(services).ForDomainEvents<PersistentProjectionEvent>();
     }
 
-    public IServiceCollection AddPostgreSQLDomainMessageSubscriber(
-      Func<PostgreSQLMessageSubscriberOptions> configureOptions
-    )
+    public IServiceCollection AddPostgreSQLDomainMessageSubscriber(Func<PostgreSQLMessageSubscriberOptions> configureOptions)
     {
       services.AddSingleton<PostgreSQLMessageSubscriberMetrics>();
 
@@ -107,10 +90,7 @@ public static class PostgreSQLDomainEventStorageExtensions
     }
   }
 
-  internal static DomainEvent ToDomainEvent<TEventBase>(
-    this MessageEntity entity,
-    JsonSerializerOptions? jsonOptions
-  )
+  internal static DomainEvent ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
     where TEventBase : class
   {
     return new DomainEvent
@@ -127,10 +107,7 @@ public static class PostgreSQLDomainEventStorageExtensions
         TraceId = entity.TraceId,
         SpanId = entity.SpanId,
       },
-      Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions)
-        is TEventBase p
-        ? p
-        : default!,
+      Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions) is TEventBase p ? p : default!,
     };
   }
 
@@ -167,10 +144,7 @@ public static class PostgreSQLDomainEventStorageExtensions
         }
         case nameof(MessageEntity.StreamType):
         {
-          streamType = await column
-            .GetTextReader()
-            .ReadToEndAsync(cancellationToken)
-            .ConfigureAwait(false);
+          streamType = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
           break;
         }
         case nameof(MessageEntity.StreamId):
@@ -185,9 +159,7 @@ public static class PostgreSQLDomainEventStorageExtensions
         }
         case nameof(MessageEntity.TenantId):
         {
-          tenantId = column.IsDBNull
-            ? null
-            : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+          tenantId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
           break;
         }
         case nameof(MessageEntity.CreatedAt):
@@ -197,9 +169,7 @@ public static class PostgreSQLDomainEventStorageExtensions
         }
         case nameof(MessageEntity.CreatedByUserId):
         {
-          createdByUserId = column.IsDBNull
-            ? null
-            : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
+          createdByUserId = column.IsDBNull ? null : await column.Get<Guid>(cancellationToken).ConfigureAwait(false);
           break;
         }
         case nameof(MessageEntity.TraceId):
@@ -209,10 +179,7 @@ public static class PostgreSQLDomainEventStorageExtensions
           else
           {
             traceId = new byte[16];
-            await column
-              .GetStream()
-              .ReadExactlyAsync(traceId, 0, traceId.Length, cancellationToken)
-              .ConfigureAwait(false);
+            await column.GetStream().ReadExactlyAsync(traceId, 0, traceId.Length, cancellationToken).ConfigureAwait(false);
           }
           break;
         }
@@ -223,19 +190,13 @@ public static class PostgreSQLDomainEventStorageExtensions
           else
           {
             spanId = new byte[8];
-            await column
-              .GetStream()
-              .ReadExactlyAsync(spanId, 0, spanId.Length, cancellationToken)
-              .ConfigureAwait(false);
+            await column.GetStream().ReadExactlyAsync(spanId, 0, spanId.Length, cancellationToken).ConfigureAwait(false);
           }
           break;
         }
         case nameof(MessageEntity.PayloadJson):
         {
-          payloadJson = await column
-            .GetTextReader()
-            .ReadToEndAsync(cancellationToken)
-            .ConfigureAwait(false);
+          payloadJson = await column.GetTextReader().ReadToEndAsync(cancellationToken).ConfigureAwait(false);
           break;
         }
       }
@@ -270,18 +231,11 @@ public static class PostgreSQLDomainEventStorageExtensions
 
     if (jsonOptions.GetTypeFromName(streamType) is not Type payloadType)
     {
-      logger?.LogError(
-        "Missing type of payload in event-id {EventId}: {PayloadType}",
-        eventId,
-        streamType
-      );
+      logger?.LogError("Missing type of payload in event-id {EventId}: {PayloadType}", eventId, streamType);
       return null;
     }
 
-    if (
-      JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions.Options)
-      is not object payload
-    )
+    if (JsonSerializer.Deserialize(payloadJson, payloadType, jsonOptions.Options) is not object payload)
     {
       logger?.LogError(
         "Payload can not be deserialized on event-id {EventId}, stream {StreamType}/{StreamId}/{StreamVersion}",

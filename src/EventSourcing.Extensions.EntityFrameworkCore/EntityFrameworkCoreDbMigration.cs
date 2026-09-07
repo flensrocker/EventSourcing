@@ -4,10 +4,8 @@ using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 
-internal class EntityFrameworkCoreDbMigration<TDbContext>(
-  TDbContext dbContext,
-  ILogger<EntityFrameworkCoreDbMigration<TDbContext>> logger
-) : IDbMigration
+internal class EntityFrameworkCoreDbMigration<TDbContext>(TDbContext dbContext, ILogger<EntityFrameworkCoreDbMigration<TDbContext>> logger)
+  : IDbMigration
   where TDbContext : DbContext
 {
   private readonly TDbContext _dbContext = dbContext;

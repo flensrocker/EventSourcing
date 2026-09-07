@@ -22,11 +22,7 @@ builder.Services.AddFlensrockerEventSourcingCore();
 builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
   {
-    return new PostgreSQLDomainEventStorageOptions
-    {
-      ConnectionName = ServiceKeys.PostgresDb,
-      JsonOptions = globalJsonOptions,
-    };
+    return new PostgreSQLDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions };
   })
   .ForDomainEvents<ToDoEvent>();
 

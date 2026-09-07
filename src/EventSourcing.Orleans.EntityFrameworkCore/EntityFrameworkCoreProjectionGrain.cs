@@ -28,9 +28,7 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
   {
     _metrics = ServiceProvider.GetRequiredService<OrleansEntityFrameworkCoreProjectionMetrics>();
     _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
-    _projectionOptions = ServiceProvider.GetRequiredKeyedService<PersistentProjectionOptions>(
-      projectionTypeName
-    );
+    _projectionOptions = ServiceProvider.GetRequiredKeyedService<PersistentProjectionOptions>(projectionTypeName);
   }
 
   public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
@@ -55,13 +53,7 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
     var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
     var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
 
-    _projection = await dbContext.UpdateProjectionAsync(
-      eventStore,
-      domainEvent,
-      _projection,
-      _projectionOptions,
-      _logger
-    );
+    _projection = await dbContext.UpdateProjectionAsync(eventStore, domainEvent, _projection, _projectionOptions, _logger);
 
     _metrics.ProjectionMessagesSaved();
   }
