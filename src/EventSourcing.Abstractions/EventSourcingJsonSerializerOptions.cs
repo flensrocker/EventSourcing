@@ -30,7 +30,7 @@ public class EventSourcingJsonSerializerOptions
   public EventSourcingJsonSerializerOptions()
   {
     Add(EventSourcingJsonSerializerContext.Default);
-    Add<PersistentProjectionEvent>(PersistentProjectionConstants.PersistentProjectionEventTypeName);
+    Add<PersistentProjectionEvent>(PersistentProjectionConstants.PersistentProjectionEvent.Base);
   }
 
   public EventSourcingJsonSerializerOptions Add(JsonSerializerContext context)
