@@ -1,5 +1,4 @@
-﻿using System.Collections.Frozen;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 

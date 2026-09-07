@@ -3,7 +3,7 @@
 namespace Flensrocker.EventSourcing.Abstractions;
 
 [GenerateSerializer]
-[Alias("Flensrocker.EventSourcing.DomainEventMetadata")]
+[Alias("Flensrocker_EventSourcing_DomainEventMetadata")]
 public sealed record DomainEventMetadata
 {
   [Id(0)]
@@ -27,7 +27,7 @@ public sealed record DomainEventMetadata
 }
 
 [GenerateSerializer]
-[Alias("Flensrocker.EventSourcing.DomainEvent")]
+[Alias("Flensrocker_EventSourcing_DomainEvent")]
 public record DomainEvent
 {
   [Id(0)]
@@ -42,7 +42,7 @@ public record DomainEvent
   /// Public messages are not applied to event-sourced projections.
   /// </summary>
   [GenerateSerializer]
-  [Alias("Flensrocker.EventSourcing.DomainEvent.WithPublicMessages")]
+  [Alias("Flensrocker_EventSourcing_DomainEvent_WithPublicMessages")]
   public sealed record WithPublicMessages : DomainEvent
   {
     [Id(0)]

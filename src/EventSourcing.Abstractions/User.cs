@@ -1,7 +1,7 @@
 ﻿namespace Flensrocker.EventSourcing.Abstractions;
 
 [GenerateSerializer]
-[Alias("Flensrocker.EventSourcing.UserClaim")]
+[Alias("Flensrocker_EventSourcing_UserClaim")]
 public sealed record UserClaim
 {
   [Id(0)]
@@ -11,7 +11,7 @@ public sealed record UserClaim
 }
 
 [GenerateSerializer]
-[Alias("Flensrocker.EventSourcing.User")]
+[Alias("Flensrocker_EventSourcing_User")]
 public sealed record User
 {
   [Id(0)]
