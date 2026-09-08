@@ -12,21 +12,13 @@ internal partial class ToDoCommandHandler(TimeProvider timeProvider) : ICommandH
     return ValueTask.FromResult(
       command switch
       {
-        ToDoCommand.Memorize memorizeToDo => Memorize(state, memorizeToDo),
         ToDoCommand.Complete completeToDo => Complete(state, completeToDo),
         ToDoCommand.Dismiss dismissToDo => Dismiss(state, dismissToDo),
+        ToDoCommand.Memorize memorizeToDo => Memorize(state, memorizeToDo),
         ToDoCommand.Reopen reopenToDo => Reopen(state, reopenToDo),
         _ => throw new NotImplementedException($"command type {command.GetType().FullName}"),
       }
     );
-  }
-
-  private ToDoEvent[]? Memorize(ToDoCommandState state, ToDoCommand.Memorize command)
-  {
-    if (state.Version > 0)
-      return null;
-
-    return [new ToDoEvent.Memorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
   }
 
   private ToDoEvent[]? Complete(ToDoCommandState state, ToDoCommand.Complete command)
@@ -47,6 +39,14 @@ internal partial class ToDoCommandHandler(TimeProvider timeProvider) : ICommandH
       return null;
 
     return [new ToDoEvent.Dismissed { Reason = command.Reason }];
+  }
+
+  private ToDoEvent[]? Memorize(ToDoCommandState state, ToDoCommand.Memorize command)
+  {
+    if (state.Version > 0)
+      return null;
+
+    return [new ToDoEvent.Memorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
   }
 
   private ToDoEvent[]? Reopen(ToDoCommandState state, ToDoCommand.Reopen command)
