@@ -19,7 +19,6 @@ builder.AddServiceDefaults();
 var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddMeasureJsonOptions().AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
-builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder
@@ -52,22 +51,18 @@ builder.UseOrleans(siloBuilder =>
 
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider(OrleansConstants.LogStorageProviderName);
 
-  //siloBuilder.AddAdoNetStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  //{
-  //  options.Invariant = "Npgsql";
-  //  options.ConnectionString = npgsqlConnectionString;
-  //});
-
-  //var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  //siloBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  //{
-  //  options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-  //  options.JsonSerializerOptions = globalJsonOptions;
-  //  options.NatsClientOptions = NatsOpts.Default with
-  //  {
-  //    Url = natsConnectionString,
-  //  };
-  //});
+  var natsConnectionString =
+    builder.Configuration.GetConnectionString(ServiceKeys.OrleansStreaming)
+    ?? throw new InvalidOperationException("NATS connection string not configured.");
+  siloBuilder.AddNatsStreams(
+    OrleansConstants.DomainEventStreamProviderName,
+    options =>
+    {
+      options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+      options.JsonSerializerOptions = globalJsonOptions.Options;
+      options.NatsClientOptions = NatsOpts.Default with { Url = natsConnectionString };
+    }
+  );
 
   siloBuilder.AddMeasureOrleans();
   siloBuilder.AddToDoOrleans();

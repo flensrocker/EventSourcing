@@ -9,10 +9,7 @@ var garnetClusteringStorage = builder.AddGarnet(ServiceKeys.OrleansClustering).W
 //.WithDataVolume("playground-garnet-data")
 ;
 
-var nats = builder.AddNats("nats").WithImageTag("2").WithJetStream().WithDataVolume("playground-nats-data");
-
-var azure = builder.AddAzureStorage("azure").RunAsEmulator();
-var azureQueuesStreams = azure.AddQueues(ServiceKeys.OrleansStreaming);
+var nats = builder.AddNats(ServiceKeys.OrleansStreaming).WithImageTag("2").WithJetStream().WithDataVolume("playground-nats-data");
 
 var postgres = builder
   .AddPostgres("postgres")
@@ -34,7 +31,7 @@ var orleans = builder
   .WithServiceId("playground")
   .WithClusterId("default")
   .WithClustering(garnetClusteringStorage)
-  .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, azureQueuesStreams)
+  // NOTE does not work yet: .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, nats)
   .WithMemoryGrainStorage("PubSubStore");
 
 IResourceBuilder<IResourceWithServiceDiscovery> webApi;
@@ -45,7 +42,6 @@ if (hostAllServicesInOneProcess)
   webApi = builder
     .AddProject<Projects.Playground_AllInOne>("playground-webapi")
     .WithReference(nats)
-    .WithReference(azureQueuesStreams)
     .WithReference(db)
     .WithReference(orleans)
     .WithExternalHttpEndpoints()
@@ -58,7 +54,6 @@ else
   var silo = builder
     .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
     .WithReference(nats)
-    .WithReference(azureQueuesStreams)
     .WithReference(db)
     .WithReference(orleans)
     .WaitFor(nats)
@@ -68,7 +63,6 @@ else
   var outbox = builder
     .AddProject<Projects.Playground_Outbox>("playground-outbox")
     .WithReference(nats)
-    .WithReference(azureQueuesStreams)
     .WithReference(db)
     .WithReference(orleans.AsClient())
     .WaitFor(nats)
@@ -79,7 +73,6 @@ else
   webApi = builder
     .AddProject<Projects.Playground_WebApi>("playground-webapi")
     .WithReference(nats)
-    .WithReference(azureQueuesStreams)
     .WithReference(db)
     .WithReference(orleans.AsClient())
     .WithExternalHttpEndpoints()

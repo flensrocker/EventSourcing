@@ -1,5 +1,4 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.Measure.Orleans.Abstractions;
+﻿using Flensrocker.Measure.Orleans.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

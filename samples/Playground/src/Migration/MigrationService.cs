@@ -1,9 +1,5 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
-using Flensrocker.EventSourcing.Orleans.PostgreSQL;
-using Flensrocker.EventSourcing.Persistence.PostgreSQL;
-using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

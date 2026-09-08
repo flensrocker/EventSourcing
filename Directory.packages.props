@@ -3,8 +3,6 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Aspire.Azure.Storage.Queues" Version="13.5.3" />
-    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.5.3" />
     <PackageVersion Include="Aspire.Hosting.Docker" Version="13.5.3" />
     <PackageVersion Include="Aspire.Hosting.Garnet" Version="13.5.3" />
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.5.3" />
@@ -26,13 +24,9 @@
     <PackageVersion Include="Microsoft.Orleans.EventSourcing" Version="10.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Persistence.AdoNet" Version="10.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Persistence.Memory" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Persistence.Redis" Version="10.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="10.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="10.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming.AdoNet" Version="10.3.1-alpha.1" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming.AzureStorage" Version="10.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="10.3.1-alpha.1" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />

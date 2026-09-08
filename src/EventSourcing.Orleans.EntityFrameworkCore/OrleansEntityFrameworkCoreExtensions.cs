@@ -1,5 +1,4 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;

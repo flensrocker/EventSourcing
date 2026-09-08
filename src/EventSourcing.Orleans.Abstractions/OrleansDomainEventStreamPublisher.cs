@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Flensrocker.EventSourcing.Abstractions;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans.Streams;

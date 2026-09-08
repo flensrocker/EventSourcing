@@ -6,13 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Azure.Storage.Queues" />
     <PackageReference Include="Aspire.NATS.Net" />
     <PackageReference Include="Aspire.StackExchange.Redis" />
     <PackageReference Include="Microsoft.Orleans.Client" />
     <PackageReference Include="Microsoft.Orleans.Clustering.Redis" />
-    <PackageReference Include="Microsoft.Orleans.Streaming.AdoNet" />
-    <PackageReference Include="Microsoft.Orleans.Streaming.AzureStorage" />
     <PackageReference Include="Microsoft.Orleans.Streaming.NATS" />
   </ItemGroup>
 

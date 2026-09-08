@@ -15,7 +15,6 @@ builder.AddServiceDefaults();
 var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
-builder.AddKeyedAzureQueueServiceClient(ServiceKeys.OrleansStreaming);
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
@@ -25,24 +24,22 @@ builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 
 builder.UseOrleansClient(clientBuilder =>
 {
-  //var npgsqlConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb) ?? throw new InvalidOperationException("Npgsql connection string not configured.");
+  var npgsqlConnectionString =
+    builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb)
+    ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
-  //clientBuilder.AddAdoNetStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  //{
-  //  options.Invariant = "Npgsql";
-  //  options.ConnectionString = npgsqlConnectionString;
-  //});
-
-  //var natsConnectionString = builder.Configuration.GetConnectionString("nats") ?? throw new InvalidOperationException("NATS connection string not configured.");
-  //clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
-  //{
-  //  options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-  //  options.JsonSerializerOptions = globalJsonOptions;
-  //  options.NatsClientOptions = NatsOpts.Default with
-  //  {
-  //    Url = natsConnectionString,
-  //  };
-  //});
+  var natsConnectionString =
+    builder.Configuration.GetConnectionString(ServiceKeys.OrleansStreaming)
+    ?? throw new InvalidOperationException("NATS connection string not configured.");
+  clientBuilder.AddNatsStreams(
+    OrleansConstants.DomainEventStreamProviderName,
+    options =>
+    {
+      options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+      options.JsonSerializerOptions = globalJsonOptions.Options;
+      options.NatsClientOptions = NatsOpts.Default with { Url = natsConnectionString };
+    }
+  );
 });
 
 builder.Services.AddOrleansDomainEventStreamPublisher();
