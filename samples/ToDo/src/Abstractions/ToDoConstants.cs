@@ -7,39 +7,39 @@ public static class ToDoConstants
   public static class ToDoEvent
   {
     public const string Base = "ToDo_ToDoEvent";
-    public const string ToDoCompleted = $"{Base}_ToDoCompleted";
-    public const string ToDoDismissed = $"{Base}_ToDoDismissed";
-    public const string ToDoMemorized = $"{Base}_ToDoMemorized";
-    public const string ToDoReopened = $"{Base}_ToDoReopened";
+    public const string Completed = $"{Base}_Completed";
+    public const string Dismissed = $"{Base}_Dismissed";
+    public const string Memorized = $"{Base}_Memorized";
+    public const string Reopened = $"{Base}_Reopened";
   }
 
   public static class ToDoCommand
   {
     public const string Base = "ToDo_ToDoCommand";
-    public const string CompleteToDo = $"{Base}_CompleteToDo";
-    public const string DismissToDo = $"{Base}_DismissToDo";
-    public const string MemorizeToDo = $"{Base}_MemorizeToDo";
-    public const string ReopenToDo = $"{Base}_ReopenToDo";
+    public const string Complete = $"{Base}_Complete";
+    public const string Dismiss = $"{Base}_Dismiss";
+    public const string Memorize = $"{Base}_Memorize";
+    public const string Reopen = $"{Base}_Reopen";
   }
 
   public static class ToDoQueryRequest
   {
     public const string Base = "ToDo_ToDoQueryRequest";
-    public const string ListToDos = $"{Base}_ListToDos";
+    public const string List = $"{Base}_List";
   }
 
   public static class ToDoQueryResponse
   {
     public const string Base = "ToDo_ToDoQueryResponse";
-    public const string ListToDos = $"{Base}_ListToDos";
-    public const string ListToDos_ToDoItem = $"{ListToDos}_ToDoItem";
+    public const string List = $"{Base}_List";
+    public const string List_Item = $"{List}_Item";
   }
 
   public static class ToDoView
   {
     public const string Base = "ToDo_ToDoView";
-    public const string ToDoDetails = $"{Base}_ToDoDetails";
-    public const string ToDoListItem = $"{Base}_ToDoListItem";
+    public const string Details = $"{Base}_Details";
+    public const string ListItem = $"{Base}_ListItem";
   }
 
   // End of "type names"

@@ -5,13 +5,13 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoCommand
 {
   [GenerateSerializer]
-  [Alias(ToDoConstants.ToDoCommand.ReopenToDo)]
-  public sealed record ReopenToDo : ToDoCommand
+  [Alias(ToDoConstants.ToDoCommand.Complete)]
+  public sealed record Complete : ToDoCommand
   {
     [JsonConstructor]
-    internal ReopenToDo() { }
+    internal Complete() { }
 
-    public static ReopenToDo? Create()
+    public static Complete? Create()
     {
       return new();
     }

@@ -12,50 +12,50 @@ internal partial class ToDoCommandHandler(TimeProvider timeProvider) : ICommandH
     return ValueTask.FromResult(
       command switch
       {
-        ToDoCommand.MemorizeToDo memorizeToDo => Memorize(state, memorizeToDo),
-        ToDoCommand.CompleteToDo completeToDo => Complete(state, completeToDo),
-        ToDoCommand.DismissToDo dismissToDo => Dismiss(state, dismissToDo),
-        ToDoCommand.ReopenToDo reopenToDo => Reopen(state, reopenToDo),
+        ToDoCommand.Memorize memorizeToDo => Memorize(state, memorizeToDo),
+        ToDoCommand.Complete completeToDo => Complete(state, completeToDo),
+        ToDoCommand.Dismiss dismissToDo => Dismiss(state, dismissToDo),
+        ToDoCommand.Reopen reopenToDo => Reopen(state, reopenToDo),
         _ => throw new NotImplementedException($"command type {command.GetType().FullName}"),
       }
     );
   }
 
-  private ToDoEvent[]? Memorize(ToDoCommandState state, ToDoCommand.MemorizeToDo command)
+  private ToDoEvent[]? Memorize(ToDoCommandState state, ToDoCommand.Memorize command)
   {
     if (state.Version > 0)
       return null;
 
-    return [new ToDoEvent.ToDoMemorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
+    return [new ToDoEvent.Memorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
   }
 
-  private ToDoEvent[]? Complete(ToDoCommandState state, ToDoCommand.CompleteToDo command)
+  private ToDoEvent[]? Complete(ToDoCommandState state, ToDoCommand.Complete command)
   {
     if (state.Version == 0)
       return null;
     if (state.Status != ToDoStatus.Open)
       return null;
 
-    return [new ToDoEvent.ToDoCompleted { }];
+    return [new ToDoEvent.Completed { }];
   }
 
-  private ToDoEvent[]? Dismiss(ToDoCommandState state, ToDoCommand.DismissToDo command)
+  private ToDoEvent[]? Dismiss(ToDoCommandState state, ToDoCommand.Dismiss command)
   {
     if (state.Version == 0)
       return null;
     if (state.Status != ToDoStatus.Open)
       return null;
 
-    return [new ToDoEvent.ToDoDismissed { Reason = command.Reason }];
+    return [new ToDoEvent.Dismissed { Reason = command.Reason }];
   }
 
-  private ToDoEvent[]? Reopen(ToDoCommandState state, ToDoCommand.ReopenToDo command)
+  private ToDoEvent[]? Reopen(ToDoCommandState state, ToDoCommand.Reopen command)
   {
     if (state.Version == 0)
       return null;
     if (state.Status == ToDoStatus.Open)
       return null;
 
-    return [new ToDoEvent.ToDoReopened { }];
+    return [new ToDoEvent.Reopened { }];
   }
 }

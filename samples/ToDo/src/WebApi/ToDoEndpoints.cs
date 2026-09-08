@@ -9,12 +9,12 @@ namespace Flensrocker.ToDo.WebApi;
 
 public static class ToDoEndpoints
 {
-  public record MemorizeToDoDto
+  public record MemorizeDto
   {
     public string? Title { get; init; }
   }
 
-  public record DismissToDoDto
+  public record DismissDto
   {
     public string? Reason { get; init; }
   }
@@ -23,9 +23,9 @@ public static class ToDoEndpoints
   {
     builder.MapPost(
       "/api/todo/memorize",
-      static async (HttpContext context, [FromBody] MemorizeToDoDto dto) =>
+      static async (HttpContext context, [FromBody] MemorizeDto dto) =>
       {
-        var command = ToDoCommand.MemorizeToDo.Create(title: dto.Title);
+        var command = ToDoCommand.Memorize.Create(title: dto.Title);
         if (command is null)
           return Results.BadRequest();
 
@@ -39,7 +39,7 @@ public static class ToDoEndpoints
       "/api/todo/{toDoId}/complete",
       static async (HttpContext context, Guid toDoId) =>
       {
-        var command = ToDoCommand.CompleteToDo.Create();
+        var command = ToDoCommand.Complete.Create();
         if (command is null)
           return Results.BadRequest();
 
@@ -50,9 +50,9 @@ public static class ToDoEndpoints
 
     builder.MapPut(
       "/api/todo/{toDoId}/dismiss",
-      static async (HttpContext context, Guid toDoId, [FromBody] DismissToDoDto dto) =>
+      static async (HttpContext context, Guid toDoId, [FromBody] DismissDto dto) =>
       {
-        var command = ToDoCommand.DismissToDo.Create(reason: dto.Reason);
+        var command = ToDoCommand.Dismiss.Create(reason: dto.Reason);
         if (command is null)
           return Results.BadRequest();
 
@@ -65,7 +65,7 @@ public static class ToDoEndpoints
       "/api/todo/{toDoId}/reopen",
       static async (HttpContext context, Guid toDoId) =>
       {
-        var command = ToDoCommand.ReopenToDo.Create();
+        var command = ToDoCommand.Reopen.Create();
         if (command is null)
           return Results.BadRequest();
 
@@ -118,7 +118,7 @@ public static class ToDoEndpoints
       "/api/todo/{toDoId}",
       static async (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
       {
-        var result = await context.RequestServices.GetProjection<ToDoView.ToDoDetails>(toDoId, cancellationToken);
+        var result = await context.RequestServices.GetProjection<ToDoView.Details>(toDoId, cancellationToken);
         return result is null ? Results.NotFound() : Results.Ok(result);
       }
     );
@@ -127,20 +127,17 @@ public static class ToDoEndpoints
       "/api/todo/{toDoId}/stream",
       static (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
       {
-        var toDoStream = context.RequestServices.StreamProjection<ToDoView.ToDoDetails>(toDoId, cancellationToken);
+        var toDoStream = context.RequestServices.StreamProjection<ToDoView.Details>(toDoId, cancellationToken);
 
-        return Results.ServerSentEvents(toDoStream, eventType: nameof(ToDoView.ToDoDetails));
+        return Results.ServerSentEvents(toDoStream, eventType: nameof(ToDoView.Details));
       }
     );
 
     builder.MapGet(
       "/api/todo",
-      static async (
-        [FromServices] IViewQuery<ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos> query,
-        CancellationToken cancellationToken
-      ) =>
+      static async ([FromServices] IViewQuery<ToDoQueryRequest.List, ToDoQueryResponse.List> query, CancellationToken cancellationToken) =>
       {
-        var request = ToDoQueryRequest.ListToDos.Create(tenantId: null);
+        var request = ToDoQueryRequest.List.Create(tenantId: null);
         if (request is null)
           return Results.BadRequest();
 

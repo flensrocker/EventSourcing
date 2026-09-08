@@ -10,7 +10,7 @@ public static class ToDoOrleansClientExtensions
   {
     public IServiceCollection AddToDoOrleansClient()
     {
-      services.AddCommandHandlerGrain<ToDoCommand>().AddProjectionGrain<ToDoView.ToDoDetails>();
+      services.AddCommandHandlerGrain<ToDoCommand>().AddProjectionGrain<ToDoView.Details>();
 
       return services;
     }

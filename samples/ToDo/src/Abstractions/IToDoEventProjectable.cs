@@ -4,25 +4,25 @@ namespace Flensrocker.ToDo.Abstractions;
 
 public interface IToDoEventProjectable : IDomainEventProjectable
 {
-  void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload);
-  void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload);
-  void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload);
-  void Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload);
+  void Apply(DomainEventMetadata metadata, ToDoEvent.Memorized payload);
+  void Apply(DomainEventMetadata metadata, ToDoEvent.Completed payload);
+  void Apply(DomainEventMetadata metadata, ToDoEvent.Dismissed payload);
+  void Apply(DomainEventMetadata metadata, ToDoEvent.Reopened payload);
 
   void ApplyToDoEvent(DomainEvent @event)
   {
     switch (@event.Payload)
     {
-      case ToDoEvent.ToDoMemorized payload:
+      case ToDoEvent.Memorized payload:
         Apply(@event.Metadata, payload);
         break;
-      case ToDoEvent.ToDoCompleted payload:
+      case ToDoEvent.Completed payload:
         Apply(@event.Metadata, payload);
         break;
-      case ToDoEvent.ToDoDismissed payload:
+      case ToDoEvent.Dismissed payload:
         Apply(@event.Metadata, payload);
         break;
-      case ToDoEvent.ToDoReopened payload:
+      case ToDoEvent.Reopened payload:
         Apply(@event.Metadata, payload);
         break;
     }

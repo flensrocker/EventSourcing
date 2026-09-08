@@ -2,12 +2,12 @@
 
 namespace Flensrocker.ToDo.Abstractions;
 
-[JsonDerivedType(typeof(ToDoMemorized), ToDoConstants.ToDoEvent.ToDoMemorized)]
+[JsonDerivedType(typeof(Memorized), ToDoConstants.ToDoEvent.Memorized)]
 public abstract partial record ToDoEvent
 {
   [GenerateSerializer]
-  [Alias(ToDoConstants.ToDoEvent.ToDoMemorized)]
-  public sealed record ToDoMemorized : ToDoEvent
+  [Alias(ToDoConstants.ToDoEvent.Memorized)]
+  public sealed record Memorized : ToDoEvent
   {
     [Id(0)]
     public required DateTimeOffset CreatedAt { get; init; }

@@ -5,8 +5,8 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoView
 {
   [GenerateSerializer]
-  [Alias(ToDoConstants.ToDoView.ToDoDetails)]
-  public sealed record ToDoDetails : ToDoView, IDomainEventVersionable, IToDoEventProjectable
+  [Alias(ToDoConstants.ToDoView.Details)]
+  public sealed record Details : ToDoView, IDomainEventVersionable, IToDoEventProjectable
   {
     [Id(0)]
     public int Version { get; private set; }
@@ -20,26 +20,26 @@ public abstract partial record ToDoView
     [Id(3)]
     public string? DismissReason { get; private set; }
 
-    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
+    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Memorized payload)
     {
       Title = payload.Title;
       Status = ToDoStatus.Open;
       DismissReason = null;
     }
 
-    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
+    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Completed payload)
     {
       Status = ToDoStatus.Completed;
       DismissReason = null;
     }
 
-    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
+    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Dismissed payload)
     {
       Status = ToDoStatus.Dismissed;
       DismissReason = payload.Reason;
     }
 
-    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
+    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Reopened payload)
     {
       Status = ToDoStatus.Open;
       DismissReason = null;

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Flensrocker.ToDo.Persistence.PostgreSQL.EntityTypeConfigurations;
 
-internal class ToDoViewListItemConfiguration : IEntityTypeConfiguration<ToDoView.ToDoListItem>
+internal class ToDoViewListItemConfiguration : IEntityTypeConfiguration<ToDoView.ListItem>
 {
-  public void Configure(EntityTypeBuilder<ToDoView.ToDoListItem> builder)
+  public void Configure(EntityTypeBuilder<ToDoView.ListItem> builder)
   {
     builder.ToTable(Constants.ListItemTableName, Constants.SchemaName);
 

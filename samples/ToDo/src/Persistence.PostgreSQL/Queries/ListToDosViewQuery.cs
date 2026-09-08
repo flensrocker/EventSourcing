@@ -5,14 +5,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Flensrocker.ToDo.Persistence.PostgreSQL.Queries;
 
 internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFactory)
-  : IViewQuery<ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>
+  : IViewQuery<ToDoQueryRequest.List, ToDoQueryResponse.List>
 {
   private readonly IDbContextFactory<ToDoDbContext> _dbContextFactory = dbContextFactory;
 
-  public async ValueTask<ToDoQueryResponse.ListToDos> ExecuteQueryAsync(
-    ToDoQueryRequest.ListToDos request,
-    CancellationToken cancellationToken
-  )
+  public async ValueTask<ToDoQueryResponse.List> ExecuteQueryAsync(ToDoQueryRequest.List request, CancellationToken cancellationToken)
   {
     using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
@@ -21,7 +18,7 @@ internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
       .Where(e => e.TenantId == request.TenantId)
       .OrderBy(e => e.Status)
       .ThenByDescending(e => e.CreatedAt)
-      .Select(e => new ToDoQueryResponse.ListToDos.ToDoItem
+      .Select(e => new ToDoQueryResponse.List.Item
       {
         ToDoId = e.ToDoId,
         Version = e.Version,
@@ -31,6 +28,6 @@ internal class ListToDosViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
       })
       .ToArrayAsync(cancellationToken);
 
-    return new ToDoQueryResponse.ListToDos { ToDoItemList = listItems };
+    return new ToDoQueryResponse.List { ItemList = listItems };
   }
 }

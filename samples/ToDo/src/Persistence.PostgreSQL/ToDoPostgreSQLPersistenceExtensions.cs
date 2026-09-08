@@ -39,12 +39,12 @@ public static class ToDoPostgreSQLPersistenceExtensions
       );
 
       services.AddEntityFrameworkCoreDbMigration<ToDoDbContext>();
-      services.AddEntityFrameworkCorePersistentProjection<ToDoListItemProjection, ToDoDbContext, ToDoView.ToDoListItem, ToDoEvent>(
-        ToDoConstants.ToDoView.ToDoListItem,
-        ToDoView.ToDoListItem.ProjectionVersion
+      services.AddEntityFrameworkCorePersistentProjection<ToDoListItemProjection, ToDoDbContext, ToDoView.ListItem, ToDoEvent>(
+        ToDoConstants.ToDoView.ListItem,
+        ToDoView.ListItem.ProjectionVersion
       );
 
-      services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.ListToDos, ToDoQueryResponse.ListToDos>();
+      services.AddViewQuery<ListToDosViewQuery, ToDoQueryRequest.List, ToDoQueryResponse.List>();
 
       return services;
     }

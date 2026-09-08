@@ -5,21 +5,21 @@ namespace Flensrocker.ToDo.Abstractions;
 public abstract partial record ToDoCommand
 {
   [GenerateSerializer]
-  [Alias(ToDoConstants.ToDoCommand.MemorizeToDo)]
-  public sealed record MemorizeToDo : ToDoCommand
+  [Alias(ToDoConstants.ToDoCommand.Memorize)]
+  public sealed record Memorize : ToDoCommand
   {
     [Id(0)]
     public required string Title { get; init; }
 
     [JsonConstructor]
-    internal MemorizeToDo() { }
+    internal Memorize() { }
 
-    public static MemorizeToDo? Create(string? title)
+    public static Memorize? Create(string? title)
     {
       if (string.IsNullOrWhiteSpace(title) || title.Length > ToDoConstants.TitleMaxLength)
         return null;
 
-      return new MemorizeToDo { Title = title };
+      return new Memorize { Title = title };
     }
   }
 }

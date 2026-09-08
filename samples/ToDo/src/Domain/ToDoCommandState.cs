@@ -13,22 +13,22 @@ public class ToDoCommandState : IDomainEventVersionable, IToDoEventProjectable
   [Id(1)]
   public ToDoStatus Status { get; private set; }
 
-  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoMemorized payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Memorized payload)
   {
     Status = ToDoStatus.Open;
   }
 
-  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoCompleted payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Completed payload)
   {
     Status = ToDoStatus.Completed;
   }
 
-  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoDismissed payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Dismissed payload)
   {
     Status = ToDoStatus.Dismissed;
   }
 
-  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.ToDoReopened payload)
+  void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Reopened payload)
   {
     Status = ToDoStatus.Open;
   }

@@ -2,12 +2,12 @@
 
 namespace Flensrocker.ToDo.Abstractions;
 
-[JsonDerivedType(typeof(ListToDos), ToDoConstants.ToDoQueryRequest.Base)]
+[JsonDerivedType(typeof(List), ToDoConstants.ToDoQueryRequest.Base)]
 public abstract partial record ToDoQueryRequest
 {
   [GenerateSerializer]
-  [Alias(ToDoConstants.ToDoQueryRequest.ListToDos)]
-  public sealed record ListToDos : ToDoQueryRequest
+  [Alias(ToDoConstants.ToDoQueryRequest.List)]
+  public sealed record List : ToDoQueryRequest
   {
     [Id(0)]
     public Guid? TenantId { get; init; }
@@ -15,25 +15,25 @@ public abstract partial record ToDoQueryRequest
     // TODO add filter, order, page-size etc.
 
     [JsonConstructor]
-    internal ListToDos() { }
+    internal List() { }
 
-    public static ListToDos? Create(Guid? tenantId)
+    public static List? Create(Guid? tenantId)
     {
-      return new ListToDos { TenantId = tenantId };
+      return new List { TenantId = tenantId };
     }
   }
 }
 
-[JsonDerivedType(typeof(ListToDos), ToDoConstants.ToDoQueryResponse.ListToDos)]
+[JsonDerivedType(typeof(List), ToDoConstants.ToDoQueryResponse.List)]
 public abstract partial record ToDoQueryResponse
 {
   [GenerateSerializer]
-  [Alias(ToDoConstants.ToDoQueryResponse.ListToDos)]
-  public sealed record ListToDos : ToDoQueryResponse
+  [Alias(ToDoConstants.ToDoQueryResponse.List)]
+  public sealed record List : ToDoQueryResponse
   {
     [GenerateSerializer]
-    [Alias(ToDoConstants.ToDoQueryResponse.ListToDos_ToDoItem)]
-    public sealed record ToDoItem
+    [Alias(ToDoConstants.ToDoQueryResponse.List_Item)]
+    public sealed record Item
     {
       [Id(0)]
       public required Guid ToDoId { get; init; }
@@ -52,6 +52,6 @@ public abstract partial record ToDoQueryResponse
     }
 
     [Id(0)]
-    public required IReadOnlyCollection<ToDoItem> ToDoItemList { get; init; }
+    public required IReadOnlyCollection<Item> ItemList { get; init; }
   }
 }
