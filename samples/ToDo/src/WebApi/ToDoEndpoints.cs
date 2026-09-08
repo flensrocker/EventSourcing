@@ -20,64 +20,57 @@ public static class ToDoEndpoints
     public string? Reason { get; init; }
   }
 
-  private static async Task<bool> ExecuteCommandAsync(this IClusterClient client, Guid toDoId, ToDoCommand command)
-  {
-    var toDo = client.GetGrain<ICommandHandlerGrain<ToDoCommand>>(toDoId);
-    var result = await toDo.ExecuteCommand(command);
-    return result;
-  }
-
   public static IEndpointRouteBuilder MapToDo(this IEndpointRouteBuilder builder)
   {
     builder.MapPost(
       "/api/todo/memorize",
-      static async ([FromBody] MemorizeToDoDto dto, [FromServices] IClusterClient client) =>
+      static async (HttpContext context, [FromBody] MemorizeToDoDto dto) =>
       {
         var command = ToDoCommand.MemorizeToDo.Create(title: dto.Title);
         if (command is null)
           return Results.BadRequest();
 
         var toDoId = Guid.CreateVersion7();
-        var result = await client.ExecuteCommandAsync(toDoId, command);
+        var result = await context.RequestServices.ExecuteCommandAsync<ToDoCommand>(toDoId, command);
         return result ? Results.Created($"/api/todo/{toDoId}", new { ToDoId = toDoId }) : Results.BadRequest();
       }
     );
 
     builder.MapPut(
       "/api/todo/{toDoId}/complete",
-      static async (Guid toDoId, [FromServices] IClusterClient client) =>
+      static async (HttpContext context, Guid toDoId) =>
       {
         var command = ToDoCommand.CompleteToDo.Create();
         if (command is null)
           return Results.BadRequest();
 
-        var result = await client.ExecuteCommandAsync(toDoId, command);
+        var result = await context.RequestServices.ExecuteCommandAsync<ToDoCommand>(toDoId, command);
         return result ? Results.Ok() : Results.BadRequest();
       }
     );
 
     builder.MapPut(
       "/api/todo/{toDoId}/dismiss",
-      static async (Guid toDoId, [FromBody] DismissToDoDto dto, [FromServices] IClusterClient client) =>
+      static async (HttpContext context, Guid toDoId, [FromBody] DismissToDoDto dto) =>
       {
         var command = ToDoCommand.DismissToDo.Create(reason: dto.Reason);
         if (command is null)
           return Results.BadRequest();
 
-        var result = await client.ExecuteCommandAsync(toDoId, command);
+        var result = await context.RequestServices.ExecuteCommandAsync<ToDoCommand>(toDoId, command);
         return result ? Results.Ok() : Results.BadRequest();
       }
     );
 
     builder.MapPut(
       "/api/todo/{toDoId}/reopen",
-      static async (Guid toDoId, [FromServices] IClusterClient client) =>
+      static async (HttpContext context, Guid toDoId) =>
       {
         var command = ToDoCommand.ReopenToDo.Create();
         if (command is null)
           return Results.BadRequest();
 
-        var result = await client.ExecuteCommandAsync(toDoId, command);
+        var result = await context.RequestServices.ExecuteCommandAsync<ToDoCommand>(toDoId, command);
         return result ? Results.Ok() : Results.BadRequest();
       }
     );

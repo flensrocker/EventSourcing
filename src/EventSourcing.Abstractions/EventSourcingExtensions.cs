@@ -16,23 +16,6 @@ public static class EventSourcingExtensions
     }
   }
 
-  [Obsolete("Will be migrated to EventSourcingJsonSerializerOptions.GetTypeName")]
-  public static string GetTypeName(this Type? type)
-  {
-    return type is null || type.FullName is not string typeFullName || type.Assembly.GetName().Name is not string assemblyName
-      ? ""
-      : $"{typeFullName.Replace(".", "-")}_-_{assemblyName.Replace(".", "-")}";
-  }
-
-  [Obsolete("Will be migrated to EventSourcingJsonSerializerOptions.GetTypeFromName")]
-  public static Type? GetTypeFromName(string typeName)
-  {
-    if (string.IsNullOrWhiteSpace(typeName))
-      return null;
-
-    return Type.GetType(typeName.Replace("_-_", ", ").Replace("-", "."), false);
-  }
-
   extension(IServiceCollection services)
   {
     public IServiceCollection AddFlensrockerEventSourcingCore()
@@ -90,6 +73,13 @@ public static class EventSourcingExtensions
 
       foreach (var dbMigration in dbMigrations)
         await dbMigration.MigrateAsync().ConfigureAwait(false);
+    }
+
+    public async Task<bool> ExecuteCommandAsync<TCommandBase>(Guid id, TCommandBase command)
+    {
+      var handler = serviceProvider.GetRequiredKeyedService<ICommandHandler<TCommandBase>>(id);
+      var result = await handler.ExecuteCommand(command);
+      return result;
     }
   }
 }

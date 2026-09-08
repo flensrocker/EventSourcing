@@ -1,6 +1,5 @@
-﻿namespace Flensrocker.EventSourcing.Orleans.Abstractions;
+﻿using Flensrocker.EventSourcing.Abstractions;
 
-public interface ICommandHandlerGrain<TCommandBase> : IGrainWithGuidKey
-{
-  Task<bool> ExecuteCommand(TCommandBase command);
-}
+namespace Flensrocker.EventSourcing.Orleans.Abstractions;
+
+public interface ICommandHandlerGrain<TCommandBase> : ICommandHandler<TCommandBase>, IGrainWithGuidKey { }

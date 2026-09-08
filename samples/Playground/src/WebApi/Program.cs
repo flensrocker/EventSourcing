@@ -26,7 +26,9 @@ builder
   )
   .ForDomainEvents<ToDoEvent>();
 
-builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
+builder
+  .Services.AddCommandHandlerGrain<ToDoCommand>()
+  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {
