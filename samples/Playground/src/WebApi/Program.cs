@@ -27,7 +27,8 @@ builder
   .ForDomainEvents<ToDoEvent>();
 
 builder
-  .Services.AddCommandHandlerGrain<ToDoCommand>()
+  .Services.AddCommandHandlerGrain<ToDoCommand>() // TODO move to Flensrocker.ToDo.Orleans.Client
+  .AddProjectionGrain<ToDoView.ToDoDetails>()
   .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
 
 builder.Host.UseOrleansClient(clientBuilder =>

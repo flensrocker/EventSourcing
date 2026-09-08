@@ -1,7 +1,5 @@
-﻿namespace Flensrocker.EventSourcing.Orleans.Abstractions;
+﻿using Flensrocker.EventSourcing.Abstractions;
 
-public interface IDomainEventProjectionGrain<TProjection> : IGrainWithGuidKey
-{
-  Task<TProjection?> GetProjection(CancellationToken cancellationToken);
-  IAsyncEnumerable<TProjection> StreamProjection(CancellationToken cancellationToken);
-}
+namespace Flensrocker.EventSourcing.Orleans.Abstractions;
+
+public interface IDomainEventProjectionGrain<TProjection> : IDomainEventProjection<TProjection>, IGrainWithGuidKey { }

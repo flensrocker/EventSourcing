@@ -1,5 +1,4 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.ToDo.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -117,20 +116,18 @@ public static class ToDoEndpoints
 
     builder.MapGet(
       "/api/todo/{toDoId}",
-      static async (Guid toDoId, [FromServices] IClusterClient client, CancellationToken cancellationToken) =>
+      static async (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
       {
-        var toDoDetails = client.GetGrain<IDomainEventProjectionGrain<ToDoView.ToDoDetails>>(toDoId);
-        var result = await toDoDetails.GetProjection(cancellationToken);
+        var result = await context.RequestServices.GetProjection<ToDoView.ToDoDetails>(toDoId, cancellationToken);
         return result is null ? Results.NotFound() : Results.Ok(result);
       }
     );
 
     builder.MapGet(
       "/api/todo/{toDoId}/stream",
-      static (Guid toDoId, [FromServices] IClusterClient client, CancellationToken cancellationToken) =>
+      static (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
       {
-        var toDoDetails = client.GetGrain<IDomainEventProjectionGrain<ToDoView.ToDoDetails>>(toDoId);
-        var toDoStream = toDoDetails.StreamProjection(cancellationToken);
+        var toDoStream = context.RequestServices.StreamProjection<ToDoView.ToDoDetails>(toDoId, cancellationToken);
 
         return Results.ServerSentEvents(toDoStream, eventType: nameof(ToDoView.ToDoDetails));
       }
