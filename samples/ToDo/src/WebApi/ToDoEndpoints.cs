@@ -9,32 +9,19 @@ namespace Flensrocker.ToDo.WebApi;
 
 public static class ToDoEndpoints
 {
-  public record MemorizeDto
-  {
-    public string? Title { get; init; }
-  }
-
   public record DismissDto
   {
     public string? Reason { get; init; }
   }
 
+  public record MemorizeDto
+  {
+    public string? Title { get; init; }
+  }
+
   public static IEndpointRouteBuilder MapToDo(this IEndpointRouteBuilder builder)
   {
-    builder.MapPost(
-      "/api/todo/memorize",
-      static async (HttpContext context, [FromBody] MemorizeDto dto) =>
-      {
-        var command = ToDoCommand.Memorize.Create(title: dto.Title);
-        if (command is null)
-          return Results.BadRequest();
-
-        var toDoId = Guid.CreateVersion7();
-        var result = await context.RequestServices.ExecuteCommandAsync<ToDoCommand>(toDoId, command);
-        return result ? Results.Created($"/api/todo/{toDoId}", new { ToDoId = toDoId }) : Results.BadRequest();
-      }
-    );
-
+    // endpoints for commands
     builder.MapPut(
       "/api/todo/{toDoId}/complete",
       static async (HttpContext context, Guid toDoId) =>
@@ -61,6 +48,20 @@ public static class ToDoEndpoints
       }
     );
 
+    builder.MapPost(
+      "/api/todo/memorize",
+      static async (HttpContext context, [FromBody] MemorizeDto dto) =>
+      {
+        var command = ToDoCommand.Memorize.Create(title: dto.Title);
+        if (command is null)
+          return Results.BadRequest();
+
+        var toDoId = Guid.CreateVersion7();
+        var result = await context.RequestServices.ExecuteCommandAsync<ToDoCommand>(toDoId, command);
+        return result ? Results.Created($"/api/todo/{toDoId}", new { ToDoId = toDoId }) : Results.BadRequest();
+      }
+    );
+
     builder.MapPut(
       "/api/todo/{toDoId}/reopen",
       static async (HttpContext context, Guid toDoId) =>
@@ -74,6 +75,41 @@ public static class ToDoEndpoints
       }
     );
 
+    // endpoints for queries
+    builder.MapGet(
+      "/api/todo",
+      static async ([FromServices] IViewQuery<ToDoQueryRequest.List, ToDoQueryResponse.List> query, CancellationToken cancellationToken) =>
+      {
+        var request = ToDoQueryRequest.List.Create(tenantId: null);
+        if (request is null)
+          return Results.BadRequest();
+
+        var response = await query.ExecuteQueryAsync(request, cancellationToken);
+        return Results.Ok(response);
+      }
+    );
+
+    // endpoints for views
+    builder.MapGet(
+      "/api/todo/{toDoId}",
+      static async (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
+      {
+        var result = await context.RequestServices.GetProjection<ToDoView.Details>(toDoId, cancellationToken);
+        return result is null ? Results.NotFound() : Results.Ok(result);
+      }
+    );
+
+    builder.MapGet(
+      "/api/todo/{toDoId}/stream",
+      static (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
+      {
+        var toDoStream = context.RequestServices.StreamProjection<ToDoView.Details>(toDoId, cancellationToken);
+
+        return Results.ServerSentEvents(toDoStream, eventType: nameof(ToDoView.Details));
+      }
+    );
+
+    // endpoints for debugging, ignore
     builder.MapGet(
       "/api/todo/events",
       static ([FromServices] IDomainEventStorage<ToDoEvent> eventStore, CancellationToken cancellationToken) =>
@@ -111,38 +147,6 @@ public static class ToDoEndpoints
             _ => toDoEvents,
           }
         );
-      }
-    );
-
-    builder.MapGet(
-      "/api/todo/{toDoId}",
-      static async (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
-      {
-        var result = await context.RequestServices.GetProjection<ToDoView.Details>(toDoId, cancellationToken);
-        return result is null ? Results.NotFound() : Results.Ok(result);
-      }
-    );
-
-    builder.MapGet(
-      "/api/todo/{toDoId}/stream",
-      static (HttpContext context, Guid toDoId, CancellationToken cancellationToken) =>
-      {
-        var toDoStream = context.RequestServices.StreamProjection<ToDoView.Details>(toDoId, cancellationToken);
-
-        return Results.ServerSentEvents(toDoStream, eventType: nameof(ToDoView.Details));
-      }
-    );
-
-    builder.MapGet(
-      "/api/todo",
-      static async ([FromServices] IViewQuery<ToDoQueryRequest.List, ToDoQueryResponse.List> query, CancellationToken cancellationToken) =>
-      {
-        var request = ToDoQueryRequest.List.Create(tenantId: null);
-        if (request is null)
-          return Results.BadRequest();
-
-        var response = await query.ExecuteQueryAsync(request, cancellationToken);
-        return Results.Ok(response);
       }
     );
 

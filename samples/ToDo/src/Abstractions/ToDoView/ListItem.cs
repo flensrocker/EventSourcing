@@ -31,16 +31,6 @@ public abstract partial record ToDoView
 
     static Expression<Func<ListItem, bool>> IWhereId<ListItem>.GetWhereId(Guid id) => item => item.ToDoId == id;
 
-    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Memorized payload)
-    {
-      ToDoId = metadata.StreamId;
-      Version = metadata.StreamVersion;
-      TenantId = metadata.TenantId;
-      CreatedAt = payload.CreatedAt;
-      Title = payload.Title;
-      Status = ToDoStatus.Open;
-    }
-
     void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Completed payload)
     {
       Version = metadata.StreamVersion;
@@ -51,6 +41,16 @@ public abstract partial record ToDoView
     {
       Version = metadata.StreamVersion;
       Status = ToDoStatus.Dismissed;
+    }
+
+    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Memorized payload)
+    {
+      ToDoId = metadata.StreamId;
+      Version = metadata.StreamVersion;
+      TenantId = metadata.TenantId;
+      CreatedAt = payload.CreatedAt;
+      Title = payload.Title;
+      Status = ToDoStatus.Open;
     }
 
     void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Reopened payload)

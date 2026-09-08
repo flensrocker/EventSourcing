@@ -1,16 +1,7 @@
 @host=localhost
 @port=5188
 
-###
-# @name memorize
-POST http://{{host}}:{{port}}/api/todo/memorize
-Content-Type: application/json
-
-{
-  "Title": "My first ToDo!"
-}
-
-###
+### Commands
 PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/complete
 Content-Type: application/json
 
@@ -26,23 +17,32 @@ Content-Type: application/json
 }
 
 ###
+# @name memorize
+POST http://{{host}}:{{port}}/api/todo/memorize
+Content-Type: application/json
+
+{
+  "Title": "My first ToDo!"
+}
+
+###
 PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/reopen
 Content-Type: application/json
 
 {
 }
 
-###
+### Queries
 GET http://{{host}}:{{port}}/api/todo
 
-###
-GET http://{{host}}:{{port}}/api/todo/events
-
-###
+### Views
 GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}
 
 ###
-GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/events
+GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/stream
+
+### Debugging
+GET http://{{host}}:{{port}}/api/todo/events
 
 ###
-GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/stream
+GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/events

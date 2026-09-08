@@ -20,13 +20,6 @@ public abstract partial record ToDoView
     [Id(3)]
     public string? DismissReason { get; private set; }
 
-    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Memorized payload)
-    {
-      Title = payload.Title;
-      Status = ToDoStatus.Open;
-      DismissReason = null;
-    }
-
     void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Completed payload)
     {
       Status = ToDoStatus.Completed;
@@ -37,6 +30,13 @@ public abstract partial record ToDoView
     {
       Status = ToDoStatus.Dismissed;
       DismissReason = payload.Reason;
+    }
+
+    void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Memorized payload)
+    {
+      Title = payload.Title;
+      Status = ToDoStatus.Open;
+      DismissReason = null;
     }
 
     void IToDoEventProjectable.Apply(DomainEventMetadata metadata, ToDoEvent.Reopened payload)
