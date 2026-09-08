@@ -4,6 +4,7 @@ using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.Measure.Orleans.Abstractions;
 using Flensrocker.Measure.WebApi;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Orleans.Client;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
 using NATS.Client.Core;
@@ -26,8 +27,7 @@ builder
   .ForDomainEvents<ToDoEvent>();
 
 builder
-  .Services.AddCommandHandlerGrain<ToDoCommand>() // TODO move to Flensrocker.ToDo.Orleans.Client
-  .AddProjectionGrain<ToDoView.ToDoDetails>()
+  .Services.AddToDoOrleansClient()
   .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
 
 builder.Host.UseOrleansClient(clientBuilder =>

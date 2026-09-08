@@ -5,6 +5,7 @@ using Flensrocker.Measure.Orleans.Abstractions;
 using Flensrocker.Measure.Orleans.Server;
 using Flensrocker.Measure.WebApi;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Orleans.Client;
 using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
@@ -27,7 +28,9 @@ builder
   )
   .ForDomainEvents<ToDoEvent>();
 
-builder.Services.AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
+builder
+  .Services.AddToDoOrleansClient()
+  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
 
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {

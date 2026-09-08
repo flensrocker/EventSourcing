@@ -32,6 +32,7 @@
   <Folder Name="/samples/ToDo/src/">
     <Project Path="samples/ToDo/src/Abstractions/Flensrocker.ToDo.Abstractions.csproj" />
     <Project Path="samples/ToDo/src/Domain/Flensrocker.ToDo.Domain.csproj" />
+    <Project Path="samples/ToDo/src/Orleans.Client/Flensrocker.ToDo.Orleans.Client.csproj" />
     <Project Path="samples/ToDo/src/Orleans.Server/Flensrocker.ToDo.Orleans.Server.csproj" />
     <Project Path="samples/ToDo/src/Persistence.PostgreSQL/Flensrocker.ToDo.Persistence.PostgreSQL.csproj" />
     <Project Path="samples/ToDo/src/WebApi/Flensrocker.ToDo.WebApi.csproj" />
