@@ -2,7 +2,7 @@
 
 namespace Flensrocker.ToDo.Orleans.Server;
 
-public static class ToDoOrleansExtensions
+public static class ToDoOrleansServerExtensions
 {
   extension(ISiloBuilder siloBuilder)
   {

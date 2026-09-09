@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Routing;
 
 namespace Flensrocker.ToDo.WebApi;
 
-public static class ToDoEndpoints
+public static class ToDoWebApiExtensions
 {
   public static IEndpointRouteBuilder MapToDo(this IEndpointRouteBuilder builder)
   {

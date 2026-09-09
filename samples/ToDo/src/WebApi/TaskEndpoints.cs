@@ -19,7 +19,7 @@ public static class TaskEndpoints
     public string? Title { get; init; }
   }
 
-  public static IEndpointRouteBuilder MapTask(this IEndpointRouteBuilder builder, string taskRoute)
+  internal static IEndpointRouteBuilder MapTask(this IEndpointRouteBuilder builder, string taskRoute)
   {
     // endpoints for commands
     builder.MapPut(
