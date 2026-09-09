@@ -20,9 +20,7 @@ public static class ToDoWebApiExtensions
   {
     public IEndpointRouteBuilder MapToDo()
     {
-      // NOTE you can add group specific metadata like authentication etc. on the MapGroup
-      var taskGroupBuilder = builder.MapGroup(ToDoRoutes.TaskRoute);
-      taskGroupBuilder.MapTask(ToDoRoutes.TaskRoute);
+      builder.MapGroup(ToDoRoutes.TaskRoute).MapTask(ToDoRoutes.TaskRoute);
 
       return builder;
     }

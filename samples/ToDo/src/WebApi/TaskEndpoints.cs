@@ -24,7 +24,8 @@ public static class TaskEndpoints
     public string? Title { get; init; }
   }
 
-  internal static IEndpointRouteBuilder MapTask(this IEndpointRouteBuilder builder, string taskRoute)
+  internal static TBuilder MapTask<TBuilder>(this TBuilder builder, string taskRoute)
+    where TBuilder : IEndpointRouteBuilder
   {
     // endpoints for commands
     builder.MapPut(
