@@ -10,8 +10,8 @@ public static class ToDoDomainExtensions
   {
     public IServiceCollection AddToDo()
     {
-      services.AddTransient<ToDoCommandHandler>();
-      services.AddTransient<ICommandHandler<ToDoEvent, ToDoCommand, ToDoCommandState>>(sp => sp.GetRequiredService<ToDoCommandHandler>());
+      services.AddTransient<TaskCommandHandler>();
+      services.AddTransient<ICommandHandler<TaskEvent, TaskCommand, TaskCommandState>>(sp => sp.GetRequiredService<TaskCommandHandler>());
 
       return services;
     }

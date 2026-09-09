@@ -7,6 +7,6 @@ public static class ToDoExtensions
   extension(EventSourcingJsonSerializerOptions jsonOptions)
   {
     public EventSourcingJsonSerializerOptions AddToDoJsonOptions() =>
-      jsonOptions.Add(ToDoJsonSerializerContext.Default).Add<ToDoEvent>(ToDoConstants.ToDoEvent.Base);
+      jsonOptions.Add(ToDoJsonSerializerContext.Default).Add<TaskEvent>(ToDoConstants.TaskEvent.Base);
   }
 }

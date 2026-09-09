@@ -2,14 +2,14 @@
 @port=5188
 
 ### Commands
-PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/complete
+PUT http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/complete
 Content-Type: application/json
 
 {
 }
 
 ###
-PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/dismiss
+PUT http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/dismiss
 Content-Type: application/json
 
 {
@@ -18,31 +18,31 @@ Content-Type: application/json
 
 ###
 # @name memorize
-POST http://{{host}}:{{port}}/api/todo/memorize
+POST http://{{host}}:{{port}}/api/todo/task/memorize
 Content-Type: application/json
 
 {
-  "Title": "My first ToDo!"
+  "Title": "My first Task!"
 }
 
 ###
-PUT http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/reopen
+PUT http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/reopen
 Content-Type: application/json
 
 {
 }
 
 ### Queries
-GET http://{{host}}:{{port}}/api/todo
+GET http://{{host}}:{{port}}/api/todo/task
 
 ### Views
-GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}
+GET http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}
 
 ###
-GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/stream
+GET http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/stream
 
 ### Debugging
-GET http://{{host}}:{{port}}/api/todo/events
+GET http://{{host}}:{{port}}/api/todo/task/events
 
 ###
-GET http://{{host}}:{{port}}/api/todo/{{memorize.response.body.$.ToDoId}}/events
+GET http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/events

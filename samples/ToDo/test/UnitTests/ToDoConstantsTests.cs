@@ -7,17 +7,16 @@ namespace Flensrocker.ToDo.UnitTests;
 public sealed class ToDoConstantsTests
 {
   [TestMethod]
-  public void ToDoEventStreamNamespaceMatchesTypeName()
+  public void TaskEventStreamNamespaceMatchesTypeName()
   {
     var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
-    Assert.AreEqual(ToDoConstants.ToDoEvent.Base, jsonOptions.GetTypeName(typeof(ToDoEvent)));
+    Assert.AreEqual(ToDoConstants.TaskEvent.Base, jsonOptions.GetTypeName(typeof(TaskEvent)));
   }
 
   [TestMethod]
-  public void ToDoEventStreamNamespaceCanBeConvertedToType()
+  public void TaskEventStreamNamespaceCanBeConvertedToType()
   {
     var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
-    var toDoEventType = jsonOptions.GetTypeFromName(ToDoConstants.ToDoEvent.Base);
-    Assert.AreEqual(typeof(ToDoEvent), toDoEventType);
+    Assert.AreEqual(typeof(TaskEvent), jsonOptions.GetTypeFromName(ToDoConstants.TaskEvent.Base));
   }
 }

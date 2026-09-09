@@ -26,7 +26,7 @@ builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
     new PostgreSQLDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions }
   )
-  .ForDomainEvents<ToDoEvent>();
+  .ForDomainEvents<TaskEvent>();
 
 builder
   .Services.AddToDo()

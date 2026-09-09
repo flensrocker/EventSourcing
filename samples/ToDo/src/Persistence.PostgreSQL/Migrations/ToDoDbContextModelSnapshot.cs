@@ -18,14 +18,14 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("ToDo")
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.ToDoView+ToDoListItem", b =>
+            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.TaskView+ListItem", b =>
                 {
-                    b.Property<Guid>("ToDoId")
+                    b.Property<Guid>("TaskId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -46,12 +46,12 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
                     b.Property<int>("Version")
                         .HasColumnType("integer");
 
-                    b.HasKey("ToDoId");
+                    b.HasKey("TaskId");
 
-                    b.HasIndex("TenantId", "ToDoId")
+                    b.HasIndex("TenantId", "TaskId")
                         .IsUnique();
 
-                    b.ToTable("ListItem", "ToDo");
+                    b.ToTable("TaskListItem", "ToDo");
                 });
 #pragma warning restore 612, 618
         }
