@@ -10,9 +10,11 @@ public abstract partial record TaskEvent
   public sealed record Memorized : TaskEvent
   {
     [Id(0)]
+    [JsonPropertyName("CreatedAt")]
     public required DateTimeOffset CreatedAt { get; init; }
 
     [Id(1)]
+    [JsonPropertyName("Title")]
     public required string Title { get; init; }
   }
 }

@@ -10,6 +10,7 @@ public abstract partial record TaskEvent
   public sealed record Dismissed : TaskEvent
   {
     [Id(0)]
+    [JsonPropertyName("Reason")]
     public required string Reason { get; init; }
   }
 }
