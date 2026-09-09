@@ -45,4 +45,5 @@ public static class ToDoConstants
   // End of "type names"
 
   public const int TaskTitleMaxLength = 100;
+  public const int TaskDismissReasonMaxLength = 200;
 }

@@ -28,7 +28,8 @@ builder
 
 builder
   .Services.AddToDoOrleansClient()
-  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb });
+  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb })
+  .AddToDoWebApi();
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {

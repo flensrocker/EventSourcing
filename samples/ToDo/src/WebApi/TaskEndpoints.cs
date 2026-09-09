@@ -1,4 +1,5 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.ComponentModel.DataAnnotations;
+using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.ToDo.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -11,11 +12,15 @@ public static class TaskEndpoints
 {
   public record DismissDto
   {
+    [Required]
+    [MaxLength(ToDoConstants.TaskDismissReasonMaxLength)]
     public string? Reason { get; init; }
   }
 
   public record MemorizeDto
   {
+    [Required]
+    [MaxLength(ToDoConstants.TaskTitleMaxLength)]
     public string? Title { get; init; }
   }
 

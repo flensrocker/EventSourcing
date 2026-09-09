@@ -16,7 +16,7 @@ public abstract partial record TaskCommand
 
     public static Dismiss? Create(string? reason)
     {
-      if (string.IsNullOrWhiteSpace(reason))
+      if (string.IsNullOrWhiteSpace(reason) || reason.Length > ToDoConstants.TaskDismissReasonMaxLength)
         return null;
 
       return new Dismiss { Reason = reason };
