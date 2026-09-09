@@ -1,5 +1,5 @@
-﻿using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Persistence.PostgreSQL.EntityTypeConfigurations;
+﻿using Flensrocker.ToDo.Abstractions.Tasks;
+using Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace Flensrocker.ToDo.Persistence.PostgreSQL;
@@ -16,8 +16,8 @@ public class ToDoDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    modelBuilder.HasDefaultSchema(Constants.SchemaName);
+    modelBuilder.HasDefaultSchema(ToDoPostgreSQLPersistenceConstants.SchemaName);
 
-    modelBuilder.ApplyConfiguration(new TaskViewListItemConfiguration());
+    modelBuilder.ApplyConfiguration(new TaskViewListItemEntityConfiguration());
   }
 }

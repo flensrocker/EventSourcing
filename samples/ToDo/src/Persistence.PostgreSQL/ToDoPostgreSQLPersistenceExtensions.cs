@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
+using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
-using Flensrocker.ToDo.Persistence.PostgreSQL.Projections;
-using Flensrocker.ToDo.Persistence.PostgreSQL.Queries;
+using Flensrocker.ToDo.Abstractions.Tasks;
+using Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -31,7 +32,7 @@ public static class ToDoPostgreSQLPersistenceExtensions
             npgsqlOptions =>
             {
               npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
+              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, ToDoPostgreSQLPersistenceConstants.SchemaName);
               npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
             }
           );
@@ -40,13 +41,21 @@ public static class ToDoPostgreSQLPersistenceExtensions
 
       services.AddEntityFrameworkCoreDbMigration<ToDoDbContext>();
       services.AddEntityFrameworkCorePersistentProjection<TaskListItemProjection, ToDoDbContext, TaskView.ListItem, TaskEvent>(
-        ToDoConstants.TaskView.ListItem,
+        TaskConstants.TaskView.ListItem,
         TaskView.ListItem.ProjectionVersion
       );
 
       services.AddViewQuery<ListTasksViewQuery, TaskQueryRequest.List, TaskQueryResponse.List>();
 
       return services;
+    }
+  }
+
+  extension(PostgreSQLDomainEventStorageBuilder builder)
+  {
+    public PostgreSQLDomainEventStorageBuilder ForToDoEvents()
+    {
+      return builder.ForDomainEvents<TaskEvent>();
     }
   }
 }

@@ -1,5 +1,6 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Abstractions.Tasks;
 
 namespace Flensrocker.ToDo.UnitTests;
 
@@ -10,13 +11,13 @@ public sealed class ToDoConstantsTests
   public void TaskEventStreamNamespaceMatchesTypeName()
   {
     var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
-    Assert.AreEqual(ToDoConstants.TaskEvent.Base, jsonOptions.GetTypeName(typeof(TaskEvent)));
+    Assert.AreEqual(TaskConstants.TaskEvent.Base, jsonOptions.GetTypeName(typeof(TaskEvent)));
   }
 
   [TestMethod]
   public void TaskEventStreamNamespaceCanBeConvertedToType()
   {
     var jsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
-    Assert.AreEqual(typeof(TaskEvent), jsonOptions.GetTypeFromName(ToDoConstants.TaskEvent.Base));
+    Assert.AreEqual(typeof(TaskEvent), jsonOptions.GetTypeFromName(TaskConstants.TaskEvent.Base));
   }
 }

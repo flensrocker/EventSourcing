@@ -1,5 +1,5 @@
 ﻿using Flensrocker.EventSourcing.Orleans.Abstractions;
-using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Abstractions.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Flensrocker.ToDo.Orleans.Client;

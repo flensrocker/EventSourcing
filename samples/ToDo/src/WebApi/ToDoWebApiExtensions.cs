@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Flensrocker.ToDo.WebApi.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,7 +21,7 @@ public static class ToDoWebApiExtensions
   {
     public IEndpointRouteBuilder MapToDo()
     {
-      builder.MapGroup(ToDoRoutes.TaskRoute).MapTask(ToDoRoutes.TaskRoute);
+      builder.MapGroup(ToDoRoutes.TaskRoute).MapTasks(ToDoRoutes.TaskRoute);
 
       return builder;
     }

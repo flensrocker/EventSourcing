@@ -1,5 +1,6 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Abstractions.Tasks;
+using Flensrocker.ToDo.Domain.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Flensrocker.ToDo.Domain;
