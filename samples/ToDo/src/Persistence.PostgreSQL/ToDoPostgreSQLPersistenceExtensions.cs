@@ -2,7 +2,6 @@
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
-using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Abstractions.Tasks;
 using Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 using Microsoft.EntityFrameworkCore;

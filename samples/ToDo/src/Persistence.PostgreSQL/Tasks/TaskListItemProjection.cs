@@ -1,7 +1,6 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
-using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Abstractions.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

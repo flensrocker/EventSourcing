@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Abstractions.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
