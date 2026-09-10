@@ -68,6 +68,8 @@ public static class TaskEndpoints
         if (command is null)
           return TypedResults.BadRequest();
 
+        // NOTE BEST PRACTICE
+        // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
         var taskId = Guid.CreateVersion7();
         var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
         return result ? TypedResults.Created($"{taskRoute}/{taskId}", new MemorizedDto { TaskId = taskId }) : TypedResults.BadRequest();
