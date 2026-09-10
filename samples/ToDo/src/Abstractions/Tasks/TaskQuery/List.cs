@@ -2,7 +2,6 @@
 
 namespace Flensrocker.ToDo.Abstractions.Tasks;
 
-[JsonDerivedType(typeof(List), TaskConstants.TaskQueryRequest.Base)]
 public abstract partial record TaskQueryRequest
 {
   [GenerateSerializer]
@@ -24,7 +23,6 @@ public abstract partial record TaskQueryRequest
   }
 }
 
-[JsonDerivedType(typeof(List), TaskConstants.TaskQueryResponse.List)]
 public abstract partial record TaskQueryResponse
 {
   [GenerateSerializer]

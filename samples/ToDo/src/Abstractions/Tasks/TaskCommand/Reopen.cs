@@ -2,6 +2,7 @@
 
 namespace Flensrocker.ToDo.Abstractions.Tasks;
 
+[JsonDerivedType(typeof(Reopen), TaskConstants.TaskCommand.Reopen)]
 public abstract partial record TaskCommand
 {
   [GenerateSerializer]
