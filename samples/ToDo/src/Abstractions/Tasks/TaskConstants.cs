@@ -5,15 +5,6 @@ public static class TaskConstants
   // NOTE BEST PRACTICE
   // These constant strings aka "type names" are stored in the event store or are used by the Orleans Serializer.
   // Their values must not be changed (without a migration).
-  public static class TaskEvent
-  {
-    public const string Base = $"{ToDoConstants.Module}_TaskEvent";
-    public const string Completed = $"{Base}_Completed";
-    public const string Dismissed = $"{Base}_Dismissed";
-    public const string Memorized = $"{Base}_Memorized";
-    public const string Reopened = $"{Base}_Reopened";
-  }
-
   public static class TaskCommand
   {
     public const string Base = $"{ToDoConstants.Module}_TaskCommand";
@@ -21,6 +12,15 @@ public static class TaskConstants
     public const string Dismiss = $"{Base}_Dismiss";
     public const string Memorize = $"{Base}_Memorize";
     public const string Reopen = $"{Base}_Reopen";
+  }
+
+  public static class TaskEvent
+  {
+    public const string Base = $"{ToDoConstants.Module}_TaskEvent";
+    public const string Completed = $"{Base}_Completed";
+    public const string Dismissed = $"{Base}_Dismissed";
+    public const string Memorized = $"{Base}_Memorized";
+    public const string Reopened = $"{Base}_Reopened";
   }
 
   public static class TaskQueryRequest
