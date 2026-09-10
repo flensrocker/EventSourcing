@@ -15,6 +15,7 @@ public abstract record PersistentProjectionEvent
   public sealed record ProjectionRegistered : PersistentProjectionEvent
   {
     [Id(0)]
+    [JsonPropertyName("TypeName")]
     public required string TypeName { get; init; }
   }
 
@@ -23,9 +24,11 @@ public abstract record PersistentProjectionEvent
   public sealed record ProjectionRebuilt : PersistentProjectionEvent
   {
     [Id(0)]
+    [JsonPropertyName("TypeName")]
     public required string TypeName { get; init; }
 
     [Id(1)]
+    [JsonPropertyName("Version")]
     public required int Version { get; init; }
   }
 }

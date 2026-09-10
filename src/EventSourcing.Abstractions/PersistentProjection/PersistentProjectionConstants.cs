@@ -6,7 +6,7 @@ internal static class PersistentProjectionConstants
 
   internal static class PersistentProjectionEvent
   {
-    internal const string Base = "Flensrocker_EventSourcing_PersistentProjectionEvent";
+    internal const string Base = $"{EventSourcingConstants.AliasBase}_PersistentProjectionEvent";
     internal const string ProjectionRegistered = $"{Base}_ProjectionRegistered";
     internal const string ProjectionRebuilt = $"{Base}_ProjectionRebuilt";
   }

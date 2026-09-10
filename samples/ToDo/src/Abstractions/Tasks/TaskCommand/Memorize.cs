@@ -15,12 +15,27 @@ public abstract partial record TaskCommand
     [JsonConstructor]
     internal Memorize() { }
 
-    public static Memorize? Create(string? title)
+    public static DomainResult Create(string? title)
     {
-      if (string.IsNullOrWhiteSpace(title) || title.Length > TaskConstants.TaskTitleMaxLength)
-        return null;
+      var errors = DomainResult.ValidationProblem.NoErrors;
 
-      return new Memorize { Title = title };
+      if (string.IsNullOrWhiteSpace(title))
+        errors = errors.Add("title", ["The title is required."]);
+      else if (title.Length > TaskConstants.TaskTitleMaxLength)
+        errors = errors.Add("title", [$"The maximum length of the title is {TaskConstants.TaskTitleMaxLength}."]);
+
+      if (errors.Count > 0)
+      {
+        return new DomainResult.ValidationProblem
+        {
+          Title = "Invalid 'Memorize' command",
+          Detail = "The task could not be created.",
+          Errors = errors,
+        };
+      }
+
+      System.Diagnostics.Debug.Assert(title is not null);
+      return new DomainResult.Success<Memorize> { Value = new Memorize { Title = title } };
     }
   }
 }

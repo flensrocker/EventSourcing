@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Flensrocker.EventSourcing.Abstractions;
+﻿using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.ToDo.Abstractions.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -13,15 +12,11 @@ public static class TaskEndpoints
 {
   public record DismissDto
   {
-    [Required]
-    [MaxLength(TaskConstants.TaskDismissReasonMaxLength)]
     public string? Reason { get; init; }
   }
 
   public record MemorizeDto
   {
-    [Required]
-    [MaxLength(TaskConstants.TaskTitleMaxLength)]
     public string? Title { get; init; }
   }
 
@@ -62,17 +57,29 @@ public static class TaskEndpoints
 
     builder.MapPost(
       "memorize",
-      async Task<Results<Created<MemorizedDto>, BadRequest>> (HttpContext context, [FromBody] MemorizeDto dto) =>
+      async Task<Results<Created<MemorizedDto>, BadRequest, ValidationProblem>> (HttpContext context, [FromBody] MemorizeDto dto) =>
       {
-        var command = TaskCommand.Memorize.Create(title: dto.Title);
-        if (command is null)
-          return TypedResults.BadRequest();
+        var commandResult = TaskCommand.Memorize.Create(title: dto.Title);
+        if (commandResult.IsSuccess<TaskCommand.Memorize>(out var command))
+        {
+          // NOTE BEST PRACTICE
+          // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
+          var taskId = Guid.CreateVersion7();
+          var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
+          if (result)
+            return TypedResults.Created($"{taskRoute}/{taskId}", new MemorizedDto { TaskId = taskId });
+        }
+        // TODO create DomainResult extensions for converting errors into TypedResults
+        else if (commandResult is DomainResult.ValidationProblem validationProblem)
+        {
+          return TypedResults.ValidationProblem(
+            errors: validationProblem.Errors,
+            detail: validationProblem.Detail,
+            title: validationProblem.Title
+          );
+        }
 
-        // NOTE BEST PRACTICE
-        // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
-        var taskId = Guid.CreateVersion7();
-        var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
-        return result ? TypedResults.Created($"{taskRoute}/{taskId}", new MemorizedDto { TaskId = taskId }) : TypedResults.BadRequest();
+        return TypedResults.BadRequest();
       }
     );
 

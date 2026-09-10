@@ -7,4 +7,14 @@ public static class EventSourcingConstants
 
   public const string MeterName = $"{nameof(Flensrocker)}.{nameof(EventSourcing)}";
   public const string MeterVersion = "1.0.0";
+
+  public const string AliasBase = "Flensrocker_EventSourcing";
+
+  internal static class DomainResult
+  {
+    internal const string Base = $"{AliasBase}_DomainResult";
+    internal const string Success = $"{Base}_Success";
+    internal const string NotFound = $"{Base}_NotFound";
+    internal const string ValidationProblem = $"{Base}_ValidationProblem";
+  }
 }
