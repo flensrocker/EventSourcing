@@ -75,7 +75,7 @@ public static class EventSourcingExtensions
         await dbMigration.MigrateAsync().ConfigureAwait(false);
     }
 
-    public async Task<DomainResult<int>> ExecuteCommandAsync<TCommandBase>(Guid id, TCommandBase command)
+    public async Task<DomainResult<ExecutionResult>> ExecuteCommandAsync<TCommandBase>(Guid id, TCommandBase command)
     {
       var handler = serviceProvider.GetRequiredKeyedService<ICommandHandler<TCommandBase>>(id);
       return await handler.ExecuteCommand(command).ConfigureAwait(false);

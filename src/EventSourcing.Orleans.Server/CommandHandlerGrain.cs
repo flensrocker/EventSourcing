@@ -61,7 +61,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
     }
   }
 
-  public async Task<DomainResult<int>> ExecuteCommand(TCommandBase command)
+  public async Task<DomainResult<ExecutionResult>> ExecuteCommand(TCommandBase command)
   {
     await using var commandScope = ServiceProvider.CreateAsyncScope();
 
@@ -69,7 +69,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
 
     return await commandHandler
       .ExecuteCommandAsync(State, command)
-      .Pipe<TEventBase[], int>(async payloads =>
+      .Pipe<TEventBase[], ExecutionResult>(async payloads =>
       {
         if (payloads.Length == 0)
           return new DomainResult.InternalError();
@@ -80,7 +80,7 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
         RaiseDomainEvents(createdAt, payloads);
         await ConfirmEvents();
 
-        return _nextVersion - 1;
+        return new ExecutionResult { Version = _nextVersion - 1 };
       });
   }
 

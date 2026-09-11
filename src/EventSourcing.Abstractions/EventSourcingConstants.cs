@@ -19,4 +19,9 @@ public static class EventSourcingConstants
     internal const string Success = $"{Base}_Success";
     internal const string ValidationProblem = $"{Base}_ValidationProblem";
   }
+
+  internal static class ExecutionResult
+  {
+    internal const string Base = $"{AliasBase}_ExecutionResult";
+  }
 }

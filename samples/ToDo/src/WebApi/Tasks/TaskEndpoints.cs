@@ -65,7 +65,7 @@ public static class TaskEndpoints
         return await TaskCommand
           .Memorize.Create(title: dto.Title)
           .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .Pipe<int, MemorizedDto>(version => new MemorizedDto { TaskId = taskId })
+          .Pipe<ExecutionResult, MemorizedDto>(_ => new MemorizedDto { TaskId = taskId })
           .ToTypedResult($"{taskRoute}/{taskId}");
       }
     );
