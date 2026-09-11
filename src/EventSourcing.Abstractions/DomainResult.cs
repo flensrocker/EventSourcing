@@ -162,9 +162,40 @@ public static class DomainResultExtensions
       return false;
     }
 
-    public DomainResult<TOut> Match<TOut>(Func<T, DomainResult<TOut>> onSuccess)
+    public DomainResult<TOut> Bind<TOut>(Func<T, DomainResult<TOut>> onSuccess)
     {
       return result.IsSuccess(out var value) ? onSuccess(value) : result.Cast<TOut>();
+    }
+
+    public async Task<DomainResult<TOut>> Bind<TOut>(
+      Func<T, CancellationToken, Task<DomainResult<TOut>>> onSuccessAsync,
+      CancellationToken cancellationToken
+    )
+    {
+      return result.IsSuccess(out var value) ? await onSuccessAsync(value, cancellationToken).ConfigureAwait(false) : result.Cast<TOut>();
+    }
+
+    public async Task<DomainResult<TOut>> Bind<TOut>(Func<T, Task<DomainResult<TOut>>> onSuccessAsync)
+    {
+      return result.IsSuccess(out var value) ? await onSuccessAsync(value).ConfigureAwait(false) : result.Cast<TOut>();
+    }
+  }
+
+  extension<T>(Task<DomainResult<T>> asyncResult)
+  {
+    public async Task<DomainResult<TOut>> Bind<TOut>(
+      Func<T, CancellationToken, Task<DomainResult<TOut>>> onSuccessAsync,
+      CancellationToken cancellationToken
+    )
+    {
+      var result = await asyncResult.ConfigureAwait(false);
+      return await result.Bind(onSuccessAsync, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<DomainResult<TOut>> Bind<TOut>(Func<T, Task<DomainResult<TOut>>> onSuccessAsync)
+    {
+      var result = await asyncResult.ConfigureAwait(false);
+      return await result.Bind(onSuccessAsync).ConfigureAwait(false);
     }
   }
 }

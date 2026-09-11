@@ -21,4 +21,15 @@ public static class DomainResultAspNetCoreExtensions
       };
     }
   }
+
+  extension<T>(Task<DomainResult<T>> asyncResult)
+  {
+    /// <param name="createdUri">Returns "Created" instead of "Ok" if not null and not empty</param>
+    /// <returns></returns>
+    public async Task<IResult> ToTypedResult(string? createdUri = null)
+    {
+      var result = await asyncResult.ConfigureAwait(false);
+      return result.ToTypedResult(createdUri);
+    }
+  }
 }

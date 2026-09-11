@@ -60,18 +60,18 @@ public static class TaskEndpoints
       "memorize",
       async (HttpContext context, [FromBody] MemorizeDto dto) =>
       {
-        var commandResult = TaskCommand.Memorize.Create(title: dto.Title);
-        if (commandResult.IsSuccess(out var command))
-        {
-          // NOTE BEST PRACTICE
-          // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
-          var taskId = Guid.CreateVersion7();
-          var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
-          if (result)
-            return TypedResults.Created($"{taskRoute}/{taskId}", new MemorizedDto { TaskId = taskId });
-        }
+        // NOTE BEST PRACTICE
+        // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
+        var taskId = Guid.CreateVersion7();
 
-        return commandResult.ToTypedResult();
+        return await TaskCommand
+          .Memorize.Create(title: dto.Title)
+          .Bind<TaskCommand.Memorize, MemorizedDto>(async command =>
+          {
+            var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
+            return result ? new MemorizedDto { TaskId = taskId } : new DomainResult.InternalError();
+          })
+          .ToTypedResult($"{taskRoute}/{taskId}");
       }
     );
 
