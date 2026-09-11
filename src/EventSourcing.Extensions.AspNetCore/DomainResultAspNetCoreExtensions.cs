@@ -1,0 +1,24 @@
+using Microsoft.AspNetCore.Http;
+
+namespace Flensrocker.EventSourcing.Extensions.AspNetCore;
+
+public static class DomainResultAspNetCoreExtensions
+{
+  extension<T>(DomainResult<T> result)
+  {
+    /// <param name="createdUri">Returns "Created" instead of "Ok" if not null and not empty</param>
+    /// <returns></returns>
+    public IResult ToTypedResult(string? createdUri = null)
+    {
+      return result switch
+      {
+        DomainResult<T>.InternalError r => TypedResults.InternalServerError(r.Message),
+        DomainResult<T>.NotFound r => TypedResults.NotFound(r.Message),
+        DomainResult<T>.Success r when !string.IsNullOrWhiteSpace(createdUri) => TypedResults.Created(createdUri, r.Value),
+        DomainResult<T>.Success r => TypedResults.Ok(r.Value),
+        DomainResult<T>.ValidationProblem r => TypedResults.ValidationProblem(title: r.Title, detail: r.Detail, errors: r.Errors),
+        _ => TypedResults.InternalServerError(),
+      };
+    }
+  }
+}

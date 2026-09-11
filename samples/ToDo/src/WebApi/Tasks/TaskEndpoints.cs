@@ -1,4 +1,5 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Extensions.AspNetCore;
 using Flensrocker.ToDo.Abstractions.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -57,10 +58,7 @@ public static class TaskEndpoints
 
     builder.MapPost(
       "memorize",
-      async Task<Results<Created<MemorizedDto>, InternalServerError, ValidationProblem>> (
-        HttpContext context,
-        [FromBody] MemorizeDto dto
-      ) =>
+      async (HttpContext context, [FromBody] MemorizeDto dto) =>
       {
         var commandResult = TaskCommand.Memorize.Create(title: dto.Title);
         if (commandResult.IsSuccess(out var command))
@@ -72,17 +70,8 @@ public static class TaskEndpoints
           if (result)
             return TypedResults.Created($"{taskRoute}/{taskId}", new MemorizedDto { TaskId = taskId });
         }
-        // TODO create DomainResult extensions for converting errors into TypedResults
-        else if (commandResult is DomainResult<TaskCommand.Memorize>.ValidationProblem validationProblem)
-        {
-          return TypedResults.ValidationProblem(
-            errors: validationProblem.Errors,
-            detail: validationProblem.Detail,
-            title: validationProblem.Title
-          );
-        }
 
-        return TypedResults.InternalServerError();
+        return commandResult.ToTypedResult();
       }
     );
 

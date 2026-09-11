@@ -42,6 +42,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/EventSourcing.Abstractions/Flensrocker.EventSourcing.Abstractions.csproj" />
+    <Project Path="src/EventSourcing.Extensions.AspNetCore/Flensrocker.EventSourcing.Extensions.AspNetCore.csproj" />
     <Project Path="src/EventSourcing.Extensions.EntityFrameworkCore/Flensrocker.EventSourcing.Extensions.EntityFrameworkCore.csproj" />
     <Project Path="src/EventSourcing.Orleans.Abstractions/Flensrocker.EventSourcing.Orleans.Abstractions.csproj" />
     <Project Path="src/EventSourcing.Orleans.EntityFrameworkCore/Flensrocker.EventSourcing.Orleans.EntityFrameworkCore.csproj" />
