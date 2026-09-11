@@ -10,5 +10,6 @@ public interface ICommandHandler<TEventBase, TCommandBase, TCommandState>
 // Mainly used to decouple the caller like WebApi from the Orleans grains
 public interface ICommandHandler<TCommandBase>
 {
-  Task<bool> ExecuteCommand(TCommandBase command);
+  /// <returns>The current version of the state</returns>
+  Task<DomainResult<int>> ExecuteCommand(TCommandBase command);
 }

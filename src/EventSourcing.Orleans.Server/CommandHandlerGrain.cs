@@ -61,23 +61,27 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
     }
   }
 
-  public async Task<bool> ExecuteCommand(TCommandBase command)
+  public async Task<DomainResult<int>> ExecuteCommand(TCommandBase command)
   {
     await using var commandScope = ServiceProvider.CreateAsyncScope();
 
     var commandHandler = commandScope.ServiceProvider.GetRequiredService<ICommandHandler<TEventBase, TCommandBase, TCommandState>>();
 
-    var payloadsResult = await commandHandler.ExecuteCommandAsync(State, command);
-    if (!payloadsResult.IsSuccess(out var payloads) || payloads.Length == 0)
-      return false;
+    return await commandHandler
+      .ExecuteCommandAsync(State, command)
+      .Pipe<TEventBase[], int>(async payloads =>
+      {
+        if (payloads.Length == 0)
+          return new DomainResult.InternalError();
 
-    var timeProvider = commandScope.ServiceProvider.GetRequiredService<TimeProvider>();
-    var createdAt = timeProvider.GetUtcNow();
+        var timeProvider = commandScope.ServiceProvider.GetRequiredService<TimeProvider>();
+        var createdAt = timeProvider.GetUtcNow();
 
-    RaiseDomainEvents(createdAt, payloads);
-    await ConfirmEvents();
+        RaiseDomainEvents(createdAt, payloads);
+        await ConfirmEvents();
 
-    return true;
+        return _nextVersion - 1;
+      });
   }
 
   Task<bool> ICustomStorageInterface<TCommandState, DomainEvent>.ApplyUpdatesToStorage(

@@ -75,11 +75,10 @@ public static class EventSourcingExtensions
         await dbMigration.MigrateAsync().ConfigureAwait(false);
     }
 
-    public async Task<bool> ExecuteCommandAsync<TCommandBase>(Guid id, TCommandBase command)
+    public async Task<DomainResult<int>> ExecuteCommandAsync<TCommandBase>(Guid id, TCommandBase command)
     {
       var handler = serviceProvider.GetRequiredKeyedService<ICommandHandler<TCommandBase>>(id);
-      var result = await handler.ExecuteCommand(command);
-      return result;
+      return await handler.ExecuteCommand(command).ConfigureAwait(false);
     }
 
     public async Task<TProjection?> GetProjection<TProjection>(Guid id, CancellationToken cancellationToken)

@@ -72,7 +72,7 @@ public abstract class DomainResult<T>
   public abstract DomainResult<TOut> Cast<TOut>();
 
   [GenerateSerializer]
-  [Alias(EventSourcingConstants.DomainResult.BadRequest)]
+  [Alias($"{EventSourcingConstants.DomainResult.BadRequest}`1")]
   public sealed class BadRequest : DomainResult<T>
   {
     [Id(0)]
@@ -85,7 +85,7 @@ public abstract class DomainResult<T>
   }
 
   [GenerateSerializer]
-  [Alias(EventSourcingConstants.DomainResult.InternalError)]
+  [Alias($"{EventSourcingConstants.DomainResult.InternalError}`1")]
   public sealed class InternalError : DomainResult<T>
   {
     [Id(0)]
@@ -98,7 +98,7 @@ public abstract class DomainResult<T>
   }
 
   [GenerateSerializer]
-  [Alias(EventSourcingConstants.DomainResult.NotFound)]
+  [Alias($"{EventSourcingConstants.DomainResult.NotFound}`1")]
   public sealed class NotFound : DomainResult<T>
   {
     [Id(0)]
@@ -111,7 +111,7 @@ public abstract class DomainResult<T>
   }
 
   [GenerateSerializer]
-  [Alias(EventSourcingConstants.DomainResult.Success)]
+  [Alias($"{EventSourcingConstants.DomainResult.Success}`1")]
   public sealed class Success : DomainResult<T>
   {
     [Id(0)]
@@ -126,7 +126,7 @@ public abstract class DomainResult<T>
   }
 
   [GenerateSerializer]
-  [Alias(EventSourcingConstants.DomainResult.ValidationProblem)]
+  [Alias($"{EventSourcingConstants.DomainResult.ValidationProblem}`1")]
   public sealed class ValidationProblem : DomainResult<T>
   {
     [Id(0)]
@@ -187,12 +187,12 @@ public static class DomainResultExtensions
       return false;
     }
 
-    public DomainResult<TOut> Bind<TOut>(Func<T, DomainResult<TOut>> onSuccess)
+    public DomainResult<TOut> Pipe<TOut>(Func<T, DomainResult<TOut>> onSuccess)
     {
       return result.IsSuccess(out var value) ? onSuccess(value) : result.Cast<TOut>();
     }
 
-    public async Task<DomainResult<TOut>> Bind<TOut>(
+    public async Task<DomainResult<TOut>> Pipe<TOut>(
       Func<T, CancellationToken, Task<DomainResult<TOut>>> onSuccessAsync,
       CancellationToken cancellationToken
     )
@@ -200,7 +200,7 @@ public static class DomainResultExtensions
       return result.IsSuccess(out var value) ? await onSuccessAsync(value, cancellationToken).ConfigureAwait(false) : result.Cast<TOut>();
     }
 
-    public async Task<DomainResult<TOut>> Bind<TOut>(Func<T, Task<DomainResult<TOut>>> onSuccessAsync)
+    public async Task<DomainResult<TOut>> Pipe<TOut>(Func<T, Task<DomainResult<TOut>>> onSuccessAsync)
     {
       return result.IsSuccess(out var value) ? await onSuccessAsync(value).ConfigureAwait(false) : result.Cast<TOut>();
     }
@@ -208,19 +208,25 @@ public static class DomainResultExtensions
 
   extension<T>(Task<DomainResult<T>> asyncResult)
   {
-    public async Task<DomainResult<TOut>> Bind<TOut>(
+    public async Task<DomainResult<TOut>> Pipe<TOut>(Func<T, DomainResult<TOut>> onSuccess)
+    {
+      var result = await asyncResult.ConfigureAwait(false);
+      return result.Pipe(onSuccess);
+    }
+
+    public async Task<DomainResult<TOut>> Pipe<TOut>(
       Func<T, CancellationToken, Task<DomainResult<TOut>>> onSuccessAsync,
       CancellationToken cancellationToken
     )
     {
       var result = await asyncResult.ConfigureAwait(false);
-      return await result.Bind(onSuccessAsync, cancellationToken).ConfigureAwait(false);
+      return await result.Pipe(onSuccessAsync, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<DomainResult<TOut>> Bind<TOut>(Func<T, Task<DomainResult<TOut>>> onSuccessAsync)
+    public async Task<DomainResult<TOut>> Pipe<TOut>(Func<T, Task<DomainResult<TOut>>> onSuccessAsync)
     {
       var result = await asyncResult.ConfigureAwait(false);
-      return await result.Bind(onSuccessAsync).ConfigureAwait(false);
+      return await result.Pipe(onSuccessAsync).ConfigureAwait(false);
     }
   }
 }

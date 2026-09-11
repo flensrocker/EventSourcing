@@ -32,27 +32,25 @@ public static class TaskEndpoints
     // endpoints for commands
     builder.MapPut(
       "{taskId}/complete",
-      static async Task<Results<Ok, BadRequest>> (HttpContext context, Guid taskId) =>
+      static async (HttpContext context, Guid taskId) =>
       {
         var command = TaskCommand.Complete.Create();
         if (command is null)
           return TypedResults.BadRequest();
 
-        var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
-        return result ? TypedResults.Ok() : TypedResults.BadRequest();
+        return await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command).ToTypedResult();
       }
     );
 
     builder.MapPut(
       "{taskId}/dismiss",
-      static async Task<Results<Ok, BadRequest>> (HttpContext context, Guid taskId, [FromBody] DismissDto dto) =>
+      static async (HttpContext context, Guid taskId, [FromBody] DismissDto dto) =>
       {
         var command = TaskCommand.Dismiss.Create(reason: dto.Reason);
         if (command is null)
           return TypedResults.BadRequest();
 
-        var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
-        return result ? TypedResults.Ok() : TypedResults.BadRequest();
+        return await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command).ToTypedResult();
       }
     );
 
@@ -66,25 +64,21 @@ public static class TaskEndpoints
 
         return await TaskCommand
           .Memorize.Create(title: dto.Title)
-          .Bind<TaskCommand.Memorize, MemorizedDto>(async command =>
-          {
-            var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
-            return result ? new MemorizedDto { TaskId = taskId } : new DomainResult.InternalError();
-          })
+          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+          .Pipe<int, MemorizedDto>(version => new MemorizedDto { TaskId = taskId })
           .ToTypedResult($"{taskRoute}/{taskId}");
       }
     );
 
     builder.MapPut(
       "{taskId}/reopen",
-      static async Task<Results<Ok, BadRequest>> (HttpContext context, Guid taskId) =>
+      static async (HttpContext context, Guid taskId) =>
       {
         var command = TaskCommand.Reopen.Create();
         if (command is null)
           return TypedResults.BadRequest();
 
-        var result = await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command);
-        return result ? TypedResults.Ok() : TypedResults.BadRequest();
+        return await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command).ToTypedResult();
       }
     );
 
