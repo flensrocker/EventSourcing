@@ -7,9 +7,9 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
 {
   private readonly TimeProvider _timeProvider = timeProvider;
 
-  public ValueTask<TaskEvent[]?> ExecuteCommandAsync(TaskCommandState state, TaskCommand command)
+  public Task<TaskEvent[]?> ExecuteCommandAsync(TaskCommandState state, TaskCommand command)
   {
-    return ValueTask.FromResult(
+    return Task.FromResult(
       command switch
       {
         TaskCommand.Complete completeToDo => Complete(state, completeToDo),
