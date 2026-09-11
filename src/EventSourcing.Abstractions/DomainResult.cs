@@ -8,7 +8,7 @@ public static class DomainResult
   {
     public string? Message { get; init; }
 
-    public InternalError(string message)
+    public InternalError(string? message)
     {
       Message = message;
     }
@@ -18,7 +18,7 @@ public static class DomainResult
   {
     public string? Message { get; init; }
 
-    public NotFound(string message)
+    public NotFound(string? message)
     {
       Message = message;
     }
@@ -59,12 +59,19 @@ public abstract class DomainResult<T>
 {
   private DomainResult() { }
 
+  public abstract DomainResult<TOut> Cast<TOut>();
+
   [GenerateSerializer]
   [Alias(EventSourcingConstants.DomainResult.InternalError)]
   public sealed class InternalError : DomainResult<T>
   {
     [Id(0)]
     public string? Message { get; init; }
+
+    public override DomainResult<TOut> Cast<TOut>()
+    {
+      return new DomainResult<TOut>.InternalError { Message = Message };
+    }
   }
 
   [GenerateSerializer]
@@ -73,6 +80,11 @@ public abstract class DomainResult<T>
   {
     [Id(0)]
     public string? Message { get; init; }
+
+    public override DomainResult<TOut> Cast<TOut>()
+    {
+      return new DomainResult<TOut>.NotFound { Message = Message };
+    }
   }
 
   [GenerateSerializer]
@@ -81,6 +93,13 @@ public abstract class DomainResult<T>
   {
     [Id(0)]
     public required T Value { get; init; }
+
+    public override DomainResult<TOut> Cast<TOut>()
+    {
+      return Value is TOut outValue
+        ? new DomainResult<TOut>.Success { Value = outValue }
+        : new DomainResult<TOut>.Success { Value = default! };
+    }
   }
 
   [GenerateSerializer]
@@ -95,6 +114,16 @@ public abstract class DomainResult<T>
 
     [Id(2)]
     public required ImmutableDictionary<string, string[]> Errors { get; init; }
+
+    public override DomainResult<TOut> Cast<TOut>()
+    {
+      return new DomainResult<TOut>.ValidationProblem
+      {
+        Title = Title,
+        Detail = Detail,
+        Errors = Errors,
+      };
+    }
   }
 
   public static implicit operator DomainResult<T>(T value) => new Success { Value = value };
@@ -131,6 +160,11 @@ public static class DomainResultExtensions
 
       value = default!;
       return false;
+    }
+
+    public DomainResult<TOut> Match<TOut>(Func<T, DomainResult<TOut>> onSuccess)
+    {
+      return result.IsSuccess(out var value) ? onSuccess(value) : result.Cast<TOut>();
     }
   }
 }
