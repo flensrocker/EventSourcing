@@ -57,10 +57,13 @@ public static class TaskEndpoints
 
     builder.MapPost(
       "memorize",
-      async Task<Results<Created<MemorizedDto>, BadRequest, ValidationProblem>> (HttpContext context, [FromBody] MemorizeDto dto) =>
+      async Task<Results<Created<MemorizedDto>, InternalServerError, ValidationProblem>> (
+        HttpContext context,
+        [FromBody] MemorizeDto dto
+      ) =>
       {
         var commandResult = TaskCommand.Memorize.Create(title: dto.Title);
-        if (commandResult.IsSuccess<TaskCommand.Memorize>(out var command))
+        if (commandResult.IsSuccess(out var command))
         {
           // NOTE BEST PRACTICE
           // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
@@ -70,7 +73,7 @@ public static class TaskEndpoints
             return TypedResults.Created($"{taskRoute}/{taskId}", new MemorizedDto { TaskId = taskId });
         }
         // TODO create DomainResult extensions for converting errors into TypedResults
-        else if (commandResult is DomainResult.ValidationProblem validationProblem)
+        else if (commandResult is DomainResult<TaskCommand.Memorize>.ValidationProblem validationProblem)
         {
           return TypedResults.ValidationProblem(
             errors: validationProblem.Errors,
@@ -79,7 +82,7 @@ public static class TaskEndpoints
           );
         }
 
-        return TypedResults.BadRequest();
+        return TypedResults.InternalServerError();
       }
     );
 

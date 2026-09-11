@@ -13,8 +13,9 @@ public static class EventSourcingConstants
   internal static class DomainResult
   {
     internal const string Base = $"{AliasBase}_DomainResult";
-    internal const string Success = $"{Base}_Success";
+    internal const string InternalError = $"{Base}_InternalError";
     internal const string NotFound = $"{Base}_NotFound";
+    internal const string Success = $"{Base}_Success";
     internal const string ValidationProblem = $"{Base}_ValidationProblem";
   }
 }

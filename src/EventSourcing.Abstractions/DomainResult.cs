@@ -2,41 +2,90 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Flensrocker.EventSourcing.Abstractions;
 
+public static class DomainResult
+{
+  public struct InternalError
+  {
+    public string? Message { get; init; }
+
+    public InternalError(string message)
+    {
+      Message = message;
+    }
+  }
+
+  public struct NotFound
+  {
+    public string? Message { get; init; }
+
+    public NotFound(string message)
+    {
+      Message = message;
+    }
+  }
+
+  public static DomainResult<T> Success<T>(T value) => new DomainResult<T>.Success { Value = value };
+
+  public struct ValidationProblem
+  {
+    public string Title { get; init; } = "";
+
+    public string Detail { get; init; } = "";
+
+    public ImmutableDictionary<string, string[]> Errors { get; private set; } = ImmutableDictionary<string, string[]>.Empty;
+
+    public bool HasErrors
+    {
+      get => Errors.Count > 0;
+    }
+
+    public ValidationProblem() { }
+
+    public void AddError(string key, string[] messages)
+    {
+      if (Errors.TryGetValue(key, out var existingMessages))
+        Errors = Errors.SetItem(key, existingMessages.Concat(messages).ToArray());
+      else
+        Errors = Errors.Add(key, messages);
+    }
+
+    public void AddError(string key, string message) => AddError(key, [message]);
+  }
+}
+
 [GenerateSerializer]
-[Alias(EventSourcingConstants.DomainResult.Base)]
-public abstract class DomainResult
+[Alias($"{EventSourcingConstants.DomainResult.Base}`1")]
+public abstract class DomainResult<T>
 {
   private DomainResult() { }
 
-  // for easier pattern matching
-  internal interface ISuccess { }
-
   [GenerateSerializer]
-  [Alias($"{EventSourcingConstants.DomainResult.Success}`1")]
-  public sealed class Success<T> : DomainResult, ISuccess
-  {
-    [Id(0)]
-    public required T Value { get; init; }
-  }
-
-  [GenerateSerializer]
-  [Alias(EventSourcingConstants.DomainResult.Success)]
-  public sealed class Success : DomainResult, ISuccess
-  {
-    public static readonly Success Instance = new();
-  }
-
-  [GenerateSerializer]
-  [Alias(EventSourcingConstants.DomainResult.NotFound)]
-  public sealed class NotFound : DomainResult
+  [Alias(EventSourcingConstants.DomainResult.InternalError)]
+  public sealed class InternalError : DomainResult<T>
   {
     [Id(0)]
     public string? Message { get; init; }
   }
 
   [GenerateSerializer]
+  [Alias(EventSourcingConstants.DomainResult.NotFound)]
+  public sealed class NotFound : DomainResult<T>
+  {
+    [Id(0)]
+    public string? Message { get; init; }
+  }
+
+  [GenerateSerializer]
+  [Alias(EventSourcingConstants.DomainResult.Success)]
+  public sealed class Success : DomainResult<T>
+  {
+    [Id(0)]
+    public required T Value { get; init; }
+  }
+
+  [GenerateSerializer]
   [Alias(EventSourcingConstants.DomainResult.ValidationProblem)]
-  public sealed class ValidationProblem : DomainResult
+  public sealed class ValidationProblem : DomainResult<T>
   {
     [Id(0)]
     public required string Title { get; init; }
@@ -46,23 +95,35 @@ public abstract class DomainResult
 
     [Id(2)]
     public required ImmutableDictionary<string, string[]> Errors { get; init; }
-
-    public static readonly ImmutableDictionary<string, string[]> NoErrors = ImmutableDictionary<string, string[]>.Empty;
   }
+
+  public static implicit operator DomainResult<T>(T value) => new Success { Value = value };
+
+  public static implicit operator DomainResult<T>(DomainResult.InternalError error) => new InternalError { Message = error.Message };
+
+  public static implicit operator DomainResult<T>(DomainResult.NotFound error) => new NotFound { Message = error.Message };
+
+  public static implicit operator DomainResult<T>(DomainResult.ValidationProblem error) =>
+    new ValidationProblem
+    {
+      Title = error.Title,
+      Detail = error.Detail,
+      Errors = error.Errors,
+    };
 }
 
 public static class DomainResultExtensions
 {
-  extension(DomainResult result)
+  extension<T>(DomainResult<T> result)
   {
     public bool IsSuccess()
     {
-      return result is DomainResult.ISuccess;
+      return result is DomainResult<T>.Success;
     }
 
-    public bool IsSuccess<T>([MaybeNullWhen(false)] out T value)
+    public bool IsSuccess([MaybeNullWhen(false)] out T value)
     {
-      if (result is DomainResult.Success<T> success)
+      if (result is DomainResult<T>.Success success)
       {
         value = success.Value;
         return true;
