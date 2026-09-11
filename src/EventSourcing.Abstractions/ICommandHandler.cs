@@ -3,7 +3,7 @@
 public interface ICommandHandler<TEventBase, TCommandBase, TCommandState>
   where TCommandState : IDomainEventProjectable
 {
-  Task<TEventBase[]?> ExecuteCommandAsync(TCommandState state, TCommandBase command);
+  Task<DomainResult<TEventBase[]>> ExecuteCommandAsync(TCommandState state, TCommandBase command);
 }
 
 // This interface is for implementations, which load the state and then call the ICommandHandler<TEventBase, TCommandBase, TCommandState>

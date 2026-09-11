@@ -67,8 +67,8 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
 
     var commandHandler = commandScope.ServiceProvider.GetRequiredService<ICommandHandler<TEventBase, TCommandBase, TCommandState>>();
 
-    var payloads = await commandHandler.ExecuteCommandAsync(State, command);
-    if (payloads is not { Length: > 0 })
+    var payloadsResult = await commandHandler.ExecuteCommandAsync(State, command);
+    if (!payloadsResult.IsSuccess(out var payloads) || payloads.Length == 0)
       return false;
 
     var timeProvider = commandScope.ServiceProvider.GetRequiredService<TimeProvider>();

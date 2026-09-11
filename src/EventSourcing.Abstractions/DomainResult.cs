@@ -4,6 +4,16 @@ using Flensrocker.EventSourcing.Abstractions;
 
 public static class DomainResult
 {
+  public struct BadRequest
+  {
+    public string? Message { get; init; }
+
+    public BadRequest(string? message)
+    {
+      Message = message;
+    }
+  }
+
   public struct InternalError
   {
     public string? Message { get; init; }
@@ -60,6 +70,19 @@ public abstract class DomainResult<T>
   private DomainResult() { }
 
   public abstract DomainResult<TOut> Cast<TOut>();
+
+  [GenerateSerializer]
+  [Alias(EventSourcingConstants.DomainResult.BadRequest)]
+  public sealed class BadRequest : DomainResult<T>
+  {
+    [Id(0)]
+    public string? Message { get; init; }
+
+    public override DomainResult<TOut> Cast<TOut>()
+    {
+      return new DomainResult<TOut>.BadRequest { Message = Message };
+    }
+  }
 
   [GenerateSerializer]
   [Alias(EventSourcingConstants.DomainResult.InternalError)]
@@ -127,6 +150,8 @@ public abstract class DomainResult<T>
   }
 
   public static implicit operator DomainResult<T>(T value) => new Success { Value = value };
+
+  public static implicit operator DomainResult<T>(DomainResult.BadRequest error) => new BadRequest { Message = error.Message };
 
   public static implicit operator DomainResult<T>(DomainResult.InternalError error) => new InternalError { Message = error.Message };
 

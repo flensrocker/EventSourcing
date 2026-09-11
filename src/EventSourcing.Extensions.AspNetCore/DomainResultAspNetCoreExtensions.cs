@@ -12,6 +12,7 @@ public static class DomainResultAspNetCoreExtensions
     {
       return result switch
       {
+        DomainResult<T>.BadRequest r => TypedResults.BadRequest(r.Message),
         DomainResult<T>.InternalError r => TypedResults.InternalServerError(r.Message),
         DomainResult<T>.NotFound r => TypedResults.NotFound(r.Message),
         DomainResult<T>.Success r when !string.IsNullOrWhiteSpace(createdUri) => TypedResults.Created(createdUri, r.Value),
