@@ -45,11 +45,10 @@ public static class TaskEndpoints
       "{taskId}/dismiss",
       static async (HttpContext context, Guid taskId, [FromBody] DismissDto dto) =>
       {
-        var command = TaskCommand.Dismiss.Create(reason: dto.Reason);
-        if (command is null)
-          return TypedResults.BadRequest();
-
-        return await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command).ToTypedResult();
+        return await TaskCommand
+          .Dismiss.Create(reason: dto.Reason)
+          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+          .ToTypedResult();
       }
     );
 
