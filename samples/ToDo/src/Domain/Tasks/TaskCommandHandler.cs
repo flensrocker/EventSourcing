@@ -9,16 +9,14 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
 
   public Task<DomainResult<TaskEvent[]>> ExecuteCommandAsync(TaskCommandState state, TaskCommand command)
   {
-    return Task.FromResult(
-      command switch
-      {
-        TaskCommand.Complete complete => Complete(state, complete),
-        TaskCommand.Dismiss dismiss => Dismiss(state, dismiss),
-        TaskCommand.Memorize memorize => Memorize(state, memorize),
-        TaskCommand.Reopen reopen => Reopen(state, reopen),
-        _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
-      }
-    );
+    return command switch
+    {
+      TaskCommand.Complete complete => Complete(state, complete),
+      TaskCommand.Dismiss dismiss => Dismiss(state, dismiss),
+      TaskCommand.Memorize memorize => Memorize(state, memorize),
+      TaskCommand.Reopen reopen => Reopen(state, reopen),
+      _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
+    };
   }
 
   private DomainResult<TaskEvent[]> Complete(TaskCommandState state, TaskCommand.Complete command)

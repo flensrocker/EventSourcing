@@ -171,6 +171,8 @@ public abstract class DomainResult<T>
       Detail = error.Detail,
       Errors = error.Errors,
     };
+
+  public static implicit operator Task<DomainResult<T>>(DomainResult<T> result) => Task.FromResult(result);
 }
 
 public static class DomainResultExtensions
