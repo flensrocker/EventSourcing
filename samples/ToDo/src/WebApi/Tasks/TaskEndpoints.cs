@@ -82,17 +82,12 @@ public static class TaskEndpoints
     // endpoints for queries
     builder.MapGet(
       "",
-      static async Task<Results<Ok<TaskQueryResponse.List>, BadRequest>> (
-        [FromServices] IViewQuery<TaskQueryRequest.List, TaskQueryResponse.List> query,
-        CancellationToken cancellationToken
-      ) =>
+      static async ([FromServices] IViewQuery<TaskQueryRequest.List, TaskQueryResponse.List> query, CancellationToken cancellationToken) =>
       {
-        var request = TaskQueryRequest.List.Create(tenantId: null);
-        if (request is null)
-          return TypedResults.BadRequest();
-
-        var response = await query.ExecuteQueryAsync(request, cancellationToken);
-        return TypedResults.Ok(response);
+        return await TaskQueryRequest
+          .List.Create(tenantId: null)
+          .Pipe(async request => await query.ExecuteQueryAsync(request, cancellationToken))
+          .ToTypedResult();
       }
     );
 

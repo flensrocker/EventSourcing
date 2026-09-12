@@ -16,7 +16,7 @@ public abstract partial record TaskQueryRequest
     [JsonConstructor]
     internal List() { }
 
-    public static List? Create(Guid? tenantId)
+    public static DomainResult<List> Create(Guid? tenantId)
     {
       return new List { TenantId = tenantId };
     }
