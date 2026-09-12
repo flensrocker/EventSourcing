@@ -72,6 +72,30 @@ public static class DomainResult
 
     public void AddError(string key, string message) => AddError(key, [message]);
   }
+
+  public static DomainResult<T> TryCatch<T>(Func<T> operation)
+  {
+    try
+    {
+      return operation();
+    }
+    catch (Exception ex)
+    {
+      return new DomainResult<T>.InternalError { Message = ex.Message };
+    }
+  }
+
+  public static async Task<DomainResult<T>> TryCatch<T>(Func<Task<T>> operation)
+  {
+    try
+    {
+      return await operation().ConfigureAwait(false);
+    }
+    catch (Exception ex)
+    {
+      return new DomainResult<T>.InternalError { Message = ex.Message };
+    }
+  }
 }
 
 [GenerateSerializer]
