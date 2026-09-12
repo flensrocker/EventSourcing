@@ -51,6 +51,13 @@ public static class DomainResult
 
     public ValidationProblem() { }
 
+    public ValidationProblem(string title, string detail, string errorKey, string errorMessage)
+    {
+      Title = title;
+      Detail = detail;
+      AddError(errorKey, errorMessage);
+    }
+
     public void AddError(string key, string[] messages)
     {
       if (Errors.TryGetValue(key, out var existingMessages))
