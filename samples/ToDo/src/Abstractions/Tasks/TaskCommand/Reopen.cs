@@ -12,9 +12,11 @@ public abstract partial record TaskCommand
     [JsonConstructor]
     internal Reopen() { }
 
-    public static Reopen? Create()
+    private static readonly Reopen _instance = new();
+
+    public static DomainResult<Reopen> Create()
     {
-      return new();
+      return _instance;
     }
   }
 }

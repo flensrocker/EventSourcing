@@ -72,11 +72,10 @@ public static class TaskEndpoints
       "{taskId}/reopen",
       static async (HttpContext context, Guid taskId) =>
       {
-        var command = TaskCommand.Reopen.Create();
-        if (command is null)
-          return TypedResults.BadRequest();
-
-        return await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command).ToTypedResult();
+        return await TaskCommand
+          .Reopen.Create()
+          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+          .ToTypedResult();
       }
     );
 
