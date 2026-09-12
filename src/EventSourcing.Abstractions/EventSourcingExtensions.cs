@@ -81,11 +81,10 @@ public static class EventSourcingExtensions
       return await handler.ExecuteCommand(command).ConfigureAwait(false);
     }
 
-    public async Task<TProjection?> GetProjection<TProjection>(Guid id, CancellationToken cancellationToken)
+    public async Task<DomainResult<TProjection>> GetProjection<TProjection>(Guid id, CancellationToken cancellationToken)
     {
       var handler = serviceProvider.GetRequiredKeyedService<IDomainEventProjection<TProjection>>(id);
-      var result = await handler.GetProjection(cancellationToken);
-      return result;
+      return await handler.GetProjection(cancellationToken).ConfigureAwait(false);
     }
 
     public IAsyncEnumerable<TProjection> StreamProjection<TProjection>(Guid id, CancellationToken cancellationToken)

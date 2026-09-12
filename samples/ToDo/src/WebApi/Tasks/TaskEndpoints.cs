@@ -94,10 +94,9 @@ public static class TaskEndpoints
     // endpoints for views
     builder.MapGet(
       "{taskId}",
-      static async Task<Results<Ok<TaskView.Details>, NotFound>> (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
+      static async (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
       {
-        var result = await context.RequestServices.GetProjection<TaskView.Details>(taskId, cancellationToken);
-        return result is null ? TypedResults.NotFound() : TypedResults.Ok(result);
+        return await context.RequestServices.GetProjection<TaskView.Details>(taskId, cancellationToken).ToTypedResult();
       }
     );
 

@@ -2,6 +2,6 @@
 
 public interface IDomainEventProjection<TProjection>
 {
-  Task<TProjection?> GetProjection(CancellationToken cancellationToken);
+  Task<DomainResult<TProjection>> GetProjection(CancellationToken cancellationToken);
   IAsyncEnumerable<TProjection> StreamProjection(CancellationToken cancellationToken);
 }

@@ -66,14 +66,15 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     _projection = null;
   }
 
-  public async Task<TProjection?> GetProjection(CancellationToken cancellationToken)
+  public async Task<DomainResult<TProjection>> GetProjection(CancellationToken cancellationToken)
   {
     var projection = await GetOrCreateProjection(cancellationToken);
 
-    if (projection is null)
-      DeactivateOnIdle();
+    if (projection?.Projection is TProjection value)
+      return value;
 
-    return projection?.Projection;
+    DeactivateOnIdle();
+    return new DomainResult.NotFound();
   }
 
   public async IAsyncEnumerable<TProjection> StreamProjection([EnumeratorCancellation] CancellationToken cancellationToken)
