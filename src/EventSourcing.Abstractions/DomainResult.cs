@@ -14,6 +14,8 @@ public static class DomainResult
     }
   }
 
+  public struct Forbid { }
+
   public struct InternalError
   {
     public string? Message { get; init; }
@@ -35,6 +37,8 @@ public static class DomainResult
   }
 
   public static DomainResult<T> Success<T>(T value) => new DomainResult<T>.Success { Value = value };
+
+  public struct Unauthorized { }
 
   public struct ValidationProblem
   {
@@ -92,6 +96,16 @@ public abstract class DomainResult<T>
   }
 
   [GenerateSerializer]
+  [Alias($"{EventSourcingConstants.DomainResult.Forbid}`1")]
+  public sealed class Forbid : DomainResult<T>
+  {
+    public override DomainResult<TOut> Cast<TOut>()
+    {
+      return new DomainResult<TOut>.Forbid();
+    }
+  }
+
+  [GenerateSerializer]
   [Alias($"{EventSourcingConstants.DomainResult.InternalError}`1")]
   public sealed class InternalError : DomainResult<T>
   {
@@ -133,6 +147,16 @@ public abstract class DomainResult<T>
   }
 
   [GenerateSerializer]
+  [Alias($"{EventSourcingConstants.DomainResult.Unauthorized}`1")]
+  public sealed class Unauthorized : DomainResult<T>
+  {
+    public override DomainResult<TOut> Cast<TOut>()
+    {
+      return new DomainResult<TOut>.Unauthorized();
+    }
+  }
+
+  [GenerateSerializer]
   [Alias($"{EventSourcingConstants.DomainResult.ValidationProblem}`1")]
   public sealed class ValidationProblem : DomainResult<T>
   {
@@ -160,9 +184,13 @@ public abstract class DomainResult<T>
 
   public static implicit operator DomainResult<T>(DomainResult.BadRequest error) => new BadRequest { Message = error.Message };
 
+  public static implicit operator DomainResult<T>(DomainResult.Forbid error) => new Forbid();
+
   public static implicit operator DomainResult<T>(DomainResult.InternalError error) => new InternalError { Message = error.Message };
 
   public static implicit operator DomainResult<T>(DomainResult.NotFound error) => new NotFound { Message = error.Message };
+
+  public static implicit operator DomainResult<T>(DomainResult.Unauthorized error) => new Unauthorized();
 
   public static implicit operator DomainResult<T>(DomainResult.ValidationProblem error) =>
     new ValidationProblem
