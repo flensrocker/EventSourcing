@@ -11,13 +11,13 @@ namespace Flensrocker.EventSourcing.Orleans.Abstractions;
 internal partial class OrleansDomainEventStreamPublisher(
   IServiceProvider serviceProvider,
   EventSourcingActivitySource activitySource,
-  OrleansDomainEventStreamPublisherMetrics metrics,
+  DomainEventPublisherMetrics metrics,
   ILogger<OrleansDomainEventStreamPublisher> logger
 ) : IDomainEventPublisher, ILifecycleParticipant<IClusterClientLifecycle>, ILifecycleParticipant<ISiloLifecycle>
 {
   private readonly IServiceProvider _serviceProvider = serviceProvider;
   private readonly EventSourcingActivitySource _activitySource = activitySource;
-  private readonly OrleansDomainEventStreamPublisherMetrics _metrics = metrics;
+  private readonly DomainEventPublisherMetrics _metrics = metrics;
   private readonly ILogger<OrleansDomainEventStreamPublisher> _logger = logger;
 
   private readonly TaskCompletionSource<IStreamProvider> _initialized = new(TaskCreationOptions.RunContinuationsAsynchronously);

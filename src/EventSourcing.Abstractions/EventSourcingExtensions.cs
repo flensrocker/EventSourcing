@@ -21,6 +21,7 @@ public static class EventSourcingExtensions
     public IServiceCollection AddFlensrockerEventSourcingCore()
     {
       services.TryAddSingleton(_ => new EventSourcingActivitySource());
+      services.TryAddSingleton<DomainEventPublisherMetrics>();
 
       return services;
     }
