@@ -34,11 +34,10 @@ public static class TaskEndpoints
       "{taskId}/complete",
       static async (HttpContext context, Guid taskId) =>
       {
-        var command = TaskCommand.Complete.Create();
-        if (command is null)
-          return TypedResults.BadRequest();
-
-        return await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command).ToTypedResult();
+        return await TaskCommand
+          .Complete.Create()
+          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+          .ToTypedResult();
       }
     );
 

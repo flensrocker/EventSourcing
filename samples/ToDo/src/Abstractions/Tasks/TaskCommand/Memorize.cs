@@ -23,7 +23,12 @@ public abstract partial record TaskCommand
       if (string.IsNullOrWhiteSpace(title))
         return new DomainResult.ValidationProblem(_errorTitle, _errorDetail, nameof(Title), "The title is required.");
       if (title.Length > TaskConstants.TaskTitleMaxLength)
-        return new DomainResult.ValidationProblem(_errorTitle, _errorDetail, nameof(Title), $"The title is too long, max. {TaskConstants.TaskTitleMaxLength} allowed.");
+        return new DomainResult.ValidationProblem(
+          _errorTitle,
+          _errorDetail,
+          nameof(Title),
+          $"The title is too long, max. {TaskConstants.TaskTitleMaxLength} allowed."
+        );
 
       return new Memorize { Title = title };
     }

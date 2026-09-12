@@ -12,9 +12,14 @@ public abstract partial record TaskCommand
     [JsonConstructor]
     internal Complete() { }
 
-    public static Complete? Create()
+    // NOTE BEST PRACTICE
+    // If your command contains no state and is immutable
+    // return that one instance you ever need to avoid unneccessary allocations
+    private static readonly Complete _instance = new();
+
+    public static DomainResult<Complete> Create()
     {
-      return new();
+      return _instance;
     }
   }
 }
