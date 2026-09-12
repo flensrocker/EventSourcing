@@ -13,13 +13,20 @@
 > I assume you basically know enough about all this.
 > If not, there are tons of resources out there to all of these topics.
 
-This is an experimental playground to explore the possibilities within my requirements.
+Some of my requirements are
 
 - **On-Premise:** No "cloud only" features like Azure Tables etc.
 - **Cheap:** Low/no license costs
 - **Scalable:** If really needed - not "globally with millions of concurrent users", but maybe to hundreds or even a thousand users.
 
-## Requirements
+## Status of this project
+
+**Not even alpha**
+
+I still am in the phase of figuring things out and I publish breaking changes all the time.
+Sometimes multiple times per day.
+
+## Build Requirements
 
 - Aspire: https://aspire.dev/
 - .NET: https://dot.net/
