@@ -21,6 +21,8 @@ public abstract partial record TaskCommand
 
     public static DomainResult<Memorize> Create(string? title)
     {
+      title = title?.Trim();
+
       if (string.IsNullOrWhiteSpace(title))
         return new DomainResult.ValidationProblem(_errorTitle, _errorDetail, nameof(Title), "The title is required.");
       if (title.Length > TaskConstants.TaskTitleMaxLength)
