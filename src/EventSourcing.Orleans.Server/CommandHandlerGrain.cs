@@ -71,14 +71,14 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
       .ExecuteCommandAsync(State, command)
       .Pipe<TEventBase[], ExecutionResult>(async payloads =>
       {
-        if (payloads.Length == 0)
-          return new DomainResult.InternalError();
+        if (payloads.Length > 0)
+        {
+          var timeProvider = commandScope.ServiceProvider.GetRequiredService<TimeProvider>();
+          var createdAt = timeProvider.GetUtcNow();
 
-        var timeProvider = commandScope.ServiceProvider.GetRequiredService<TimeProvider>();
-        var createdAt = timeProvider.GetUtcNow();
-
-        RaiseDomainEvents(createdAt, payloads);
-        await ConfirmEvents();
+          RaiseDomainEvents(createdAt, payloads);
+          await ConfirmEvents();
+        }
 
         return new ExecutionResult { Version = _nextVersion - 1 };
       });

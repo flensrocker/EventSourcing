@@ -21,6 +21,9 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
 
   private DomainResult<TaskEvent[]> Complete(TaskCommandState state, TaskCommand.Complete command)
   {
+    if (state.Status == Abstractions.Tasks.TaskStatus.Completed)
+      return (TaskEvent[])[];
+
     if (state.Version == 0)
       return new DomainResult.NotFound("The task does not exist.");
     if (state.Status != Abstractions.Tasks.TaskStatus.Open)
@@ -31,6 +34,9 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
 
   private DomainResult<TaskEvent[]> Dismiss(TaskCommandState state, TaskCommand.Dismiss command)
   {
+    if (state.Status == Abstractions.Tasks.TaskStatus.Dismissed && state.DismissReason == command.Reason)
+      return (TaskEvent[])[];
+
     if (state.Version == 0)
       return new DomainResult.NotFound("The task does not exist.");
     if (state.Status != Abstractions.Tasks.TaskStatus.Open)
@@ -49,10 +55,11 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
 
   private DomainResult<TaskEvent[]> Reopen(TaskCommandState state, TaskCommand.Reopen command)
   {
+    if (state.Status == Abstractions.Tasks.TaskStatus.Open)
+      return (TaskEvent[])[];
+
     if (state.Version == 0)
       return new DomainResult.NotFound("The task does not exist.");
-    if (state.Status == Abstractions.Tasks.TaskStatus.Open)
-      return new DomainResult.BadRequest("The task is already open.");
 
     return (TaskEvent[])[new TaskEvent.Reopened { }];
   }
