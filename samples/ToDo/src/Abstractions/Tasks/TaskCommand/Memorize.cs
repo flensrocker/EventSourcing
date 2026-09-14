@@ -19,6 +19,15 @@ public abstract partial record TaskCommand
     private const string _errorDetail = "The task cannot be created.";
     private static readonly char[] _invalidCharacters = ['\r', '\n'];
 
+    // NOTE BEST PRACTICE
+    // The static "Create" method in combination with the internal constructor is the anti corruption layer of the command.
+    // To instantiate a command the caller has to use the "Create" method.
+    // This ensures that every command is valid.
+    // Alternative approach:
+    // Use the validation properties from System.ComponentModel.DataAnnotations and rely on external validation like ASP.NET Core.
+    // Advantage: less code, but also less control about the validation
+    // Other alternatives can include Fluent.Validation and similar libraries.
+    // The concrete implementation is not important for Flensrocker.EventSourcing and should fit the needs of the domain.
     public static DomainResult<Memorize> Create(string? title)
     {
       title = title?.Trim();
