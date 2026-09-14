@@ -23,7 +23,7 @@ public class TaskCommandState : IDomainEventVersionable, ITaskEventProjectable
     Status = Abstractions.Tasks.TaskStatus.Dismissed;
   }
 
-  void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Memorized payload)
+  void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
   {
     Status = Abstractions.Tasks.TaskStatus.Open;
   }

@@ -2,14 +2,14 @@
 @port=5188
 
 ### Commands
-PUT http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/complete
+PUT http://{{host}}:{{port}}/api/todo/task/{{note.response.body.$.TaskId}}/complete
 Content-Type: application/json
 
 {
 }
 
 ###
-PUT http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/dismiss
+PUT http://{{host}}:{{port}}/api/todo/task/{{note.response.body.$.TaskId}}/dismiss
 Content-Type: application/json
 
 {
@@ -17,8 +17,8 @@ Content-Type: application/json
 }
 
 ###
-# @name memorize
-POST http://{{host}}:{{port}}/api/todo/task/memorize
+# @name note
+POST http://{{host}}:{{port}}/api/todo/task/note
 Content-Type: application/json
 
 {
@@ -26,7 +26,7 @@ Content-Type: application/json
 }
 
 ###
-PUT http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/reopen
+PUT http://{{host}}:{{port}}/api/todo/task/{{note.response.body.$.TaskId}}/reopen
 Content-Type: application/json
 
 {
@@ -36,13 +36,13 @@ Content-Type: application/json
 GET http://{{host}}:{{port}}/api/todo/task
 
 ### Views
-GET http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}
+GET http://{{host}}:{{port}}/api/todo/task/{{note.response.body.$.TaskId}}
 
 ###
-GET http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/stream
+GET http://{{host}}:{{port}}/api/todo/task/{{note.response.body.$.TaskId}}/stream
 
 ### Debugging
 GET http://{{host}}:{{port}}/api/todo/task/events
 
 ###
-GET http://{{host}}:{{port}}/api/todo/task/{{memorize.response.body.$.TaskId}}/events
+GET http://{{host}}:{{port}}/api/todo/task/{{note.response.body.$.TaskId}}/events

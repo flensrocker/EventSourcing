@@ -13,7 +13,7 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
     {
       TaskCommand.Complete complete => Complete(state, complete),
       TaskCommand.Dismiss dismiss => Dismiss(state, dismiss),
-      TaskCommand.Memorize memorize => Memorize(state, memorize),
+      TaskCommand.Note note => Note(state, note),
       TaskCommand.Reopen reopen => Reopen(state, reopen),
       _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
     };
@@ -39,12 +39,12 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
     return (TaskEvent[])[new TaskEvent.Dismissed { Reason = command.Reason }];
   }
 
-  private DomainResult<TaskEvent[]> Memorize(TaskCommandState state, TaskCommand.Memorize command)
+  private DomainResult<TaskEvent[]> Note(TaskCommandState state, TaskCommand.Note command)
   {
     if (state.Version > 0)
       return new DomainResult.BadRequest("A task with this id already exists.");
 
-    return (TaskEvent[])[new TaskEvent.Memorized { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
+    return (TaskEvent[])[new TaskEvent.Noted { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
   }
 
   private DomainResult<TaskEvent[]> Reopen(TaskCommandState state, TaskCommand.Reopen command)

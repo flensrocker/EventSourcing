@@ -32,7 +32,7 @@ public abstract partial record TaskView
       DismissReason = payload.Reason;
     }
 
-    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Memorized payload)
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
     {
       Title = payload.Title;
       Status = TaskStatus.Open;

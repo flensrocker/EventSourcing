@@ -6,16 +6,16 @@ using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskCommand;
 namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 
 [TestClass]
-public sealed class MemorizeTests
+public sealed class NoteTests
 {
   [TestMethod]
   [DataRow("Valid Title")]
   [DataRow("max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890")]
   public void ValidTitleReturnsSuccess(string validTitle)
   {
-    var testResult = SuT.Memorize.Create(title: validTitle);
+    var testResult = SuT.Note.Create(title: validTitle);
 
-    var result = Assert.IsInstanceOfType<DomainResult<SuT.Memorize>.Success>(testResult);
+    var result = Assert.IsInstanceOfType<DomainResult<SuT.Note>.Success>(testResult);
     Assert.AreEqual(validTitle, result.Value.Title);
   }
 
@@ -29,9 +29,9 @@ public sealed class MemorizeTests
   )]
   public void TitleIsSanitized(string title, string expectedTitle)
   {
-    var testResult = SuT.Memorize.Create(title: title);
+    var testResult = SuT.Note.Create(title: title);
 
-    var result = Assert.IsInstanceOfType<DomainResult<SuT.Memorize>.Success>(testResult);
+    var result = Assert.IsInstanceOfType<DomainResult<SuT.Note>.Success>(testResult);
     Assert.AreEqual(expectedTitle, result.Value.Title);
   }
 
@@ -48,9 +48,9 @@ public sealed class MemorizeTests
   [DataRow("With\rCarriage Return")]
   public void InvalidTitleReturnsValidationProblem(string? invalidTitle)
   {
-    var testResult = SuT.Memorize.Create(title: invalidTitle);
+    var testResult = SuT.Note.Create(title: invalidTitle);
 
-    var result = Assert.IsInstanceOfType<DomainResult<SuT.Memorize>.ValidationProblem>(testResult);
-    Assert.IsTrue(result.Errors.ContainsKey(nameof(SuT.Memorize.Title)));
+    var result = Assert.IsInstanceOfType<DomainResult<SuT.Note>.ValidationProblem>(testResult);
+    Assert.IsTrue(result.Errors.ContainsKey(nameof(SuT.Note.Title)));
   }
 }

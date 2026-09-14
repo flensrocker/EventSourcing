@@ -10,7 +10,7 @@ public interface ITaskEventProjectable : IDomainEventProjectable
 {
   void Apply(DomainEventMetadata metadata, TaskEvent.Completed payload);
   void Apply(DomainEventMetadata metadata, TaskEvent.Dismissed payload);
-  void Apply(DomainEventMetadata metadata, TaskEvent.Memorized payload);
+  void Apply(DomainEventMetadata metadata, TaskEvent.Noted payload);
   void Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload);
 
   void ApplyTaskEvent(DomainEvent @event)
@@ -23,7 +23,7 @@ public interface ITaskEventProjectable : IDomainEventProjectable
       case TaskEvent.Dismissed payload:
         Apply(@event.Metadata, payload);
         break;
-      case TaskEvent.Memorized payload:
+      case TaskEvent.Noted payload:
         Apply(@event.Metadata, payload);
         break;
       case TaskEvent.Reopened payload:

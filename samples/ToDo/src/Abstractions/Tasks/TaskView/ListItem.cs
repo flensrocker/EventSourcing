@@ -43,7 +43,7 @@ public abstract partial record TaskView
       Status = TaskStatus.Dismissed;
     }
 
-    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Memorized payload)
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
     {
       TaskId = metadata.StreamId;
       Version = metadata.StreamVersion;
