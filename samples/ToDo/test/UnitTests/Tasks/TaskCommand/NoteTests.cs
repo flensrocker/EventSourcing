@@ -1,6 +1,6 @@
 // NOTE BEST PRACTICE
-// The namespace of the tests and of the "system under test" are the same after the assembly prefix.
-// To avoid name conflicts use a "using alias".
+// The namespace of the tests and of the "system under test" (SuT) are the same after the assembly prefix.
+// To avoid name conflicts use a "using alias" for the SuT.
 using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskCommand;
 
 namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
@@ -11,7 +11,7 @@ public sealed class NoteTests
   [TestMethod]
   [DataRow("Valid Title")]
   [DataRow("max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890")]
-  public void ValidTitleReturnsSuccess(string validTitle)
+  public void ValidInputsReturnSuccess(string validTitle)
   {
     var testResult = SuT.Note.Create(title: validTitle);
 
@@ -46,7 +46,7 @@ public sealed class NoteTests
   [DataRow("123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1")]
   [DataRow("With\nLinebreak")]
   [DataRow("With\rCarriage Return")]
-  public void InvalidTitleReturnsValidationProblem(string? invalidTitle)
+  public void InvalidInputsReturnValidationProblem(string? invalidTitle)
   {
     var testResult = SuT.Note.Create(title: invalidTitle);
 
