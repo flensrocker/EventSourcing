@@ -3,7 +3,7 @@ using Flensrocker.ToDo.Abstractions.Tasks;
 
 namespace Flensrocker.ToDo.Domain.Tasks;
 
-internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandHandler<TaskEvent, TaskCommand, TaskCommandState>
+internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHandler<TaskEvent, TaskCommand, TaskCommandState>
 {
   private readonly TimeProvider _timeProvider = timeProvider;
 
@@ -19,7 +19,7 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
     };
   }
 
-  private DomainResult<TaskEvent[]> Complete(TaskCommandState state, TaskCommand.Complete command)
+  private static DomainResult<TaskEvent[]> Complete(TaskCommandState state, TaskCommand.Complete command)
   {
     if (state.Status == Abstractions.Tasks.TaskStatus.Completed)
       return (TaskEvent[])[];
@@ -32,7 +32,7 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
     return (TaskEvent[])[new TaskEvent.Completed { }];
   }
 
-  private DomainResult<TaskEvent[]> Dismiss(TaskCommandState state, TaskCommand.Dismiss command)
+  private static DomainResult<TaskEvent[]> Dismiss(TaskCommandState state, TaskCommand.Dismiss command)
   {
     if (state.Status == Abstractions.Tasks.TaskStatus.Dismissed && state.DismissReason == command.Reason)
       return (TaskEvent[])[];
@@ -53,7 +53,7 @@ internal partial class TaskCommandHandler(TimeProvider timeProvider) : ICommandH
     return (TaskEvent[])[new TaskEvent.Noted { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
   }
 
-  private DomainResult<TaskEvent[]> Reopen(TaskCommandState state, TaskCommand.Reopen command)
+  private static DomainResult<TaskEvent[]> Reopen(TaskCommandState state, TaskCommand.Reopen command)
   {
     if (state.Status == Abstractions.Tasks.TaskStatus.Open)
       return (TaskEvent[])[];

@@ -5,7 +5,7 @@ namespace Flensrocker.ToDo.Domain.Tasks;
 
 [GenerateSerializer]
 [Alias("ToDo_TaskCommandState")]
-public class TaskCommandState : IDomainEventVersionable, ITaskEventProjectable
+public sealed class TaskCommandState : IDomainEventVersionable, ITaskEventProjectable
 {
   [Id(0)]
   public int Version { get; private set; }
