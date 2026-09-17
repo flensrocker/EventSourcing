@@ -55,11 +55,11 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
 
   private static DomainResult<TaskEvent[]> Reopen(TaskCommandState state, TaskCommand.Reopen command)
   {
-    if (state.Status == Abstractions.Tasks.TaskStatus.Open)
-      return (TaskEvent[])[];
-
     if (state.Version == 0)
       return new DomainResult.NotFound("The task does not exist.");
+
+    if (state.Status == Abstractions.Tasks.TaskStatus.Open)
+      return (TaskEvent[])[];
 
     return (TaskEvent[])[new TaskEvent.Reopened { }];
   }
