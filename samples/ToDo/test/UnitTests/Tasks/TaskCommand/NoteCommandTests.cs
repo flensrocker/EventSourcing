@@ -11,7 +11,7 @@ public sealed class NoteCommandTests
   [TestMethod]
   [DataRow("Valid Title")]
   [DataRow("max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890")]
-  public void ValidInputsReturnSuccess(string validTitle)
+  public void GivenValidInputsThenReturnSuccess(string validTitle)
   {
     var testResult = SuT.Note.Create(title: validTitle);
 
@@ -27,7 +27,7 @@ public sealed class NoteCommandTests
     " max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890",
     "max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890"
   )]
-  public void TitleIsSanitized(string title, string expectedTitle)
+  public void GivenValidButDirtyInputsThenReturnSuccessWithSanitizedValues(string title, string expectedTitle)
   {
     var testResult = SuT.Note.Create(title: title);
 
@@ -46,7 +46,7 @@ public sealed class NoteCommandTests
   [DataRow("123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1")]
   [DataRow("With\nLinebreak")]
   [DataRow("With\rCarriage Return")]
-  public void InvalidInputsReturnValidationProblem(string? invalidTitle)
+  public void GivenInvalidInputsThenReturnValidationProblem(string? invalidTitle)
   {
     var testResult = SuT.Note.Create(title: invalidTitle);
 

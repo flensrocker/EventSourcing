@@ -6,7 +6,7 @@ namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 public sealed class CompleteCommandTests
 {
   [TestMethod]
-  public void ValidInputsReturnSuccess()
+  public void GivenValidInputsThenReturnSuccess()
   {
     var testResult = SuT.Complete.Create();
 

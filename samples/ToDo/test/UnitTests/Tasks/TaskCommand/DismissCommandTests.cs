@@ -13,7 +13,7 @@ public sealed class DismissCommandTests
   [DataRow(
     "max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890"
   )]
-  public void ValidInputsReturnSuccess(string validReason)
+  public void GivenValidInputsThenReturnSuccess(string validReason)
   {
     var testResult = SuT.Dismiss.Create(reason: validReason);
 
@@ -29,7 +29,7 @@ public sealed class DismissCommandTests
     " max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890",
     "max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890"
   )]
-  public void ReasonIsSanitized(string reason, string expectedReason)
+  public void GivenValidButDirtyInputsThenReturnSuccessWithSanitizedValues(string reason, string expectedReason)
   {
     var testResult = SuT.Dismiss.Create(reason: reason);
 
@@ -50,7 +50,7 @@ public sealed class DismissCommandTests
   )]
   [DataRow("With\nLinebreak")]
   [DataRow("With\rCarriage Return")]
-  public void InvalidInputsReturnValidationProblem(string? invalidReason)
+  public void GivenInvalidInputsThenReturnValidationProblem(string? invalidReason)
   {
     var testResult = SuT.Dismiss.Create(reason: invalidReason);
 
