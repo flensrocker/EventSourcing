@@ -6,7 +6,7 @@ using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskCommand;
 namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 
 [TestClass]
-public sealed class NoteTests
+public sealed class NoteCommandTests
 {
   [TestMethod]
   [DataRow("Valid Title")]

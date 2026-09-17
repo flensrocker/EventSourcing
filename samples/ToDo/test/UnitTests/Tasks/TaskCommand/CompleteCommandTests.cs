@@ -3,13 +3,13 @@ using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskCommand;
 namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 
 [TestClass]
-public sealed class ReopenTests
+public sealed class CompleteCommandTests
 {
   [TestMethod]
   public void ValidInputsReturnSuccess()
   {
-    var testResult = SuT.Reopen.Create();
+    var testResult = SuT.Complete.Create();
 
-    _ = Assert.IsInstanceOfType<DomainResult<SuT.Reopen>.Success>(testResult);
+    Assert.IsInstanceOfType<DomainResult<SuT.Complete>.Success>(testResult);
   }
 }

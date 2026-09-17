@@ -25,7 +25,7 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     var result = Assert.IsInstanceOfType<DomainResult<TaskEvent[]>.Success>(testResult);
     Assert.HasCount(1, result.Value);
-    var completedEvent = Assert.IsInstanceOfType<TaskEvent.Completed>(result.Value[0]);
+    Assert.IsInstanceOfType<TaskEvent.Completed>(result.Value[0]);
   }
 
   [TestMethod]
