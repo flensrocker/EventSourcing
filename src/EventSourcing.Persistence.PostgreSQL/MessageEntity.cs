@@ -12,9 +12,12 @@ internal class MessageEntity
   internal long GlobalIndex { get; set; }
 
   // Unique (StreamType, StreamId, StreamVersion)
-  // StreamType = typeof(TEventBase).GetTypeName() for a DomainEvent
+  // "TypeName" for the baseclass of the payload in a DomainEvent used for JSON de-/serialization
+  // Must be the same within each StreamId
   // Namespace of the Orleans Stream
   internal string StreamType { get; set; } = "";
+
+  // The id of the tracked "thing"/entity/aggregate
   internal Guid StreamId { get; set; }
 
   // if > 0 => DomainEvent
@@ -25,10 +28,11 @@ internal class MessageEntity
   internal DateTimeOffset CreatedAt { get; set; }
   internal Guid? CreatedByUserId { get; set; }
 
+  // OpenTelemetry data associated with the creation of this message
   internal byte[]? TraceId { get; set; }
   internal byte[]? SpanId { get; set; }
 
-  // Either DomainEvent<TEventBase>.Payload as JSON
+  // Either DomainEvent.Payload as JSON
   // Or just the public message as JSON
   internal string PayloadJson { get; set; } = "";
 }

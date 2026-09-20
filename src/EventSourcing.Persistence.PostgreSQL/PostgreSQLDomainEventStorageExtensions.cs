@@ -88,7 +88,7 @@ public static class PostgreSQLDomainEventStorageExtensions
         TraceId = entity.TraceId,
         SpanId = entity.SpanId,
       },
-      Payload = JsonSerializer.Deserialize(entity.PayloadJson, typeof(TEventBase), jsonOptions) is TEventBase p ? p : default!,
+      Payload = JsonSerializer.Deserialize<TEventBase>(entity.PayloadJson, jsonOptions) is TEventBase p ? p : default!,
     };
   }
 
