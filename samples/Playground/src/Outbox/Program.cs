@@ -24,10 +24,6 @@ builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 
 builder.UseOrleansClient(clientBuilder =>
 {
-  var npgsqlConnectionString =
-    builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb)
-    ?? throw new InvalidOperationException("Npgsql connection string not configured.");
-
   var natsConnectionString =
     builder.Configuration.GetConnectionString(ServiceKeys.OrleansStreaming)
     ?? throw new InvalidOperationException("NATS connection string not configured.");

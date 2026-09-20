@@ -34,19 +34,6 @@ builder
 
 builder.UseOrleans(siloBuilder =>
 {
-  var npgsqlConnectionString =
-    builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb)
-    ?? throw new InvalidOperationException("Npgsql connection string not configured.");
-
-  siloBuilder.AddAdoNetGrainStorage(
-    "Default",
-    options =>
-    {
-      options.Invariant = "Npgsql";
-      options.ConnectionString = npgsqlConnectionString;
-    }
-  );
-
   siloBuilder.AddCustomStorageBasedLogConsistencyProvider(OrleansConstants.LogStorageProviderName);
 
   var natsConnectionString =

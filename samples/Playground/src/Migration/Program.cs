@@ -1,5 +1,4 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Orleans.PostgreSQL;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
@@ -12,11 +11,6 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.AddServiceDefaults();
 
 var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
-
-builder.Services.AddOrleansPostgreSQL(() =>
-{
-  return new OrleansPostgreSQLOptions { ConnectionName = ServiceKeys.PostgresDb };
-});
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder

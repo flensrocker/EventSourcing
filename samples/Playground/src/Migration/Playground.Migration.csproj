@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.PostgreSQL\Flensrocker.EventSourcing.Orleans.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Persistence.PostgreSQL\Flensrocker.EventSourcing.Persistence.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\Abstractions\Flensrocker.ToDo.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\Persistence.PostgreSQL\Flensrocker.ToDo.Persistence.PostgreSQL.csproj" />
