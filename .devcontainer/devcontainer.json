@@ -20,6 +20,7 @@
 	"remoteEnv": {
 		"SSL_CERT_DIR": "/usr/lib/ssl/certs:/home/vscode/.aspnet/dev-certs/trust"
 	},
+	"remoteUser": "root",
 	"postStartCommand": "aspire certs trust --non-interactive",
 	"customizations": {
 		"vscode": {
