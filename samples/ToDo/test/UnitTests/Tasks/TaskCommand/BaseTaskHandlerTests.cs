@@ -29,16 +29,6 @@ public abstract class BaseTaskHandlerTests
 
   protected DomainEvent CreateTaskEvent(Guid taskId, int taskVersion, TaskEvent payload)
   {
-    var taskCreatedAt = _timeProvider.GetUtcNow();
-
-    return DomainEvent.Create(
-      streamType: TaskConstants.TaskEvent.Base,
-      streamId: taskId,
-      streamVersion: taskVersion,
-      payload: payload,
-      tenantId: null,
-      userId: null,
-      createdAt: taskCreatedAt
-    );
+    return TaskTestUtilities.CreateTaskEvent(_timeProvider, null, null, taskId, taskVersion, payload);
   }
 }
