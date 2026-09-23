@@ -311,7 +311,7 @@ you can easily query outdated projections with a `JOIN`.
 select m."StreamId", max(l."Version") as "actual version", max(m."StreamVersion") as "expected version"
 from "EventSourcing"."Message" as m
 left join "ToDo"."ListItem" as l on m."StreamId" = l."ToDoId"
-where m."StreamType" = 'Flensrocker-ToDo-Abstractions-ToDoEvent_-_Flensrocker-ToDo-Abstractions'
+where m."StreamType" = 'ToDo_TaskEvent'
 and (l."Version" is null or l."Version" < m."StreamVersion")
 group by m."StreamType", m."StreamId"
 ```
