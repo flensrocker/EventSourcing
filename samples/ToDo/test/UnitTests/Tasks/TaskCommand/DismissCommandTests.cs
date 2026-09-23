@@ -57,4 +57,10 @@ public sealed class DismissCommandTests
     var result = Assert.IsInstanceOfType<DomainResult<SuT.Dismiss>.ValidationProblem>(testResult);
     Assert.IsTrue(result.Errors.ContainsKey(nameof(SuT.Dismiss.Reason)));
   }
+
+  [TestMethod]
+  public void IsJsonSerializable()
+  {
+    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Dismiss>(SuT.Dismiss.Create(reason: "Some Reason"));
+  }
 }

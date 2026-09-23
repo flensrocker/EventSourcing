@@ -1,5 +1,4 @@
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.ToDo.Abstractions.Tasks;
 using Flensrocker.ToDo.Domain.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskCommand;
@@ -17,14 +16,14 @@ public sealed class NoteHandlerTests : BaseTaskHandlerTests
     var testState = new TaskCommandState();
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
-    var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<TaskEvent, SuT, TaskCommandState>>();
+    var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Note.Create(title: _validTitle)
       .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
 
-    var result = Assert.IsInstanceOfType<DomainResult<TaskEvent[]>.Success>(testResult);
+    var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.HasCount(1, result.Value);
-    var notedEvent = Assert.IsInstanceOfType<TaskEvent.Noted>(result.Value[0]);
+    var notedEvent = Assert.IsInstanceOfType<Abstractions.Tasks.TaskEvent.Noted>(result.Value[0]);
     Assert.AreEqual(_timeProvider.GetUtcNow(), notedEvent.CreatedAt);
     Assert.AreEqual(_validTitle, notedEvent.Title);
   }
@@ -37,14 +36,16 @@ public sealed class NoteHandlerTests : BaseTaskHandlerTests
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
     var testState = new TaskCommandState();
-    testState.Apply(CreateTaskEvent(taskId, taskVersion++, new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = _validTitle }));
+    testState.Apply(
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = _validTitle })
+    );
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
-    var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<TaskEvent, SuT, TaskCommandState>>();
+    var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Note.Create(title: _validTitle)
       .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
 
-    Assert.IsInstanceOfType<DomainResult<TaskEvent[]>.BadRequest>(testResult);
+    Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.BadRequest>(testResult);
   }
 }

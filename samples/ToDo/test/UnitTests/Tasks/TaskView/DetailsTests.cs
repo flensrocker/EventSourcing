@@ -1,4 +1,3 @@
-using Flensrocker.ToDo.Abstractions.Tasks;
 using Microsoft.Extensions.Time.Testing;
 using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskView;
 
@@ -19,7 +18,7 @@ public sealed class DetailsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
 
     var testState = new SuT.Details();
@@ -41,9 +40,9 @@ public sealed class DetailsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var completedPayload = new TaskEvent.Completed { };
+    var completedPayload = new Abstractions.Tasks.TaskEvent.Completed { };
     var completedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, completedPayload);
 
     var testState = new SuT.Details();
@@ -66,9 +65,9 @@ public sealed class DetailsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var dismissedPayload = new TaskEvent.Dismissed { Reason = "Some Reason" };
+    var dismissedPayload = new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" };
     var dismissedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, dismissedPayload);
 
     var testState = new SuT.Details();
@@ -91,11 +90,11 @@ public sealed class DetailsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var completedPayload = new TaskEvent.Completed { };
+    var completedPayload = new Abstractions.Tasks.TaskEvent.Completed { };
     var completedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, completedPayload);
-    var reopenedPayload = new TaskEvent.Reopened { };
+    var reopenedPayload = new Abstractions.Tasks.TaskEvent.Reopened { };
     var reopenedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, reopenedPayload);
 
     var testState = new SuT.Details();
@@ -119,11 +118,11 @@ public sealed class DetailsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var dismissedPayload = new TaskEvent.Dismissed { Reason = "Some Reason" };
+    var dismissedPayload = new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" };
     var dismissedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, dismissedPayload);
-    var reopenedPayload = new TaskEvent.Reopened { };
+    var reopenedPayload = new Abstractions.Tasks.TaskEvent.Reopened { };
     var reopenedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, reopenedPayload);
 
     var testState = new SuT.Details();
@@ -135,5 +134,11 @@ public sealed class DetailsTests
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
     Assert.IsNull(testState.DismissReason);
+  }
+
+  [TestMethod]
+  public void IsJsonSerializable()
+  {
+    ToDoTestUtilities.AssertJsonSerializable<SuT.Details>(new SuT.Details());
   }
 }

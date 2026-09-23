@@ -53,4 +53,10 @@ public sealed class NoteCommandTests
     var result = Assert.IsInstanceOfType<DomainResult<SuT.Note>.ValidationProblem>(testResult);
     Assert.IsTrue(result.Errors.ContainsKey(nameof(SuT.Note.Title)));
   }
+
+  [TestMethod]
+  public void IsJsonSerializable()
+  {
+    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Note>(SuT.Note.Create(title: "Some Title"));
+  }
 }

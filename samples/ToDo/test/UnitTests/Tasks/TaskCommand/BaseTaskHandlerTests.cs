@@ -1,5 +1,4 @@
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.ToDo.Abstractions.Tasks;
 using Flensrocker.ToDo.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
@@ -27,7 +26,7 @@ public abstract class BaseTaskHandlerTests
     await ((IAsyncDisposable)_serviceProvider).DisposeAsync();
   }
 
-  protected DomainEvent CreateTaskEvent(Guid taskId, int taskVersion, TaskEvent payload)
+  protected DomainEvent CreateTaskEvent(Guid taskId, int taskVersion, Abstractions.Tasks.TaskEvent payload)
   {
     return TaskTestUtilities.CreateTaskEvent(_timeProvider, null, null, taskId, taskVersion, payload);
   }

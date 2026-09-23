@@ -12,4 +12,10 @@ public sealed class CompleteCommandTests
 
     Assert.IsInstanceOfType<DomainResult<SuT.Complete>.Success>(testResult);
   }
+
+  [TestMethod]
+  public void IsJsonSerializable()
+  {
+    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Complete>(SuT.Complete.Create());
+  }
 }

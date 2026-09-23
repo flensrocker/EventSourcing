@@ -1,5 +1,3 @@
-using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.ToDo.Abstractions.Tasks;
 using Microsoft.Extensions.Time.Testing;
 using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskView;
 
@@ -20,13 +18,13 @@ public sealed class ListItemTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
 
     var testState = new SuT.ListItem();
     testState.Apply(notedEvent);
 
-    Assert.IsTrue(TestWhereId(testState, taskId));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereId(testState, taskId));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -45,16 +43,16 @@ public sealed class ListItemTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var completedPayload = new TaskEvent.Completed { };
+    var completedPayload = new Abstractions.Tasks.TaskEvent.Completed { };
     var completedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, completedPayload);
 
     var testState = new SuT.ListItem();
     testState.Apply(notedEvent);
     testState.Apply(completedEvent);
 
-    Assert.IsTrue(TestWhereId(testState, taskId));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereId(testState, taskId));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -73,16 +71,16 @@ public sealed class ListItemTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var dismissedPayload = new TaskEvent.Dismissed { Reason = "Some Reason" };
+    var dismissedPayload = new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" };
     var dismissedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, dismissedPayload);
 
     var testState = new SuT.ListItem();
     testState.Apply(notedEvent);
     testState.Apply(dismissedEvent);
 
-    Assert.IsTrue(TestWhereId(testState, taskId));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereId(testState, taskId));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -101,11 +99,11 @@ public sealed class ListItemTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var completedPayload = new TaskEvent.Completed { };
+    var completedPayload = new Abstractions.Tasks.TaskEvent.Completed { };
     var completedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, completedPayload);
-    var reopenedPayload = new TaskEvent.Reopened { };
+    var reopenedPayload = new Abstractions.Tasks.TaskEvent.Reopened { };
     var reopenedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, reopenedPayload);
 
     var testState = new SuT.ListItem();
@@ -113,7 +111,7 @@ public sealed class ListItemTests
     testState.Apply(completedEvent);
     testState.Apply(reopenedEvent);
 
-    Assert.IsTrue(TestWhereId(testState, taskId));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereId(testState, taskId));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -132,11 +130,11 @@ public sealed class ListItemTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
-    var dismissedPayload = new TaskEvent.Dismissed { Reason = "Some Reason" };
+    var dismissedPayload = new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" };
     var dismissedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, dismissedPayload);
-    var reopenedPayload = new TaskEvent.Reopened { };
+    var reopenedPayload = new Abstractions.Tasks.TaskEvent.Reopened { };
     var reopenedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, reopenedPayload);
 
     var testState = new SuT.ListItem();
@@ -144,7 +142,7 @@ public sealed class ListItemTests
     testState.Apply(dismissedEvent);
     testState.Apply(reopenedEvent);
 
-    Assert.IsTrue(TestWhereId(testState, taskId));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereId(testState, taskId));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -153,10 +151,9 @@ public sealed class ListItemTests
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
   }
 
-  // TODO move to some global helper class
-  static bool TestWhereId<T>(T item, Guid id)
-    where T : IWhereId<T>
+  [TestMethod]
+  public void IsJsonSerializable()
   {
-    return T.GetWhereId(id).Compile().Invoke(item);
+    ToDoTestUtilities.AssertJsonSerializable<SuT.ListItem>(new SuT.ListItem());
   }
 }

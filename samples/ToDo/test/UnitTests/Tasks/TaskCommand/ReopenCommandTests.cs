@@ -12,4 +12,10 @@ public sealed class ReopenCommandTests
 
     Assert.IsInstanceOfType<DomainResult<SuT.Reopen>.Success>(testResult);
   }
+
+  [TestMethod]
+  public void IsJsonSerializable()
+  {
+    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Reopen>(SuT.Reopen.Create());
+  }
 }

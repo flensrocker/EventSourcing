@@ -24,4 +24,12 @@ public sealed class ListQueryTests
 
     Assert.IsEmpty(testResponse.ItemList);
   }
+
+  [TestMethod]
+  public void IsJsonSerializable()
+  {
+    ToDoTestUtilities.AssertJsonSerializable(TaskQueryRequest.List.Create(tenantId: Guid.CreateVersion7()));
+
+    ToDoTestUtilities.AssertJsonSerializable<TaskQueryResponse.List>(new TaskQueryResponse.List { ItemList = [] });
+  }
 }
