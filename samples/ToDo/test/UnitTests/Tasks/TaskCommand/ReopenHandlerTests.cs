@@ -68,6 +68,26 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
   }
 
   [TestMethod]
+  public async Task GivenReopenedStateThenReturnEmptySuccess()
+  {
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+
+    var testState = new TaskCommandState();
+    testState.Apply(CreateTaskEvent(taskId, taskVersion++, new TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" }));
+    testState.Apply(CreateTaskEvent(taskId, taskVersion++, new TaskEvent.Completed { }));
+    testState.Apply(CreateTaskEvent(taskId, taskVersion++, new TaskEvent.Reopened { }));
+
+    await using var testScope = _serviceProvider.CreateAsyncScope();
+    var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<TaskEvent, SuT, TaskCommandState>>();
+    var testResult = await SuT.Reopen.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+
+    var result = Assert.IsInstanceOfType<DomainResult<TaskEvent[]>.Success>(testResult);
+    Assert.IsEmpty(result.Value);
+  }
+
+  [TestMethod]
   public async Task GivenEmptyStateThenReturnNotFound()
   {
     var testState = new TaskCommandState();
