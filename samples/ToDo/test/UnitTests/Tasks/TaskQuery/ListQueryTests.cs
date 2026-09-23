@@ -16,4 +16,12 @@ public sealed class ListQueryTests
     var result = Assert.IsInstanceOfType<DomainResult<TaskQueryRequest.List>.Success>(testResult);
     Assert.AreEqual(validTenantId, result.Value.TenantId);
   }
+
+  [TestMethod]
+  public void GivenNoInputsThenReturnEmptyResponse()
+  {
+    var testResponse = new TaskQueryResponse.List { ItemList = [] };
+
+    Assert.IsEmpty(testResponse.ItemList);
+  }
 }
