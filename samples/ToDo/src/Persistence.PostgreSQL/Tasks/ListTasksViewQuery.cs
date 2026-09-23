@@ -16,7 +16,7 @@ internal class ListTasksViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
   {
     using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-    var listItems = await dbContext
+    var itemList = await dbContext
       .TaskListItem.AsNoTracking()
       .Where(e => e.TenantId == request.TenantId)
       .OrderBy(e => e.Status)
@@ -31,6 +31,6 @@ internal class ListTasksViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
       })
       .ToArrayAsync(cancellationToken);
 
-    return new TaskQueryResponse.List { ItemList = listItems };
+    return new TaskQueryResponse.List { ItemList = itemList };
   }
 }
