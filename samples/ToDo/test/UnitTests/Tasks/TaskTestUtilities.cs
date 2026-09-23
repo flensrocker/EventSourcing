@@ -3,7 +3,14 @@ using Flensrocker.ToDo.Abstractions.Tasks;
 
 internal static class TaskTestUtilities
 {
-  internal static DomainEvent CreateTaskEvent(TimeProvider timeProvider, Guid? tenantId, Guid? userId, Guid taskId, int taskVersion, TaskEvent payload)
+  internal static DomainEvent CreateTaskEvent(
+    TimeProvider timeProvider,
+    Guid? tenantId,
+    Guid? userId,
+    Guid taskId,
+    int taskVersion,
+    TaskEvent payload
+  )
   {
     var taskCreatedAt = timeProvider.GetUtcNow();
 
