@@ -25,7 +25,7 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.Created, testResponse.StatusCode);
-    var noteResponse = await testResponse.Content.ReadFromJsonAsync<NotedDto>();
+    var noteResponse = await testResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken);
     Assert.IsNotNull(noteResponse);
     Assert.AreEqual(1, noteResponse.Version);
     Assert.AreNotEqual(Guid.Empty, noteResponse.TaskId);
