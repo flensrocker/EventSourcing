@@ -22,18 +22,18 @@ public class CompleteEndpointTests : BaseEndpointTests<CompleteEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noted = await noteResponse.Content.ReadFromJsonAsync<NotedDto>();
-    Assert.IsNotNull(noted);
-    var taskId = noted.TaskId;
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>();
+    Assert.IsNotNull(noteResult);
+    var taskId = noteResult.TaskId;
 
     using var testResponse = await _client
       .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{taskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, testResponse.StatusCode);
-    var result = await testResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
-    Assert.IsNotNull(result);
-    Assert.AreEqual(noted.Version + 1, result.Version);
+    var testResult = await testResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    Assert.IsNotNull(testResult);
+    Assert.AreEqual(noteResult.Version + 1, testResult.Version);
   }
 
   [TestMethod]
@@ -46,27 +46,27 @@ public class CompleteEndpointTests : BaseEndpointTests<CompleteEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noted = await noteResponse.Content.ReadFromJsonAsync<NotedDto>();
-    Assert.IsNotNull(noted);
-    var taskId = noted.TaskId;
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>();
+    Assert.IsNotNull(noteResult);
+    var taskId = noteResult.TaskId;
 
-    using var completeResponse = await _client
+    using var firstCompleteResponse = await _client
       .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{taskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
-    Assert.AreEqual(HttpStatusCode.OK, completeResponse.StatusCode);
-    var completeResult = await completeResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
-    Assert.IsNotNull(completeResult);
-    Assert.AreEqual(noted.Version + 1, completeResult.Version);
+    Assert.AreEqual(HttpStatusCode.OK, firstCompleteResponse.StatusCode);
+    var firstCompleteResult = await firstCompleteResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    Assert.IsNotNull(firstCompleteResult);
+    Assert.AreEqual(noteResult.Version + 1, firstCompleteResult.Version);
 
-    using var testResponse = await _client
+    using var secondCompleteResponse = await _client
       .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{taskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
-    Assert.AreEqual(HttpStatusCode.OK, testResponse.StatusCode);
-    var result = await testResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
-    Assert.IsNotNull(result);
-    Assert.AreEqual(completeResult.Version, result.Version);
+    Assert.AreEqual(HttpStatusCode.OK, secondCompleteResponse.StatusCode);
+    var secondCompleteResult = await secondCompleteResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    Assert.IsNotNull(secondCompleteResult);
+    Assert.AreEqual(firstCompleteResult.Version, secondCompleteResult.Version);
   }
 
   [TestMethod]
