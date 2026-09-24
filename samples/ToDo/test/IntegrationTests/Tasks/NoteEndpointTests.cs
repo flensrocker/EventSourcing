@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Abstractions.Tasks;
@@ -31,14 +30,12 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
     Assert.AreEqual(1, noteResult.Version);
     Assert.AreNotEqual(Guid.Empty, noteResult.TaskId);
 
-    var detailsResponse = await _client.GetAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}", _cancellationToken);
-    Assert.IsNotNull(detailsResponse);
-    Assert.AreEqual(HttpStatusCode.OK, detailsResponse.StatusCode);
-    var detailsJson = await detailsResponse.Content.ReadAsStringAsync(_cancellationToken);
-    _testContext.WriteLine(detailsJson);
-    var detailsResult = JsonSerializer.Deserialize<TaskView.Details>(detailsJson, ToDoJsonSerializerContext.Default.Options);
+    var detailsResult = await _client.GetFromJsonAsync<TaskView.Details>(
+      $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
+      ToDoJsonSerializerContext.Default.Options,
+      _cancellationToken
+    );
     Assert.IsNotNull(detailsResult);
-    _testContext.WriteLine(detailsResult.ToString());
     Assert.AreEqual(1, detailsResult.Version);
     Assert.AreEqual(testRequest.Title, detailsResult.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, detailsResult.Status);

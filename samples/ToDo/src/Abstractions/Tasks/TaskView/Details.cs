@@ -10,27 +10,20 @@ public abstract partial record TaskView
   public sealed record Details : TaskView, IDomainEventVersionable, ITaskEventProjectable
   {
     [Id(0)]
-    public int Version { get; private set; }
+    [JsonInclude]
+    public int Version { get; internal set; }
 
     [Id(1)]
-    public string Title { get; private set; } = "";
+    [JsonInclude]
+    public string Title { get; internal set; } = "";
 
     [Id(2)]
-    public TaskStatus Status { get; private set; }
+    [JsonInclude]
+    public TaskStatus Status { get; internal set; }
 
     [Id(3)]
-    public string? DismissReason { get; private set; }
-
-    public Details() { }
-
-    [JsonConstructor]
-    internal Details(int version, string title, TaskStatus status, string? dismissReason)
-    {
-      Version = version;
-      Title = title;
-      Status = status;
-      DismissReason = dismissReason;
-    }
+    [JsonInclude]
+    public string? DismissReason { get; internal set; }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Completed payload)
     {

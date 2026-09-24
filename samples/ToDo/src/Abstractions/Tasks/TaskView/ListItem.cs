@@ -13,35 +13,28 @@ public abstract partial record TaskView
     public const int ProjectionVersion = 1;
 
     [Id(0)]
-    public Guid TaskId { get; private set; }
+    [JsonInclude]
+    public Guid TaskId { get; internal set; }
 
     [Id(1)]
-    public int Version { get; private set; }
+    [JsonInclude]
+    public int Version { get; internal set; }
 
     [Id(2)]
-    public Guid? TenantId { get; private set; }
+    [JsonInclude]
+    public Guid? TenantId { get; internal set; }
 
     [Id(3)]
-    public DateTimeOffset CreatedAt { get; private set; }
+    [JsonInclude]
+    public DateTimeOffset CreatedAt { get; internal set; }
 
     [Id(4)]
-    public string Title { get; private set; } = "";
+    [JsonInclude]
+    public string Title { get; internal set; } = "";
 
     [Id(5)]
-    public TaskStatus Status { get; private set; }
-
-    public ListItem() { }
-
-    [JsonConstructor]
-    internal ListItem(Guid taskId, int version, Guid? tenantId, DateTimeOffset createdAt, string title, TaskStatus status)
-    {
-      TaskId = taskId;
-      Version = version;
-      TenantId = tenantId;
-      CreatedAt = createdAt;
-      Title = title;
-      Status = status;
-    }
+    [JsonInclude]
+    public TaskStatus Status { get; internal set; }
 
     static Expression<Func<ListItem, bool>> IWhereId<ListItem>.GetWhereId(Guid id) => item => item.TaskId == id;
 
