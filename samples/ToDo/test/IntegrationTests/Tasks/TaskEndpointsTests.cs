@@ -44,6 +44,19 @@ public class TaskEndpointsTests
   }
 
   [TestMethod]
+  public async Task GivenValidNoteRequestThenReturnCreated()
+  {
+    var request = new NoteDto { Title = "Some Title" };
+    using var response = await _client.PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", request, _cancellationToken).ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+    var notedResponse = await response.Content.ReadFromJsonAsync<NotedDto>();
+    Assert.IsNotNull(notedResponse);
+    Assert.AreEqual(1, notedResponse.Version);
+    Assert.AreNotEqual(Guid.Empty, notedResponse.TaskId);
+  }
+
+  [TestMethod]
   public async Task GivenInvalidNoteRequestThenReturnBadRequest()
   {
     var request = new NoteDto { Title = null };

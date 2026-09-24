@@ -2,6 +2,7 @@ using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
+using Flensrocker.ToDo.Domain;
 using Flensrocker.ToDo.Orleans.Client;
 using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
@@ -19,8 +20,10 @@ builder
   .ForToDoEvents();
 
 builder
-  .Services.AddToDoOrleansClient()
-  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = "DefaultConnection" });
+  .Services.AddToDo()
+  .AddToDoOrleansClient()
+  .AddToDoPostgreSQLPersistence(() => new ToDoPostgreSQLPersistenceOptions { ConnectionName = "DefaultConnection" })
+  .AddToDoWebApi();
 
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
