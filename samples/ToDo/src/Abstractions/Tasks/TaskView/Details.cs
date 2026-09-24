@@ -1,4 +1,5 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
+﻿using System.Text.Json.Serialization;
+using Flensrocker.EventSourcing.Abstractions;
 
 namespace Flensrocker.ToDo.Abstractions.Tasks;
 
@@ -19,6 +20,17 @@ public abstract partial record TaskView
 
     [Id(3)]
     public string? DismissReason { get; private set; }
+
+    public Details() { }
+
+    [JsonConstructor]
+    internal Details(int version, string title, TaskStatus status, string? dismissReason)
+    {
+      Version = version;
+      Title = title;
+      Status = status;
+      DismissReason = dismissReason;
+    }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Completed payload)
     {

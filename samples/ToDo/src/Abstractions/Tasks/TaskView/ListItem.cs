@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Text.Json.Serialization;
 using Flensrocker.EventSourcing.Abstractions;
 
 namespace Flensrocker.ToDo.Abstractions.Tasks;
@@ -28,6 +29,19 @@ public abstract partial record TaskView
 
     [Id(5)]
     public TaskStatus Status { get; private set; }
+
+    public ListItem() { }
+
+    [JsonConstructor]
+    internal ListItem(Guid taskId, int version, Guid? tenantId, DateTimeOffset createdAt, string title, TaskStatus status)
+    {
+      TaskId = taskId;
+      Version = version;
+      TenantId = tenantId;
+      CreatedAt = createdAt;
+      Title = title;
+      Status = status;
+    }
 
     static Expression<Func<ListItem, bool>> IWhereId<ListItem>.GetWhereId(Guid id) => item => item.TaskId == id;
 

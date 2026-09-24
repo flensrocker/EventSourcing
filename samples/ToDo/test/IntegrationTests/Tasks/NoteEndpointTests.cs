@@ -36,15 +36,13 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
     Assert.AreEqual(HttpStatusCode.OK, detailsResponse.StatusCode);
     var detailsJson = await detailsResponse.Content.ReadAsStringAsync(_cancellationToken);
     _testContext.WriteLine(detailsJson);
-    var jsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions().MakeReadOnly();
-    var detailsResult = JsonSerializer.Deserialize<TaskView.Details>(detailsJson, jsonOptions.Options);
+    var detailsResult = JsonSerializer.Deserialize<TaskView.Details>(detailsJson, ToDoJsonSerializerContext.Default.Options);
     Assert.IsNotNull(detailsResult);
     _testContext.WriteLine(detailsResult.ToString());
-    // TODO deserialization does not work
-    // Assert.AreEqual(1, detailsResult.Version);
-    // Assert.AreEqual(testRequest.Title, detailsResult.Title);
-    // Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, detailsResult.Status);
-    // Assert.IsNull(detailsResult.DismissReason);
+    Assert.AreEqual(1, detailsResult.Version);
+    Assert.AreEqual(testRequest.Title, detailsResult.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, detailsResult.Status);
+    Assert.IsNull(detailsResult.DismissReason);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
