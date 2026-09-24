@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using Flensrocker.ToDo.WebApi;
 using Microsoft.AspNetCore.Mvc.Testing;
 using static Flensrocker.ToDo.WebApi.Tasks.TaskEndpoints;
 
@@ -47,7 +48,7 @@ public class TaskEndpointsTests
   public async Task GivenInvalidNoteRequestThenReturnBadRequest()
   {
     var request = new NoteDto { Title = null };
-    using var response = await _client.PostAsJsonAsync($"/api/todo/task/note", request, _cancellationToken).ConfigureAwait(false);
+    using var response = await _client.PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", request, _cancellationToken).ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
   }
