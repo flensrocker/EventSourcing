@@ -10,42 +10,10 @@ using static Flensrocker.ToDo.WebApi.Tasks.TaskEndpoints;
 namespace Flensrocker.ToDo.IntegrationTests.Tasks;
 
 [TestClass]
-public class NoteEndpointTests
+public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
 {
-  private static ToDoWebApplicationFactory _factory = default!;
-
-  private readonly CancellationToken _cancellationToken;
-  private HttpClient _client = default!;
-
   public NoteEndpointTests(TestContext testContext)
-  {
-    _cancellationToken = testContext.CancellationTokenSource.Token;
-  }
-
-  [ClassInitialize]
-  public static async Task ClassInitialize(TestContext testContext)
-  {
-    _factory = await ToDoWebApplicationFactory.StartAsync(testContext.CancellationToken);
-  }
-
-  [ClassCleanup]
-  public static async Task ClassCleanup()
-  {
-    await _factory.DisposeAsync();
-  }
-
-  [TestInitialize]
-  public void TestInitialize()
-  {
-    _client = _factory.CreateClient();
-  }
-
-  [TestCleanup]
-  public void TestCleanup()
-  {
-    _client?.Dispose();
-    _client = default!;
-  }
+    : base(testContext) { }
 
   [TestMethod]
   public async Task GivenValidNoteRequestThenReturnCreated()
