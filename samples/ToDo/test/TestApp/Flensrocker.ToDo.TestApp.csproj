@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Orleans.Persistence.Memory" />
+    <PackageReference Include="Microsoft.Orleans.Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.Server\Flensrocker.EventSourcing.Orleans.Server.csproj" />
+    <ProjectReference Include="..\..\..\..\src\EventSourcing.Persistence.PostgreSQL\Flensrocker.EventSourcing.Persistence.PostgreSQL.csproj" />
+    <ProjectReference Include="..\..\src\Orleans.Client\Flensrocker.ToDo.Orleans.Client.csproj" />
+    <ProjectReference Include="..\..\src\Orleans.Server\Flensrocker.ToDo.Orleans.Server.csproj" />
+    <ProjectReference Include="..\..\src\Persistence.PostgreSQL\Flensrocker.ToDo.Persistence.PostgreSQL.csproj" />
+    <ProjectReference Include="..\..\src\WebApi\Flensrocker.ToDo.WebApi.csproj" />
+  </ItemGroup>
+</Project>

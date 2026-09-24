@@ -7,14 +7,11 @@
     <File Path="NuGet.config" />
     <File Path="README.md" />
   </Folder>
-  <Folder Name="/samples/" />
-  <Folder Name="/samples/Measure/" />
   <Folder Name="/samples/Measure/src/">
     <Project Path="samples/Measure/src/Orleans.Abstractions/Flensrocker.Measure.Orleans.Abstractions.csproj" />
     <Project Path="samples/Measure/src/Orleans.Server/Flensrocker.Measure.Orleans.Server.csproj" />
     <Project Path="samples/Measure/src/WebApi/Flensrocker.Measure.WebApi.csproj" />
   </Folder>
-  <Folder Name="/samples/Playground/" />
   <Folder Name="/samples/Playground/src/">
     <Project Path="samples/Playground/src/AllInOne/Playground.AllInOne.csproj" />
     <Project
@@ -28,7 +25,6 @@
     <Project Path="samples/Playground/src/ServiceDefaults/Playground.ServiceDefaults.csproj" />
     <Project Path="samples/Playground/src/WebApi/Playground.WebApi.csproj" />
   </Folder>
-  <Folder Name="/samples/ToDo/" />
   <Folder Name="/samples/ToDo/src/">
     <Project Path="samples/ToDo/src/Abstractions/Flensrocker.ToDo.Abstractions.csproj" />
     <Project Path="samples/ToDo/src/Domain/Flensrocker.ToDo.Domain.csproj" />
@@ -38,6 +34,8 @@
     <Project Path="samples/ToDo/src/WebApi/Flensrocker.ToDo.WebApi.csproj" />
   </Folder>
   <Folder Name="/samples/ToDo/test/">
+    <Project Path="samples/ToDo/test/IntegrationTests/Flensrocker.ToDo.IntegrationTests.csproj" />
+    <Project Path="samples/ToDo/test/TestApp/Flensrocker.ToDo.TestApp.csproj" />
     <Project Path="samples/ToDo/test/UnitTests/Flensrocker.ToDo.UnitTests.csproj" />
   </Folder>
   <Folder Name="/src/">
