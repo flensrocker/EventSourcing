@@ -1,7 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using Flensrocker.ToDo.WebApi;
-using Microsoft.AspNetCore.Mvc.Testing;
 using static Flensrocker.ToDo.WebApi.Tasks.TaskEndpoints;
 
 namespace Flensrocker.ToDo.IntegrationTests.Tasks;
@@ -9,7 +8,7 @@ namespace Flensrocker.ToDo.IntegrationTests.Tasks;
 [TestClass]
 public class TaskEndpointsTests
 {
-  private static WebApplicationFactory<Program> _factory = default!;
+  private static ToDoWebApplicationFactory _factory = default!;
 
   private readonly CancellationToken _cancellationToken;
   private HttpClient _client = default!;
@@ -20,15 +19,15 @@ public class TaskEndpointsTests
   }
 
   [ClassInitialize]
-  public static void ClassInitialize(TestContext testContext)
+  public static async Task ClassInitialize(TestContext testContext)
   {
-    _factory = new WebApplicationFactory<Program>();
+    _factory = await ToDoWebApplicationFactory.StartAsync(testContext.CancellationToken);
   }
 
   [ClassCleanup]
-  public static void ClassCleanup()
+  public static async Task ClassCleanup()
   {
-    _factory.Dispose();
+    await _factory.DisposeAsync();
   }
 
   [TestInitialize]

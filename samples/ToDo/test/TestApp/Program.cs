@@ -51,6 +51,16 @@ builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 
 using var app = builder.Build();
 
+await using (var migrationScope = app.Services.CreateAsyncScope())
+{
+  var logger = migrationScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+  logger.LogInformation("Starting Migrations");
+
+  await migrationScope.ServiceProvider.RunDbMigrationsAsync();
+
+  logger.LogInformation("Finished Migrations");
+}
+
 app.MapToDo();
 
 app.Run();

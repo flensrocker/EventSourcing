@@ -38,5 +38,6 @@
     <PackageVersion Include="Polly.Core" Version="8.8.0" />
     <PackageVersion Include="System.Interactive.Async" Version="7.0.1" />
     <PackageVersion Include="System.Reactive" Version="7.0.0" />
+    <PackageVersion Include="Testcontainers.PostgreSql" Version="4.15.0" />
   </ItemGroup>
 </Project>
