@@ -5,11 +5,13 @@ public abstract class BaseEndpointTests<T>
 {
   protected static ToDoWebApplicationFactory _factory = default!;
 
+  protected readonly TestContext _testContext;
   protected readonly CancellationToken _cancellationToken;
   protected HttpClient _client = default!;
 
   protected BaseEndpointTests(TestContext testContext)
   {
+    _testContext = testContext;
     _cancellationToken = testContext.CancellationTokenSource.Token;
   }
 

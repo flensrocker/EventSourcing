@@ -2,6 +2,8 @@ using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.ToDo.Abstractions;
 
+namespace Flensrocker.ToDo.UnitTests;
+
 internal static class ToDoTestUtilities
 {
   internal static EventSourcingJsonSerializerOptions JsonOptions { get; } =
