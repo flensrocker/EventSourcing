@@ -151,10 +151,10 @@ public sealed class DetailsTests
     var dismissedPayload = new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" };
     var dismissedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, dismissedPayload);
 
-    var details = new SuT.Details();
-    details.Apply(notedEvent);
-    details.Apply(dismissedEvent);
+    var testState = new SuT.Details();
+    testState.Apply(notedEvent);
+    testState.Apply(dismissedEvent);
 
-    ToDoTestUtilities.AssertJsonSerializable<SuT.Details>(details);
+    ToDoTestUtilities.AssertJsonSerializable<SuT.Details>(testState);
   }
 }

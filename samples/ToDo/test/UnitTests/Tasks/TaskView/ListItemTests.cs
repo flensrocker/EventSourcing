@@ -154,6 +154,22 @@ public sealed class ListItemTests
   [TestMethod]
   public void IsJsonSerializable()
   {
-    ToDoTestUtilities.AssertJsonSerializable<SuT.ListItem>(new SuT.ListItem());
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+    var dismissedPayload = new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" };
+    var dismissedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, dismissedPayload);
+
+    var testState = new SuT.ListItem();
+    testState.Apply(notedEvent);
+    testState.Apply(dismissedEvent);
+
+    ToDoTestUtilities.AssertJsonSerializable<SuT.ListItem>(testState);
   }
 }

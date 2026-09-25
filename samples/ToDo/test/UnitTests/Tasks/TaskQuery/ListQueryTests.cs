@@ -30,6 +30,21 @@ public sealed class ListQueryTests
   {
     ToDoTestUtilities.AssertJsonSerializable(TaskQueryRequest.List.Create(tenantId: Guid.CreateVersion7()));
 
-    ToDoTestUtilities.AssertJsonSerializable<TaskQueryResponse.List>(new TaskQueryResponse.List { ItemList = [] });
+    ToDoTestUtilities.AssertJsonSerializable<TaskQueryResponse.List>(
+      new TaskQueryResponse.List
+      {
+        ItemList =
+        [
+          new()
+          {
+            TaskId = Guid.CreateVersion7(),
+            Version = 2,
+            CreatedAt = DateTimeOffset.UtcNow,
+            Title = "Some Title",
+            Status = Abstractions.Tasks.TaskStatus.Dismissed,
+          },
+        ],
+      }
+    );
   }
 }
