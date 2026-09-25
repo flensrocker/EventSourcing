@@ -63,6 +63,9 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
-    // TODO inspect Content for ValidationProblems
+    var testResult = await testResponse.Content.ReadAsProblemDetailsWithErrorsAsync(_cancellationToken);
+    Assert.IsNotNull(testResult);
+    Assert.IsNotNull(testResult.Errors);
+    Assert.IsTrue(testResult.Errors.ContainsKey("Title"));
   }
 }
