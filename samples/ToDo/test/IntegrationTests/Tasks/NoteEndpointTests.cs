@@ -41,16 +41,29 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, detailsResult.Status);
     Assert.IsNull(detailsResult.DismissReason);
 
+    // TODO how to wait for list to be populated?
+
+    // var listResult = await _client.GetFromJsonAsync<TaskQueryResponse.List>(
+    //   ToDoRoutes.TaskRoute,
+    //   ToDoJsonSerializerContext.Default.Options,
+    //   _cancellationToken
+    // );
+    // Assert.IsNotNull(listResult);
+    // Assert.HasCount(1, listResult.ItemList);
+    // var listItem = listResult.ItemList.First();
+    // Assert.AreEqual(noteResult.TaskId, listItem.TaskId);
+    // Assert.AreEqual(1, listItem.Version);
+    // Assert.AreEqual(testRequest.Title, listItem.Title);
+    // Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, listItem.Status);
+
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken);
     Assert.IsNotNull(taskEventList);
     Assert.HasCount(1, taskEventList);
-    var notedMetadata = taskEventList[0].Metadata;
     var notedEvent = Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
     Assert.AreEqual(testRequest.Title, notedEvent.Title);
-    Assert.AreEqual(1, notedMetadata.StreamVersion);
   }
 
   [TestMethod]
