@@ -16,8 +16,6 @@ public class EventSourcingJsonSerializerOptions
   private readonly Dictionary<string, Type> _nameToType = new();
   private readonly Dictionary<Type, string> _typeToName = new();
 
-  public static EventSourcingJsonSerializerOptions Default { get; } = new();
-
   public JsonSerializerOptions Options { get; } =
     new JsonSerializerOptions { AllowOutOfOrderMetadataProperties = true, PropertyNamingPolicy = null };
 

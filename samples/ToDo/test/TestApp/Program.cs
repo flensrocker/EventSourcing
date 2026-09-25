@@ -10,7 +10,7 @@ using Flensrocker.ToDo.WebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var globalJsonOptions = EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions();
 
 builder.Services.AddFlensrockerEventSourcingCore();
 builder

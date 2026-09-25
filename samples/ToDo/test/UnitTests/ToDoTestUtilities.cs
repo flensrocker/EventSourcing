@@ -7,7 +7,7 @@ namespace Flensrocker.ToDo.UnitTests;
 internal static class ToDoTestUtilities
 {
   internal static EventSourcingJsonSerializerOptions JsonOptions { get; } =
-    EventSourcingJsonSerializerOptions.Default.AddToDoJsonOptions().MakeReadOnly();
+    new EventSourcingJsonSerializerOptions().AddToDoJsonOptions().MakeReadOnly();
 
   internal static void AssertJsonSerializable<TBase, TValue>(DomainResult<TValue> result)
     where TValue : TBase => AssertJsonSerializable<TBase, TValue>(result, JsonOptions.Options);
