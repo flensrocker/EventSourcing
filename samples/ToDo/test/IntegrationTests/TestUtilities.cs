@@ -22,7 +22,7 @@ public static class TestUtilities
     {
       Assert.AreEqual("application/problem+json", httpContent.Headers.ContentType?.MediaType);
 
-      return await httpContent.ReadFromJsonAsync<ProblemDetailsWithErrors>(WebJsonOptions, cancellationToken);
+      return await httpContent.ReadFromJsonAsync<ProblemDetailsWithErrors>(WebJsonOptions, cancellationToken).ConfigureAwait(false);
     }
   }
 }

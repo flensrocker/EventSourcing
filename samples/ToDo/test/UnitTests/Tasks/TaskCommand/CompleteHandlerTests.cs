@@ -8,6 +8,9 @@ namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 [TestClass]
 public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 {
+  public CompleteHandlerTests(TestContext testContext)
+    : base(testContext) { }
+
   [TestMethod]
   public async Task GivenOpenStateThenReturnCompletedEvent()
   {
@@ -22,7 +25,10 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Complete.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Complete.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.HasCount(1, result.Value);
@@ -44,7 +50,10 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Complete.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Complete.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.IsEmpty(result.Value);
@@ -57,7 +66,10 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Complete.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Complete.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.NotFound>(testResult);
   }
@@ -77,7 +89,10 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Complete.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Complete.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.BadRequest>(testResult);
   }

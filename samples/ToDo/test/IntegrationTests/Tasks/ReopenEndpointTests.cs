@@ -26,7 +26,7 @@ public class ReopenEndpointTests : ToDoBaseEndpointTests<ReopenEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>();
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(noteResult);
     Assert.AreEqual(expectedVersion, noteResult.Version);
     expectedVersion++;
@@ -36,7 +36,7 @@ public class ReopenEndpointTests : ToDoBaseEndpointTests<ReopenEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, completeResponse.StatusCode);
-    var completeResult = await completeResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    var completeResult = await completeResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(completeResult);
     Assert.AreEqual(expectedVersion, completeResult.Version);
     expectedVersion++;
@@ -46,15 +46,17 @@ public class ReopenEndpointTests : ToDoBaseEndpointTests<ReopenEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, testResponse.StatusCode);
-    var testResult = await testResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    var testResult = await testResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(testResult);
     Assert.AreEqual(expectedVersion, testResult.Version);
 
-    var detailsResult = await _client.GetFromJsonAsync<TaskView.Details>(
-      $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
-      ToDoJsonSerializerContext.Default.Options,
-      _cancellationToken
-    );
+    var detailsResult = await _client
+      .GetFromJsonAsync<TaskView.Details>(
+        $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
+        ToDoJsonSerializerContext.Default.Options,
+        _cancellationToken
+      )
+      .ConfigureAwait(false);
     Assert.IsNotNull(detailsResult);
     Assert.AreEqual(expectedVersion, detailsResult.Version);
     Assert.AreEqual(noteRequest.Title, detailsResult.Title);
@@ -64,7 +66,7 @@ public class ReopenEndpointTests : ToDoBaseEndpointTests<ReopenEndpointTests>
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
-    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken);
+    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);
     Assert.HasCount(3, taskEventList);
     Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
@@ -86,7 +88,7 @@ public class ReopenEndpointTests : ToDoBaseEndpointTests<ReopenEndpointTests>
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
-    var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken);
+    var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
   }
 }

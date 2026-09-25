@@ -8,6 +8,9 @@ namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 [TestClass]
 public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 {
+  public ReopenHandlerTests(TestContext testContext)
+    : base(testContext) { }
+
   [TestMethod]
   public async Task GivenCompletedStateThenReturnReopenedEvent()
   {
@@ -23,7 +26,10 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Reopen.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Reopen.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.HasCount(1, result.Value);
@@ -45,7 +51,10 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Reopen.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Reopen.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.HasCount(1, result.Value);
@@ -66,7 +75,10 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Reopen.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Reopen.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.IsEmpty(result.Value);
@@ -88,7 +100,10 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Reopen.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Reopen.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.IsEmpty(result.Value);
@@ -101,7 +116,10 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
-    var testResult = await SuT.Reopen.Create().Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+    var testResult = await SuT
+      .Reopen.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.NotFound>(testResult);
   }

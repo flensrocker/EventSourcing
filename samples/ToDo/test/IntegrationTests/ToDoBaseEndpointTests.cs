@@ -1,5 +1,8 @@
 namespace Flensrocker.ToDo.IntegrationTests;
 
+// NOTE BEST PRACTICE
+// The generic argument is used to give all the derived classes a unique base class.
+// With this they have different static properties and therefore different ToDoWebApplicationFactories with distinct databases.
 public abstract class ToDoBaseEndpointTests<T>
   where T : ToDoBaseEndpointTests<T>
 {
@@ -18,13 +21,15 @@ public abstract class ToDoBaseEndpointTests<T>
   [ClassInitialize(InheritanceBehavior.BeforeEachDerivedClass)]
   public static void ClassInitialize(TestContext testContext)
   {
+    Assert.IsNull(_factory);
     _factory = new ToDoWebApplicationFactory();
   }
 
   [ClassCleanup(InheritanceBehavior.BeforeEachDerivedClass)]
   public static async Task ClassCleanup()
   {
-    await _factory.DisposeAsync();
+    await _factory.DisposeAsync().ConfigureAwait(false);
+    _factory = default!;
   }
 
   [TestInitialize]

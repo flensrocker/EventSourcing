@@ -26,7 +26,7 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>();
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(noteResult);
     Assert.AreEqual(expectedVersion, noteResult.Version);
     expectedVersion++;
@@ -37,15 +37,17 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, testResponse.StatusCode);
-    var testResult = await testResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    var testResult = await testResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(testResult);
     Assert.AreEqual(expectedVersion, testResult.Version);
 
-    var detailsResult = await _client.GetFromJsonAsync<TaskView.Details>(
-      $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
-      ToDoJsonSerializerContext.Default.Options,
-      _cancellationToken
-    );
+    var detailsResult = await _client
+      .GetFromJsonAsync<TaskView.Details>(
+        $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
+        ToDoJsonSerializerContext.Default.Options,
+        _cancellationToken
+      )
+      .ConfigureAwait(false);
     Assert.IsNotNull(detailsResult);
     Assert.AreEqual(expectedVersion, detailsResult.Version);
     Assert.AreEqual(noteRequest.Title, detailsResult.Title);
@@ -55,7 +57,7 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
-    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken);
+    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);
     Assert.HasCount(2, taskEventList);
     Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
@@ -74,7 +76,7 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>();
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(noteResult);
     Assert.AreEqual(expectedVersion, noteResult.Version);
     expectedVersion++;
@@ -85,7 +87,9 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, firstDismissResponse.StatusCode);
-    var firstDismissResult = await firstDismissResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    var firstDismissResult = await firstDismissResponse
+      .Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken)
+      .ConfigureAwait(false);
     Assert.IsNotNull(firstDismissResult);
     Assert.AreEqual(expectedVersion, firstDismissResult.Version);
 
@@ -94,15 +98,19 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, secondDismissResponse.StatusCode);
-    var secondDismissResult = await secondDismissResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken);
+    var secondDismissResult = await secondDismissResponse
+      .Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken)
+      .ConfigureAwait(false);
     Assert.IsNotNull(secondDismissResult);
     Assert.AreEqual(expectedVersion, secondDismissResult.Version);
 
-    var detailsResult = await _client.GetFromJsonAsync<TaskView.Details>(
-      $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
-      ToDoJsonSerializerContext.Default.Options,
-      _cancellationToken
-    );
+    var detailsResult = await _client
+      .GetFromJsonAsync<TaskView.Details>(
+        $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
+        ToDoJsonSerializerContext.Default.Options,
+        _cancellationToken
+      )
+      .ConfigureAwait(false);
     Assert.IsNotNull(detailsResult);
     Assert.AreEqual(expectedVersion, detailsResult.Version);
     Assert.AreEqual(noteRequest.Title, detailsResult.Title);
@@ -112,7 +120,7 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
-    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken);
+    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);
     Assert.HasCount(2, taskEventList);
     Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
@@ -135,7 +143,7 @@ public class DismissEndpointTests : ToDoBaseEndpointTests<DismissEndpointTests>
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
-    var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken);
+    var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
   }
 }

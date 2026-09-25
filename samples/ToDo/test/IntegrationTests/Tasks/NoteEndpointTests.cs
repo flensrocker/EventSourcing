@@ -27,16 +27,18 @@ public class NoteEndpointTests : ToDoBaseEndpointTests<NoteEndpointTests>
     var testEndTimestamp = DateTimeOffset.UtcNow;
 
     Assert.AreEqual(HttpStatusCode.Created, testResponse.StatusCode);
-    var noteResult = await testResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken);
+    var noteResult = await testResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(noteResult);
     Assert.AreEqual(1, noteResult.Version);
     Assert.AreNotEqual(Guid.Empty, noteResult.TaskId);
 
-    var detailsResult = await _client.GetFromJsonAsync<TaskView.Details>(
-      $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
-      ToDoJsonSerializerContext.Default.Options,
-      _cancellationToken
-    );
+    var detailsResult = await _client
+      .GetFromJsonAsync<TaskView.Details>(
+        $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
+        ToDoJsonSerializerContext.Default.Options,
+        _cancellationToken
+      )
+      .ConfigureAwait(false);
     Assert.IsNotNull(detailsResult);
     Assert.AreEqual(1, detailsResult.Version);
     Assert.AreEqual(testRequest.Title, detailsResult.Title);
@@ -46,7 +48,7 @@ public class NoteEndpointTests : ToDoBaseEndpointTests<NoteEndpointTests>
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
-    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken);
+    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);
     Assert.HasCount(1, taskEventList);
     var notedEvent = Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
@@ -64,7 +66,7 @@ public class NoteEndpointTests : ToDoBaseEndpointTests<NoteEndpointTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
-    var testResult = await testResponse.Content.ReadAsProblemDetailsWithErrorsAsync(_cancellationToken);
+    var testResult = await testResponse.Content.ReadAsProblemDetailsWithErrorsAsync(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(testResult?.Errors);
     Assert.IsTrue(testResult.Errors.ContainsKey("Title"));
   }

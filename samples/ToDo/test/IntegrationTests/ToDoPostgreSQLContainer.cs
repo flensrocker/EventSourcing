@@ -12,13 +12,15 @@ public static class ToDoPostgreSQLContainer
   [AssemblyInitialize]
   public static async Task InitializeAsync(TestContext testContext)
   {
+    Assert.IsNull(Instance);
     Instance = new PostgreSqlBuilder("postgres:18-alpine").WithCommand("-c", "wal_level=logical").Build();
-    await Instance.StartAsync(testContext.CancellationToken);
+    await Instance.StartAsync(testContext.CancellationToken).ConfigureAwait(false);
   }
 
   [AssemblyCleanup]
   public static async Task CleanupAsync()
   {
-    await Instance.DisposeAsync();
+    await Instance.DisposeAsync().ConfigureAwait(false);
+    Instance = default!;
   }
 }

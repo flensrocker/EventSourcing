@@ -7,8 +7,16 @@ namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 
 public abstract class BaseTaskHandlerTests
 {
+  protected readonly TestContext _testContext;
+  protected readonly CancellationToken _cancellationToken;
   protected readonly FakeTimeProvider _timeProvider = new();
   protected IServiceProvider _serviceProvider = default!;
+
+  protected BaseTaskHandlerTests(TestContext testContext)
+  {
+    _testContext = testContext;
+    _cancellationToken = testContext.CancellationToken;
+  }
 
   [TestInitialize]
   public void Initialize()

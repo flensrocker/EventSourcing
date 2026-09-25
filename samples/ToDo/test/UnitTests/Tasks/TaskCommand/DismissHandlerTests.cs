@@ -10,6 +10,9 @@ public sealed class DismissHandlerTests : BaseTaskHandlerTests
 {
   private readonly string _validReason = "Valid Reason";
 
+  public DismissHandlerTests(TestContext testContext)
+    : base(testContext) { }
+
   [TestMethod]
   public async Task GivenOpenStateThenReturnDismissedEvent()
   {
@@ -26,7 +29,8 @@ public sealed class DismissHandlerTests : BaseTaskHandlerTests
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Dismiss.Create(reason: _validReason)
-      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.HasCount(1, result.Value);
@@ -51,7 +55,8 @@ public sealed class DismissHandlerTests : BaseTaskHandlerTests
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Dismiss.Create(reason: _validReason)
-      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.IsEmpty(result.Value);
@@ -76,7 +81,8 @@ public sealed class DismissHandlerTests : BaseTaskHandlerTests
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Dismiss.Create(reason: _validReason)
-      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.BadRequest>(testResult);
   }
@@ -90,7 +96,8 @@ public sealed class DismissHandlerTests : BaseTaskHandlerTests
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Dismiss.Create(reason: _validReason)
-      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.NotFound>(testResult);
   }
@@ -112,7 +119,8 @@ public sealed class DismissHandlerTests : BaseTaskHandlerTests
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Dismiss.Create(reason: _validReason)
-      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.BadRequest>(testResult);
   }

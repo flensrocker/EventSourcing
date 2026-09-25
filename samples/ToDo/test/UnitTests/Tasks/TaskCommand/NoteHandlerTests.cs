@@ -10,6 +10,9 @@ public sealed class NoteHandlerTests : BaseTaskHandlerTests
 {
   private readonly string _validTitle = "Valid Title";
 
+  public NoteHandlerTests(TestContext testContext)
+    : base(testContext) { }
+
   [TestMethod]
   public async Task GivenEmptyStateThenReturnNotedEvent()
   {
@@ -19,7 +22,8 @@ public sealed class NoteHandlerTests : BaseTaskHandlerTests
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Note.Create(title: _validTitle)
-      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     var result = Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.Success>(testResult);
     Assert.HasCount(1, result.Value);
@@ -44,7 +48,8 @@ public sealed class NoteHandlerTests : BaseTaskHandlerTests
     var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
     var testResult = await SuT
       .Note.Create(title: _validTitle)
-      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command));
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.BadRequest>(testResult);
   }
