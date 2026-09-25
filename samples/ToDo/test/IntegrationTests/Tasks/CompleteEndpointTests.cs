@@ -10,7 +10,7 @@ using static Flensrocker.ToDo.WebApi.Tasks.TaskEndpoints;
 namespace Flensrocker.ToDo.IntegrationTests.Tasks;
 
 [TestClass]
-public class CompleteEndpointTests : BaseEndpointTests<CompleteEndpointTests>
+public class CompleteEndpointTests : ToDoBaseEndpointTests<CompleteEndpointTests>
 {
   public CompleteEndpointTests(TestContext testContext)
     : base(testContext) { }
@@ -57,10 +57,7 @@ public class CompleteEndpointTests : BaseEndpointTests<CompleteEndpointTests>
     var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken);
     Assert.IsNotNull(taskEventList);
     Assert.HasCount(2, taskEventList);
-
-    var notedEvent = Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
-    Assert.AreEqual(noteRequest.Title, notedEvent.Title);
-
+    Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
     Assert.IsInstanceOfType<TaskEvent.Completed>(taskEventList[1].Payload);
   }
 

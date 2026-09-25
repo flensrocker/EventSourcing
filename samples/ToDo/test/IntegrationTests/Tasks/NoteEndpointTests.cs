@@ -10,7 +10,7 @@ using static Flensrocker.ToDo.WebApi.Tasks.TaskEndpoints;
 namespace Flensrocker.ToDo.IntegrationTests.Tasks;
 
 [TestClass]
-public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
+public class NoteEndpointTests : ToDoBaseEndpointTests<NoteEndpointTests>
 {
   public NoteEndpointTests(TestContext testContext)
     : base(testContext) { }
@@ -20,9 +20,11 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
   {
     var testRequest = new NoteDto { Title = "Some Title" };
 
+    var testStartTimestamp = DateTimeOffset.UtcNow;
     using var testResponse = await _client
       .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", testRequest, _cancellationToken)
       .ConfigureAwait(false);
+    var testEndTimestamp = DateTimeOffset.UtcNow;
 
     Assert.AreEqual(HttpStatusCode.Created, testResponse.StatusCode);
     var noteResult = await testResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken);
@@ -49,6 +51,7 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
     Assert.HasCount(1, taskEventList);
     var notedEvent = Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
     Assert.AreEqual(testRequest.Title, notedEvent.Title);
+    Assert.IsInRange(testStartTimestamp, testEndTimestamp, notedEvent.CreatedAt);
   }
 
   [TestMethod]
@@ -62,8 +65,7 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
 
     Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
     var testResult = await testResponse.Content.ReadAsProblemDetailsWithErrorsAsync(_cancellationToken);
-    Assert.IsNotNull(testResult);
-    Assert.IsNotNull(testResult.Errors);
+    Assert.IsNotNull(testResult?.Errors);
     Assert.IsTrue(testResult.Errors.ContainsKey("Title"));
   }
 }

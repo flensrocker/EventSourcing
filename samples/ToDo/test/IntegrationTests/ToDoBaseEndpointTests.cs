@@ -1,7 +1,7 @@
-namespace Flensrocker.ToDo.IntegrationTests.Tasks;
+namespace Flensrocker.ToDo.IntegrationTests;
 
-public abstract class BaseEndpointTests<T>
-  where T : BaseEndpointTests<T>
+public abstract class ToDoBaseEndpointTests<T>
+  where T : ToDoBaseEndpointTests<T>
 {
   protected static ToDoWebApplicationFactory _factory = default!;
 
@@ -9,7 +9,7 @@ public abstract class BaseEndpointTests<T>
   protected readonly CancellationToken _cancellationToken;
   protected HttpClient _client = default!;
 
-  protected BaseEndpointTests(TestContext testContext)
+  protected ToDoBaseEndpointTests(TestContext testContext)
   {
     _testContext = testContext;
     _cancellationToken = testContext.CancellationTokenSource.Token;
