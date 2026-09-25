@@ -41,20 +41,32 @@ public class NoteEndpointTests : BaseEndpointTests<NoteEndpointTests>
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, detailsResult.Status);
     Assert.IsNull(detailsResult.DismissReason);
 
-    // TODO how to wait for list to be populated?
+    // TODO find a better way to wait for async projections
+    TaskQueryResponse.List? listResult = null;
+    var listRetryCount = 10;
+    do
+    {
+      listResult = await _client.GetFromJsonAsync<TaskQueryResponse.List>(
+        ToDoRoutes.TaskRoute,
+        ToDoJsonSerializerContext.Default.Options,
+        _cancellationToken
+      );
+      if (listResult is not null && listResult.ItemList.Count > 0)
+        break;
 
-    // var listResult = await _client.GetFromJsonAsync<TaskQueryResponse.List>(
-    //   ToDoRoutes.TaskRoute,
-    //   ToDoJsonSerializerContext.Default.Options,
-    //   _cancellationToken
-    // );
-    // Assert.IsNotNull(listResult);
-    // Assert.HasCount(1, listResult.ItemList);
-    // var listItem = listResult.ItemList.First();
-    // Assert.AreEqual(noteResult.TaskId, listItem.TaskId);
-    // Assert.AreEqual(1, listItem.Version);
-    // Assert.AreEqual(testRequest.Title, listItem.Title);
-    // Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, listItem.Status);
+      listRetryCount--;
+      Assert.IsGreaterThan(0, listRetryCount, "Task list not populated in time.");
+
+      await Task.Delay(500, _cancellationToken);
+    } while (true);
+
+    Assert.IsNotNull(listResult);
+    Assert.HasCount(1, listResult.ItemList);
+    var listItem = listResult.ItemList.First();
+    Assert.AreEqual(noteResult.TaskId, listItem.TaskId);
+    Assert.AreEqual(1, listItem.Version);
+    Assert.AreEqual(testRequest.Title, listItem.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, listItem.Status);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
