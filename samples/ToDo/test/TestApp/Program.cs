@@ -1,4 +1,5 @@
 using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
@@ -62,6 +63,16 @@ await using (var migrationScope = app.Services.CreateAsyncScope())
   await migrationScope.ServiceProvider.RunDbMigrationsAsync();
 
   logger.LogInformation("Finished Migrations");
+}
+
+await using (var rebuildScope = app.Services.CreateAsyncScope())
+{
+  var logger = rebuildScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+  logger.LogInformation("Starting Rebuilds");
+
+  await rebuildScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync();
+
+  logger.LogInformation("Finished Rebuilds");
 }
 
 app.MapToDo();
