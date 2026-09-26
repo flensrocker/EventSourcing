@@ -8,6 +8,7 @@
     "csharpier.csharpier-vscode",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
+    "humao.rest-client",
     "microsoft-aspire.aspire-vscode",
     "ms-dotnettools.csdevkit",
     "vitest.explorer"
