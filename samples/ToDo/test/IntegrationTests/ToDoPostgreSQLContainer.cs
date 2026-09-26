@@ -7,13 +7,11 @@ namespace Flensrocker.ToDo.IntegrationTests;
 [TestClass]
 public static class ToDoPostgreSQLContainer
 {
-  public static PostgreSqlContainer Instance = default!;
+  public static PostgreSqlContainer Instance = new PostgreSqlBuilder("postgres:18-alpine").WithCommand("-c", "wal_level=logical").Build();
 
   [AssemblyInitialize]
   public static async Task InitializeAsync(TestContext testContext)
   {
-    Assert.IsNull(Instance);
-    Instance = new PostgreSqlBuilder("postgres:18-alpine").WithCommand("-c", "wal_level=logical").Build();
     await Instance.StartAsync(testContext.CancellationToken).ConfigureAwait(false);
   }
 
@@ -21,6 +19,5 @@ public static class ToDoPostgreSQLContainer
   public static async Task CleanupAsync()
   {
     await Instance.DisposeAsync().ConfigureAwait(false);
-    Instance = default!;
   }
 }
