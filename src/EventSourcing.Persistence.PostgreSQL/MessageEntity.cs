@@ -37,17 +37,23 @@ internal class MessageEntity
   internal string PayloadJson { get; set; } = "";
 }
 
-internal class MessageEntiyConfiguration(ModelBuilder modelBuilder) : IEntityTypeConfiguration<MessageEntity>
+internal class MessageEntiyConfiguration(ModelBuilder modelBuilder, bool excludeFromMigrations) : IEntityTypeConfiguration<MessageEntity>
 {
   private readonly ModelBuilder _modelBuilder = modelBuilder;
+  private readonly bool _excludeFromMigrations = excludeFromMigrations;
 
   public void Configure(EntityTypeBuilder<MessageEntity> builder)
   {
-    builder.ToTable(Constants.MessageTableName, Constants.SchemaName);
+    builder.ToTable(
+      Constants.MessageTableName,
+      Constants.SchemaName,
+      tableBuilder => tableBuilder.ExcludeFromMigrations(_excludeFromMigrations)
+    );
 
     builder.HasKey(e => e.Id);
 
-    _modelBuilder.HasSequence(Constants.GlobalMessageIndexSequenceName, Constants.SchemaName).StartsAt(1L);
+    if (!_excludeFromMigrations)
+      _modelBuilder.HasSequence(Constants.GlobalMessageIndexSequenceName, Constants.SchemaName).StartsAt(1L);
 
     builder
       .Property(e => e.GlobalIndex)

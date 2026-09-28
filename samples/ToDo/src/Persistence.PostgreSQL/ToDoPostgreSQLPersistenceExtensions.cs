@@ -54,7 +54,7 @@ public static class ToDoPostgreSQLPersistenceExtensions
   {
     public PostgreSQLDomainEventStorageBuilder ForToDoEvents()
     {
-      return builder.ForDomainEvents<TaskEvent>();
+      return builder.ForDomainEvents<TaskEvent, ToDoDbContext>();
     }
   }
 }

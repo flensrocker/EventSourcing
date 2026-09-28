@@ -40,7 +40,7 @@ public static class PostgreSQLDomainEventStorageExtensions
       );
       services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
 
-      return new PostgreSQLDomainEventStorageBuilder(services).ForDomainEvents<PersistentProjectionEvent>();
+      return new PostgreSQLDomainEventStorageBuilder(services).ForDomainEvents<PersistentProjectionEvent, EventSourcingDbContext>();
     }
 
     public IServiceCollection AddPostgreSQLDomainMessageSubscriber(Func<PostgreSQLMessageSubscriberOptions> configureOptions)
@@ -68,6 +68,15 @@ public static class PostgreSQLDomainEventStorageExtensions
     internal void DropPublication()
     {
       migrationBuilder.Sql($"DROP PUBLICATION {Constants.PublicationName};");
+    }
+  }
+
+  extension(ModelBuilder modelBuilder)
+  {
+    public ModelBuilder ApplyEventSourcingConfiguration(bool excludeFromMigrations)
+    {
+      modelBuilder.ApplyConfiguration(new MessageEntiyConfiguration(modelBuilder, excludeFromMigrations));
+      return modelBuilder;
     }
   }
 

@@ -1,4 +1,5 @@
-﻿using Flensrocker.ToDo.Abstractions.Tasks;
+﻿using Flensrocker.EventSourcing.Persistence.PostgreSQL;
+using Flensrocker.ToDo.Abstractions.Tasks;
 using Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,10 @@ public class ToDoDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
+    // NOTE BEST PRACTICE
+    // This is only needed if you implement strong consistent projections on your DbContext
+    modelBuilder.ApplyEventSourcingConfiguration(excludeFromMigrations: true);
+
     modelBuilder.HasDefaultSchema(ToDoPostgreSQLPersistenceConstants.SchemaName);
 
     modelBuilder.ApplyConfiguration(new TaskViewListItemEntityConfiguration());

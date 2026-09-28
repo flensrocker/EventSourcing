@@ -11,6 +11,6 @@ internal class EventSourcingDbContext : DbContext
   {
     modelBuilder.HasDefaultSchema(Constants.SchemaName);
 
-    modelBuilder.ApplyConfiguration(new MessageEntiyConfiguration(modelBuilder));
+    modelBuilder.ApplyEventSourcingConfiguration(excludeFromMigrations: false);
   }
 }

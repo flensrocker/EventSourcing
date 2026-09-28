@@ -8,16 +8,17 @@ using Npgsql;
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-internal class PostgreSQLDomainEventStorage<TEventBase>(
+internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
   PostgreSQLDomainEventStorageOptions options,
-  IDbContextFactory<EventSourcingDbContext> dbContextFactory,
-  ILogger<PostgreSQLDomainEventStorage<TEventBase>> logger
+  IDbContextFactory<TDbContext> dbContextFactory,
+  ILogger<PostgreSQLDomainEventStorage<TEventBase, TDbContext>> logger
 ) : IDomainEventStorage<TEventBase>
   where TEventBase : class
+  where TDbContext : DbContext
 {
   private readonly PostgreSQLDomainEventStorageOptions _options = options;
-  private readonly IDbContextFactory<EventSourcingDbContext> _dbContextFactory = dbContextFactory;
-  private readonly ILogger<PostgreSQLDomainEventStorage<TEventBase>> _logger = logger;
+  private readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;
+  private readonly ILogger<PostgreSQLDomainEventStorage<TEventBase, TDbContext>> _logger = logger;
 
   public string StreamType { get; } = options.JsonOptions.GetTypeName(typeof(TEventBase));
 
@@ -47,7 +48,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     var state = new TState();
 
-    await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+    await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
 
     var domainEventList = await dbContext
       .Set<MessageEntity>()
@@ -74,6 +75,9 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     int expectedVersion
   )
   {
+    if (updates.Count == 0)
+      return true;
+
     try
     {
       var parameters = new List<NpgsqlParameter>();
@@ -130,21 +134,27 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
       insertSql.Append(valueSql);
       insertSql.Append(';');
 
-      await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+      await using var dbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+      await using var transaction = await dbContext.Database.BeginTransactionAsync().ConfigureAwait(false);
 
       var insertedCount = await dbContext.Database.ExecuteSqlRawAsync(insertSql.ToString(), parameters).ConfigureAwait(false);
 
-      return insertedCount == updates.Count;
+      if (insertedCount != updates.Count)
+      {
+        await transaction.RollbackAsync().ConfigureAwait(false);
+        LogInsertCountError(_logger, StreamType, streamId, expectedVersion, insertedCount, updates.Count);
+
+        return false;
+      }
+
+      // TODO execute strong consistent projections retrieved from DI
+
+      await transaction.CommitAsync().ConfigureAwait(false);
+      return true;
     }
     catch (Exception ex)
     {
-      _logger.LogError(
-        ex,
-        "Failure in applying updates to storage for events of type {StreamType}, stream-id {StreamId} and expected version {ExpectedVersion}",
-        StreamType,
-        streamId,
-        expectedVersion
-      );
+      LogInsertError(_logger, ex, StreamType, streamId, expectedVersion);
 
       return false;
     }
@@ -159,7 +169,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
   {
     if (fromVersionIncl > 0 && (toVersionExcl <= 0 || toVersionExcl > fromVersionIncl))
     {
-      await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+      await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
 
       var domainEventList = await dbContext
         .Set<MessageEntity>()
@@ -192,7 +202,7 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     [EnumeratorCancellation] CancellationToken cancellationToken
   )
   {
-    await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+    await using var dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
 
     var domainEventList = dbContext
       .Set<MessageEntity>()
@@ -205,4 +215,23 @@ internal class PostgreSQLDomainEventStorage<TEventBase>(
     await foreach (var domainEvent in domainEventList.WithCancellation(cancellationToken).ConfigureAwait(false))
       yield return domainEvent;
   }
+
+  [LoggerMessage(
+    LogLevel.Error,
+    Message = "Failure in applying updates to storage for events of type {StreamType}, stream-id {StreamId} and expected version {ExpectedVersion}: insert only {InsertedCount} instead of {ExpectedCount}"
+  )]
+  internal static partial void LogInsertCountError(
+    ILogger logger,
+    string streamType,
+    Guid streamId,
+    int expectedVersion,
+    int insertedCount,
+    int expectedCount
+  );
+
+  [LoggerMessage(
+    LogLevel.Error,
+    Message = "Failure in applying updates to storage for events of type {StreamType}, stream-id {StreamId} and expected version {ExpectedVersion}"
+  )]
+  internal static partial void LogInsertError(ILogger logger, Exception ex, string streamType, Guid streamId, int expectedVersion);
 }
