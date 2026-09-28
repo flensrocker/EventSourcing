@@ -21,6 +21,17 @@ public static class EntityFrameworkCoreExtensions
       where TDbContext : DbContext
       where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
       where TEventBase : class => services.AddPersistentProjection<TProjection>(projectionTypeName, currentVersion);
+
+    public IServiceCollection AddEntityFrameworkCoreStrongConsistentProjection<TEventBase, TDbContext, TProjection>()
+      where TEventBase : class
+      where TDbContext : DbContext
+      where TProjection : class, IDbStrongConsistentProjection<TEventBase, TDbContext>
+    {
+      services.AddScoped<TProjection>();
+      services.AddScoped<IDbStrongConsistentProjection<TEventBase, TDbContext>>(sp => sp.GetRequiredService<TProjection>());
+
+      return services;
+    }
   }
 
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
@@ -28,7 +39,7 @@ public static class EntityFrameworkCoreExtensions
     IDomainEventStorage<TEventBase> eventStore,
     IEnumerable<DomainEvent> domainEvents,
     TEntity? projection,
-    PersistentProjectionOptions projectionOptions,
+    string projectionTypeName,
     ILogger logger
   )
     where TDbContext : DbContext
@@ -39,8 +50,11 @@ public static class EntityFrameworkCoreExtensions
     if (firstEvent is null)
       return projection;
 
+    var lastEvent = domainEvents.Last();
+
     var entityId = firstEvent.Metadata.StreamId;
-    var expectedVersion = firstEvent.Metadata.StreamVersion - 1;
+    var firstExpectedVersion = firstEvent.Metadata.StreamVersion - 1;
+    var lastExpectedVersion = lastEvent.Metadata.StreamVersion - 1;
 
     try
     {
@@ -50,7 +64,7 @@ public static class EntityFrameworkCoreExtensions
         .Where(TEntity.GetWhereId(entityId))
         .FirstOrDefaultAsync()
         .ConfigureAwait(false);
-      if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > expectedVersion)
+      if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > lastExpectedVersion)
         return projection;
 
       var addToDbContext = false;
@@ -62,28 +76,28 @@ public static class EntityFrameworkCoreExtensions
 
       var entity = dbContext.Attach(projection);
 
-      if (projection is IDomainEventVersionable withVersion && withVersion.Version < expectedVersion)
+      if (projection is IDomainEventVersionable withVersion && withVersion.Version < firstExpectedVersion)
       {
         logger.LogWarning(
           "Entity {ProjectionType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}",
-          projectionOptions.TypeName,
+          projectionTypeName,
           entityId,
-          expectedVersion,
+          firstExpectedVersion,
           withVersion.Version
         );
 
         var fromVersion = Math.Max(1, withVersion.Version);
         var missingEvents = await eventStore
-          .ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default)
+          .ReadEventsFromStorage(entityId, fromVersion, firstExpectedVersion + 1, default)
           .ConfigureAwait(false);
         if (missingEvents is null)
         {
           logger.LogError(
             "Failure in retrieving missing events from storage for type {ProjectionType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}",
-            projectionOptions.TypeName,
+            projectionTypeName,
             entityId,
             fromVersion,
-            expectedVersion
+            firstExpectedVersion
           );
           return projection;
         }
@@ -102,10 +116,11 @@ public static class EntityFrameworkCoreExtensions
     {
       logger.LogError(
         ex,
-        "Failure in applying updates to projection of type {ProjectionType}, entity-id {EntityId} and expected version {ExpectedVersion}",
-        projectionOptions.TypeName,
+        "Failure in applying updates to projection of type {ProjectionType}, entity-id {EntityId} and expected version {FirstExpectedVersion}-{LastExpectedVersion}",
+        projectionTypeName,
         entityId,
-        expectedVersion
+        firstExpectedVersion,
+        lastExpectedVersion
       );
     }
 

@@ -236,9 +236,8 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
       .GetFromJsonAsync<TaskQueryResponse.List>(ToDoRoutes.TaskRoute, ToDoJsonSerializerContext.Default.Options, _cancellationToken)
       .ConfigureAwait(false);
     Assert.IsNotNull(listResult);
-    // TODO how to wait for finished async projection?
-    // Assert.HasCount(1, listResult.ItemList);
-    // Assert.AreEqual(noteResult.TaskId, listResult.ItemList.First().TaskId);
+    Assert.HasCount(1, listResult.ItemList);
+    Assert.AreEqual(noteResult.TaskId, listResult.ItemList.First().TaskId);
 
     // TODO assert stream result
     // var detailsList = await streamTask.ConfigureAwait(false);

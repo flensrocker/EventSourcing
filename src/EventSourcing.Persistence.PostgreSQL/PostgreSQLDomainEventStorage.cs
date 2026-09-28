@@ -11,6 +11,7 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
   PostgreSQLDomainEventStorageOptions options,
   IDbContextFactory<TDbContext> dbContextFactory,
+  IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> strongConsistentProjections,
   ILogger<PostgreSQLDomainEventStorage<TEventBase, TDbContext>> logger
 ) : IDomainEventStorage<TEventBase>
   where TEventBase : class
@@ -18,6 +19,8 @@ internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
 {
   private readonly PostgreSQLDomainEventStorageOptions _options = options;
   private readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;
+  private readonly IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> _strongConsistentProjections =
+    strongConsistentProjections;
   private readonly ILogger<PostgreSQLDomainEventStorage<TEventBase, TDbContext>> _logger = logger;
 
   public string StreamType { get; } = options.JsonOptions.GetTypeName(typeof(TEventBase));
@@ -134,23 +137,41 @@ internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
       insertSql.Append(valueSql);
       insertSql.Append(';');
 
-      await using var dbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
-      await using var transaction = await dbContext.Database.BeginTransactionAsync().ConfigureAwait(false);
+      await using var strategyDbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
-      var insertedCount = await dbContext.Database.ExecuteSqlRawAsync(insertSql.ToString(), parameters).ConfigureAwait(false);
+      return await strategyDbContext
+        .Database.CreateExecutionStrategy()
+        .ExecuteAsync(async () =>
+        {
+          await using var dbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
+          await using var transaction = await dbContext.Database.BeginTransactionAsync().ConfigureAwait(false);
 
-      if (insertedCount != updates.Count)
-      {
-        await transaction.RollbackAsync().ConfigureAwait(false);
-        LogInsertCountError(_logger, StreamType, streamId, expectedVersion, insertedCount, updates.Count);
+          var insertedCount = await dbContext.Database.ExecuteSqlRawAsync(insertSql.ToString(), parameters).ConfigureAwait(false);
 
-        return false;
-      }
+          if (insertedCount != updates.Count)
+          {
+            await transaction.RollbackAsync().ConfigureAwait(false);
+            LogInsertCountError(_logger, StreamType, streamId, expectedVersion, insertedCount, updates.Count);
 
-      // TODO execute strong consistent projections retrieved from DI
+            return false;
+          }
 
-      await transaction.CommitAsync().ConfigureAwait(false);
-      return true;
+          foreach (var strongConsistentProjection in _strongConsistentProjections)
+          {
+            try
+            {
+              await strongConsistentProjection.ApplyEvents(this, dbContext, updates).ConfigureAwait(false);
+            }
+            catch (Exception projectionEx)
+            {
+              LogProjectionUpdateError(_logger, projectionEx, strongConsistentProjection.GetType());
+            }
+          }
+
+          await transaction.CommitAsync().ConfigureAwait(false);
+          return true;
+        })
+        .ConfigureAwait(false);
     }
     catch (Exception ex)
     {
@@ -228,6 +249,9 @@ internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
     int insertedCount,
     int expectedCount
   );
+
+  [LoggerMessage(LogLevel.Error, Message = "Failure in applying strong consistent projection of type {ProjectionType}")]
+  internal static partial void LogProjectionUpdateError(ILogger logger, Exception ex, Type projectionType);
 
   [LoggerMessage(
     LogLevel.Error,

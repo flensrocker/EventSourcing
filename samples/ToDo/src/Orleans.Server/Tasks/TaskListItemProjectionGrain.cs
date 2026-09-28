@@ -4,9 +4,10 @@ using Flensrocker.ToDo.Persistence.PostgreSQL;
 
 namespace Flensrocker.ToDo.Orleans.Server.Tasks;
 
-[ImplicitStreamSubscription(TaskConstants.TaskEvent.Base)]
-public class TaskListItemProjectionGrain : EntityFrameworkCoreProjectionGrain<ToDoDbContext, TaskView.ListItem, TaskEvent>
-{
-  public TaskListItemProjectionGrain()
-    : base(TaskConstants.TaskView.ListItem) { }
-}
+// TODO need another example for async projection, because TaskView.ListItem is handled by a strong consistent projection
+// [ImplicitStreamSubscription(TaskConstants.TaskEvent.Base)]
+// public class TaskListItemProjectionGrain : EntityFrameworkCoreProjectionGrain<ToDoDbContext, TaskView.ListItem, TaskEvent>
+// {
+//   public TaskListItemProjectionGrain()
+//     : base(TaskConstants.TaskView.ListItem) { }
+// }
