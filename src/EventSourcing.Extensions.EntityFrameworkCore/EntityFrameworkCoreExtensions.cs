@@ -26,7 +26,7 @@ public static class EntityFrameworkCoreExtensions
   public static async Task<TEntity?> UpdateProjectionAsync<TDbContext, TEntity, TEventBase>(
     this TDbContext dbContext,
     IDomainEventStorage<TEventBase> eventStore,
-    DomainEvent domainEvent,
+    IEnumerable<DomainEvent> domainEvents,
     TEntity? projection,
     PersistentProjectionOptions projectionOptions,
     ILogger logger
@@ -35,8 +35,12 @@ public static class EntityFrameworkCoreExtensions
     where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
     where TEventBase : class
   {
-    var entityId = domainEvent.Metadata.StreamId;
-    var expectedVersion = domainEvent.Metadata.StreamVersion - 1;
+    var firstEvent = domainEvents.FirstOrDefault();
+    if (firstEvent is null)
+      return projection;
+
+    var entityId = firstEvent.Metadata.StreamId;
+    var expectedVersion = firstEvent.Metadata.StreamVersion - 1;
 
     try
     {
@@ -69,8 +73,10 @@ public static class EntityFrameworkCoreExtensions
         );
 
         var fromVersion = Math.Max(1, withVersion.Version);
-        var itemEvents = await eventStore.ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default).ConfigureAwait(false);
-        if (itemEvents is null)
+        var missingEvents = await eventStore
+          .ReadEventsFromStorage(entityId, fromVersion, expectedVersion + 1, default)
+          .ConfigureAwait(false);
+        if (missingEvents is null)
         {
           logger.LogError(
             "Failure in retrieving missing events from storage for type {ProjectionType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}",
@@ -82,11 +88,10 @@ public static class EntityFrameworkCoreExtensions
           return projection;
         }
 
-        foreach (var itemEvent in itemEvents)
-          projection.Apply(itemEvent);
+        projection.ApplyEvents(missingEvents);
       }
 
-      projection.Apply(domainEvent);
+      projection.ApplyEvents(domainEvents);
 
       if (addToDbContext)
         entity.State = EntityState.Added;

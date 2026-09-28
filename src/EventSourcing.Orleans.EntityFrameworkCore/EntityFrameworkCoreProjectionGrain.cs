@@ -53,7 +53,7 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
     var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
     var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
 
-    _projection = await dbContext.UpdateProjectionAsync(eventStore, domainEvent, _projection, _projectionOptions, _logger);
+    _projection = await dbContext.UpdateProjectionAsync(eventStore, [domainEvent], _projection, _projectionOptions, _logger);
 
     _metrics.ProjectionMessagesSaved();
   }
