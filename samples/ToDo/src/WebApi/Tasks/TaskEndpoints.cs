@@ -82,6 +82,22 @@ public static class TaskEndpoints
 
     // endpoints for queries
     builder.MapGet(
+      "dailystats",
+      static async (
+        [FromServices] IViewQuery<TaskQueryRequest.DailyStats, TaskQueryResponse.DailyStats> query,
+        [FromQuery] DateOnly? fromDate,
+        [FromQuery] DateOnly? toDate,
+        CancellationToken cancellationToken
+      ) =>
+      {
+        return await TaskQueryRequest
+          .DailyStats.Create(tenantId: null, userId: null, fromDate: fromDate, toDate: toDate)
+          .Pipe(async request => await query.ExecuteQueryAsync(request, cancellationToken))
+          .ToTypedResult();
+      }
+    );
+
+    builder.MapGet(
       "",
       static async ([FromServices] IViewQuery<TaskQueryRequest.List, TaskQueryResponse.List> query, CancellationToken cancellationToken) =>
       {

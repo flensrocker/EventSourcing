@@ -7,6 +7,10 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL;
 
 public class ToDoDbContext : DbContext
 {
+  public DbSet<TaskView.DailyStats> TaskDailyStats
+  {
+    get => Set<TaskView.DailyStats>();
+  }
   public DbSet<TaskView.ListItem> TaskListItem
   {
     get => Set<TaskView.ListItem>();
@@ -23,6 +27,7 @@ public class ToDoDbContext : DbContext
 
     modelBuilder.HasDefaultSchema(ToDoPostgreSQLPersistenceConstants.SchemaName);
 
+    modelBuilder.ApplyConfiguration(new TaskViewDailyStatsEntityConfiguration());
     modelBuilder.ApplyConfiguration(new TaskViewListItemEntityConfiguration());
   }
 }

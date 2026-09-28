@@ -239,6 +239,8 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.HasCount(1, listResult.ItemList);
     Assert.AreEqual(noteResult.TaskId, listResult.ItemList.First().TaskId);
 
+    // TODO add test for DailyStats query => wait for async projection
+
     // TODO assert stream result
     // var detailsList = await streamTask.ConfigureAwait(false);
     // Assert.HasCount(4, detailsList);

@@ -31,7 +31,7 @@ public abstract partial record TaskQueryResponse
   {
     [GenerateSerializer]
     [Alias(TaskConstants.TaskQueryResponse.List_Item)]
-    public sealed record Item
+    public sealed record ListItem
     {
       [Id(0)]
       public required Guid TaskId { get; init; }
@@ -50,6 +50,6 @@ public abstract partial record TaskQueryResponse
     }
 
     [Id(0)]
-    public required IReadOnlyCollection<Item> ItemList { get; init; }
+    public required IReadOnlyCollection<ListItem> ItemList { get; init; }
   }
 }

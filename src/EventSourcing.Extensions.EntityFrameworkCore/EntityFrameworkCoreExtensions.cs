@@ -61,7 +61,7 @@ public static class EntityFrameworkCoreExtensions
       projection ??= await dbContext
         .Set<TEntity>()
         .AsNoTracking()
-        .Where(TEntity.GetWhereId(entityId))
+        .Where(TEntity.GetWhereId(firstEvent.Metadata))
         .FirstOrDefaultAsync()
         .ConfigureAwait(false);
       if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > lastExpectedVersion)
@@ -172,7 +172,7 @@ public static class EntityFrameworkCoreExtensions
           {
             projection = await dbContext
               .Set<TEntity>()
-              .Where(TEntity.GetWhereId(domainEvent.Metadata.StreamId))
+              .Where(TEntity.GetWhereId(domainEvent.Metadata))
               .FirstOrDefaultAsync(cancellationToken)
               .ConfigureAwait(false);
             if (projection is null)

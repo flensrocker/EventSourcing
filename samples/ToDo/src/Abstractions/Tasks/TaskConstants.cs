@@ -26,12 +26,15 @@ public static class TaskConstants
   public static class TaskQueryRequest
   {
     public const string Base = $"{ToDoConstants.Module}_TaskQueryRequest";
+    public const string DailyStats = $"{Base}_DailyStats";
     public const string List = $"{Base}_List";
   }
 
   public static class TaskQueryResponse
   {
     public const string Base = $"{ToDoConstants.Module}_TaskQueryResponse";
+    public const string DailyStats = $"{Base}_DailyStats";
+    public const string DailyStats_Item = $"{DailyStats}_Item";
     public const string List = $"{Base}_List";
     public const string List_Item = $"{List}_Item";
   }
@@ -39,6 +42,7 @@ public static class TaskConstants
   public static class TaskView
   {
     public const string Base = $"{ToDoConstants.Module}_TaskView";
+    public const string DailyStats = $"{Base}_DailyStats";
     public const string Details = $"{Base}_Details";
     public const string ListItem = $"{Base}_ListItem";
   }

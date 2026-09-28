@@ -62,15 +62,17 @@ public static class DomainResult
       AddError(errorKey, errorMessage);
     }
 
-    public void AddError(string key, string[] messages)
+    public ValidationProblem AddError(string key, string[] messages)
     {
       if (Errors.TryGetValue(key, out var existingMessages))
         Errors = Errors.SetItem(key, existingMessages.Concat(messages).ToArray());
       else
         Errors = Errors.Add(key, messages);
+
+      return this;
     }
 
-    public void AddError(string key, string message) => AddError(key, [message]);
+    public ValidationProblem AddError(string key, string message) => AddError(key, [message]);
   }
 
   public static DomainResult<T> TryCatch<T>(Func<T> operation)

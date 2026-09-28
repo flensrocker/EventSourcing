@@ -21,7 +21,7 @@ internal class ListTasksViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
       .Where(e => e.TenantId == request.TenantId)
       .OrderBy(e => e.Status)
       .ThenByDescending(e => e.CreatedAt)
-      .Select(e => new TaskQueryResponse.List.Item
+      .Select(e => new TaskQueryResponse.List.ListItem
       {
         TaskId = e.TaskId,
         Version = e.Version,

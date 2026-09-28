@@ -18,12 +18,98 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("ToDo")
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.TaskView+ListItem", b =>
+            modelBuilder.Entity("Flensrocker.EventSourcing.Persistence.PostgreSQL.MessageEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("GlobalIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValueSql("nextval('\"EventSourcing\".\"GlobalMessageIndex\"')");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<byte[]>("SpanId")
+                        .HasMaxLength(8)
+                        .HasColumnType("bytea");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("StreamType")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<int>("StreamVersion")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte[]>("TraceId")
+                        .HasMaxLength(16)
+                        .HasColumnType("bytea");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GlobalIndex")
+                        .IsUnique();
+
+                    b.HasIndex("StreamType", "GlobalIndex");
+
+                    b.HasIndex("StreamType", "StreamId", "StreamVersion")
+                        .IsUnique();
+
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("StreamType", "StreamId", "StreamVersion"), new[] { "TenantId" });
+
+                    b.ToTable("Message", "EventSourcing", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.Tasks.TaskView+DailyStats", b =>
+                {
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CountCompleted")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CountDismissed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CountNoted")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Day", "TenantId", "UserId");
+
+                    b.ToTable("TaskDailyStats", "ToDo");
+                });
+
+            modelBuilder.Entity("Flensrocker.ToDo.Abstractions.Tasks.TaskView+ListItem", b =>
                 {
                     b.Property<Guid>("TaskId")
                         .ValueGeneratedOnAdd()

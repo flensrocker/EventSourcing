@@ -33,6 +33,9 @@ Content-Type: application/json
 }
 
 ### Queries
+GET http://{{host}}:{{port}}/api/todo/task/dailystats
+
+###
 GET http://{{host}}:{{port}}/api/todo/task
 
 ### Views

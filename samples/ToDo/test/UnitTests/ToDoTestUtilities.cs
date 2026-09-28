@@ -45,9 +45,9 @@ internal static class ToDoTestUtilities
     Assert.AreEqual(expectedJson.Value, actualJson);
   }
 
-  internal static bool TestWhereId<T>(T item, Guid id)
+  internal static bool TestWhereId<T>(T item, DomainEventMetadata metadata)
     where T : IWhereId<T>
   {
-    return T.GetWhereId(id).Compile().Invoke(item);
+    return T.GetWhereId(metadata).Compile().Invoke(item);
   }
 }
