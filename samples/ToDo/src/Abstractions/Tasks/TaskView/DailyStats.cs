@@ -12,14 +12,11 @@ public abstract partial record TaskView
   {
     public const int ProjectionVersion = 1;
 
-    public static (DateOnly Day, Guid TenantId, Guid UserId) GetKey(DomainEventMetadata metadata)
+    public static (DateOnly Day, Guid? TenantId, Guid? UserId) GetKey(DomainEventMetadata metadata)
     {
       // for simplicity timezones don't matter in this statistic
       (var day, _, _) = metadata.CreatedAt;
-      // TenantId and UserId will be part of the primary key and therefore cannot be null
-      // This is a bit leaking implementation details from the infrastructure into the domain
-      // TODO TECHNICAL DEBT
-      return (day, metadata.TenantId ?? Guid.Empty, metadata.CreatedByUserId ?? Guid.Empty);
+      return (day, metadata.TenantId, metadata.CreatedByUserId);
     }
 
     static Expression<Func<DailyStats, bool>> IWhereKey<DailyStats>.GetWhereKey(DomainEventMetadata metadata)
@@ -34,11 +31,11 @@ public abstract partial record TaskView
 
     [Id(1)]
     [JsonInclude]
-    public Guid TenantId { get; internal set; }
+    public Guid? TenantId { get; internal set; }
 
     [Id(2)]
     [JsonInclude]
-    public Guid UserId { get; internal set; }
+    public Guid? UserId { get; internal set; }
 
     [Id(3)]
     [JsonInclude]

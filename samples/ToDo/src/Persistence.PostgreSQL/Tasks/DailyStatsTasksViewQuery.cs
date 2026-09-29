@@ -21,8 +21,8 @@ internal class DailyStatsTasksViewQuery(IDbContextFactory<ToDoDbContext> dbConte
       .Where(e =>
         (!request.FromDate.HasValue || e.Day >= request.FromDate.Value)
         && (!request.ToDate.HasValue || e.Day <= request.ToDate.Value)
-        && (request.TenantId.HasValue && e.TenantId == request.TenantId.Value || !request.TenantId.HasValue && e.TenantId == Guid.Empty)
-        && (request.UserId.HasValue && e.UserId == request.UserId.Value || !request.UserId.HasValue && e.UserId == Guid.Empty)
+        && e.TenantId == request.TenantId
+        && e.UserId == request.UserId
       )
       .OrderBy(e => e.Day)
       .ThenBy(e => e.TenantId)
@@ -30,7 +30,7 @@ internal class DailyStatsTasksViewQuery(IDbContextFactory<ToDoDbContext> dbConte
       .Select(e => new TaskQueryResponse.DailyStats.DailyStatsItem
       {
         Day = e.Day,
-        UserId = e.UserId == Guid.Empty ? null : e.UserId,
+        UserId = e.UserId,
         CountNoted = e.CountNoted,
         CountCompleted = e.CountCompleted,
         CountDismissed = e.CountDismissed,

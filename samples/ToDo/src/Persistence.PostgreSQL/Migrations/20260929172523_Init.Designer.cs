@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
-    [Migration("20260928131701_ToDoDailyStats")]
-    partial class ToDoDailyStats
+    [Migration("20260929172523_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,7 +26,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Flensrocker.EventSourcing.Persistence.PostgreSQL.MessageEntity", b =>
+            modelBuilder.Entity("Flensrocker.EventSourcing.Persistence.EntityFrameworkCore.MessageEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -89,13 +89,8 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 
             modelBuilder.Entity("Flensrocker.ToDo.Abstractions.Tasks.TaskView+DailyStats", b =>
                 {
-                    b.Property<DateOnly>("Day")
-                        .HasColumnType("date");
-
-                    b.Property<Guid>("TenantId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<int>("CountCompleted")
@@ -107,7 +102,19 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
                     b.Property<int>("CountNoted")
                         .HasColumnType("integer");
 
-                    b.HasKey("Day", "TenantId", "UserId");
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Day", "TenantId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("TaskDailyStats", "ToDo");
                 });

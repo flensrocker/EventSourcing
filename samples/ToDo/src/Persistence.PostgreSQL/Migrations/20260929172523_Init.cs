@@ -1,16 +1,36 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 {
   /// <inheritdoc />
-  public partial class ToDoInit : Migration
+  public partial class Init : Migration
   {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
       migrationBuilder.EnsureSchema(name: "ToDo");
+
+      migrationBuilder.CreateTable(
+        name: "TaskDailyStats",
+        schema: "ToDo",
+        columns: table => new
+        {
+          Id = table.Column<Guid>(type: "uuid", nullable: false),
+          Day = table.Column<DateOnly>(type: "date", nullable: false),
+          TenantId = table.Column<Guid>(type: "uuid", nullable: true),
+          UserId = table.Column<Guid>(type: "uuid", nullable: true),
+          CountNoted = table.Column<int>(type: "integer", nullable: false),
+          CountCompleted = table.Column<int>(type: "integer", nullable: false),
+          CountDismissed = table.Column<int>(type: "integer", nullable: false),
+        },
+        constraints: table =>
+        {
+          table.PrimaryKey("PK_TaskDailyStats", x => x.Id);
+        }
+      );
 
       migrationBuilder.CreateTable(
         name: "TaskListItem",
@@ -31,6 +51,14 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
       );
 
       migrationBuilder.CreateIndex(
+        name: "IX_TaskDailyStats_Day_TenantId_UserId",
+        schema: "ToDo",
+        table: "TaskDailyStats",
+        columns: new[] { "Day", "TenantId", "UserId" },
+        unique: true
+      );
+
+      migrationBuilder.CreateIndex(
         name: "IX_TaskListItem_TenantId_TaskId",
         schema: "ToDo",
         table: "TaskListItem",
@@ -42,6 +70,8 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
+      migrationBuilder.DropTable(name: "TaskDailyStats", schema: "ToDo");
+
       migrationBuilder.DropTable(name: "TaskListItem", schema: "ToDo");
     }
   }
