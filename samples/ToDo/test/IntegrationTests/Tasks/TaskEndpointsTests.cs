@@ -37,6 +37,32 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   }
 
   [TestMethod]
+  public async Task GivenDismissedTaskWhenCompleteThenReturnBadRequest()
+  {
+    var noteRequest = new NoteDto { Title = "Some Title" };
+    using var noteResponse = await _client
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", noteRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(noteResult);
+
+    var dismissRequest = new DismissDto { Reason = "Some Reason" };
+    using var dismissResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/dismiss", dismissRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.OK, dismissResponse.StatusCode);
+
+    using var testResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
+  }
+
+  [TestMethod]
   [DataRow("2026-09-28", "2026-09-27")]
   public async Task GivenInvalidDismissRequestWhenNoteThenReturnBadRequest(string? fromDate, string? toDate)
   {
@@ -107,6 +133,32 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     var testResult = await testResponse.Content.ReadAsProblemDetailsWithErrorsAsync(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(testResult?.Errors);
     Assert.IsTrue(testResult.Errors.ContainsKey(nameof(DismissDto.Reason)));
+  }
+
+  [TestMethod]
+  public async Task GivenCompletedTaskWhenDismissThenReturnBadRequest()
+  {
+    var noteRequest = new NoteDto { Title = "Some Title" };
+    using var noteResponse = await _client
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", noteRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(noteResult);
+
+    using var completeResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.OK, completeResponse.StatusCode);
+
+    var testRequest = new DismissDto { Reason = "Some Reason" };
+    using var testResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/dismiss", testRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
   }
 
   [TestMethod]
@@ -254,8 +306,8 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
       .GetFromJsonAsync<TaskQueryResponse.List>(ToDoRoutes.TaskRoute, ToDoJsonSerializerContext.Default.Options, _cancellationToken)
       .ConfigureAwait(false);
     Assert.IsNotNull(listResult);
-    Assert.HasCount(1, listResult.ItemList);
-    Assert.AreEqual(noteResult.TaskId, listResult.ItemList.First().TaskId);
+    Assert.IsNotEmpty(listResult.ItemList);
+    CollectionAssert.Contains(listResult.ItemList.Select(item => item.TaskId).ToArray(), noteResult.TaskId);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
