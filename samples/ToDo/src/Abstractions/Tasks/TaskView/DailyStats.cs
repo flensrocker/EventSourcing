@@ -24,10 +24,8 @@ public abstract partial record TaskView
       var (day, tenantId, userId) = GetKey(metadata);
       return item =>
         item.Day == day
-        && item.TenantId.HasValue == tenantId.HasValue
-        && item.TenantId == tenantId
-        && item.UserId.HasValue == userId.HasValue
-        && item.UserId == userId;
+        && (!item.TenantId.HasValue && !tenantId.HasValue || item.TenantId == tenantId)
+        && (!item.UserId.HasValue && !userId.HasValue || item.UserId == userId);
     }
 
     [Id(0)]
