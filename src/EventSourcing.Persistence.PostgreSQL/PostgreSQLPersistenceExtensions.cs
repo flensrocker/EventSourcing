@@ -1,10 +1,9 @@
 ﻿using System.Reflection;
 using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
+using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -12,35 +11,38 @@ using Npgsql.Replication.PgOutput.Messages;
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-public static class PostgreSQLDomainEventStorageExtensions
+public static class PostgreSQLPersistenceExtensions
 {
   extension(IServiceCollection services)
   {
-    public PostgreSQLDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(Func<PostgreSQLDomainEventStorageOptions> configureOptions)
+    public EntityFrameworkCoreDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(
+      Func<EntityFrameworkCoreDomainEventStorageOptions> configureOptions
+    )
     {
-      var storageOptions = configureOptions();
-      services.TryAddSingleton(storageOptions);
-
-      services.AddPooledDbContextFactory<EventSourcingDbContext>(
-        (serviceProvider, dbOptions) =>
+      var builder = services.AddDomainEventStorage<PostgreSQLDomainEventStorageDbProvider>(
+        configureOptions: configureOptions,
+        configureDbOptions: () =>
+          new EventSourcingDbContextOptions
+          {
+            CreateModel = modelBuilder => ApplyPostgreSQLEventSourcingConfiguration(modelBuilder, false),
+          },
+        configureDbContext: (connectionString, dbOptions) =>
         {
-          var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
-          var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
-
           dbOptions.UseNpgsql(
             connectionString,
             npgsqlOptions =>
             {
               npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, Constants.SchemaName);
+              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, EntityFrameworkCoreConstants.SchemaName);
               npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
             }
           );
         }
       );
-      services.AddDbMigration<PostgreSQLDomainEventStorageDbMigration>();
 
-      return new PostgreSQLDomainEventStorageBuilder(services).ForDomainEvents<PersistentProjectionEvent, EventSourcingDbContext>();
+      services.AddDbMigration<PostgreSQLPersistenceDbMigration>();
+
+      return builder;
     }
 
     public IServiceCollection AddPostgreSQLDomainMessageSubscriber(Func<PostgreSQLMessageSubscriberOptions> configureOptions)
@@ -61,44 +63,23 @@ public static class PostgreSQLDomainEventStorageExtensions
     internal void CreatePublication()
     {
       migrationBuilder.Sql(
-        $"CREATE PUBLICATION {Constants.PublicationName} FOR TABLE \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" WITH (publish = 'insert');"
+        $"CREATE PUBLICATION {PostgreSQLPersistenceConstants.PublicationName} FOR TABLE \"{EntityFrameworkCoreConstants.SchemaName}\".\"{EntityFrameworkCoreConstants.MessageTableName}\" WITH (publish = 'insert');"
       );
     }
 
     internal void DropPublication()
     {
-      migrationBuilder.Sql($"DROP PUBLICATION {Constants.PublicationName};");
+      migrationBuilder.Sql($"DROP PUBLICATION {PostgreSQLPersistenceConstants.PublicationName};");
     }
   }
 
   extension(ModelBuilder modelBuilder)
   {
-    public ModelBuilder ApplyEventSourcingConfiguration(bool excludeFromMigrations)
+    public ModelBuilder ApplyPostgreSQLEventSourcingConfiguration(bool excludeFromMigrations)
     {
       modelBuilder.ApplyConfiguration(new MessageEntiyConfiguration(modelBuilder, excludeFromMigrations));
       return modelBuilder;
     }
-  }
-
-  internal static DomainEvent ToDomainEvent<TEventBase>(this MessageEntity entity, JsonSerializerOptions? jsonOptions)
-    where TEventBase : class
-  {
-    return new DomainEvent
-    {
-      Metadata = new DomainEventMetadata
-      {
-        EventId = entity.Id,
-        StreamType = entity.StreamType,
-        StreamId = entity.StreamId,
-        StreamVersion = entity.StreamVersion,
-        TenantId = entity.TenantId,
-        CreatedAt = entity.CreatedAt,
-        CreatedByUserId = entity.CreatedByUserId,
-        TraceId = entity.TraceId,
-        SpanId = entity.SpanId,
-      },
-      Payload = JsonSerializer.Deserialize<TEventBase>(entity.PayloadJson, jsonOptions) is TEventBase p ? p : default!,
-    };
   }
 
   internal static async Task<(DomainEventMetadata Metadata, object Payload)?> ToDomainEventAsync(

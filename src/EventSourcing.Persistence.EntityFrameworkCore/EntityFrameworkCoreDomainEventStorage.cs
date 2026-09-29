@@ -1,48 +1,28 @@
 ﻿using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 
-namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
+namespace Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 
-internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
-  PostgreSQLDomainEventStorageOptions options,
+internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>(
+  EntityFrameworkCoreDomainEventStorageOptions options,
+  IDomainEventStorageDbProvider dbProvider,
   IDbContextFactory<TDbContext> dbContextFactory,
   IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> strongConsistentProjections,
-  ILogger<PostgreSQLDomainEventStorage<TEventBase, TDbContext>> logger
+  ILogger<EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>> logger
 ) : IDomainEventStorage<TEventBase>
   where TEventBase : class
   where TDbContext : DbContext
 {
-  private readonly PostgreSQLDomainEventStorageOptions _options = options;
+  private readonly EntityFrameworkCoreDomainEventStorageOptions _options = options;
+  private readonly IDomainEventStorageDbProvider _dbProvider = dbProvider;
   private readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;
   private readonly IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> _strongConsistentProjections =
     strongConsistentProjections;
-  private readonly ILogger<PostgreSQLDomainEventStorage<TEventBase, TDbContext>> _logger = logger;
+  private readonly ILogger<EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>> _logger = logger;
 
   public string StreamType { get; } = options.JsonOptions.GetTypeName(typeof(TEventBase));
-
-  private static readonly string[] _insertColumnList =
-  [
-    nameof(MessageEntity.Id),
-    nameof(MessageEntity.StreamType),
-    nameof(MessageEntity.StreamId),
-    nameof(MessageEntity.StreamVersion),
-    nameof(MessageEntity.TenantId),
-    nameof(MessageEntity.CreatedAt),
-    nameof(MessageEntity.CreatedByUserId),
-    nameof(MessageEntity.TraceId),
-    nameof(MessageEntity.SpanId),
-    nameof(MessageEntity.PayloadJson),
-  ];
-  private static readonly string _insertColumnNameList = string.Join(", ", _insertColumnList.Select(n => $"\"{n}\""));
-
-  private static string GetInsertParameterName(int columnIndex, int valueIndex) => $"@{_insertColumnList[columnIndex]}{valueIndex}";
-
-  private static string GetInsertParameterNameList(int index) => $"({string.Join(", ", _insertColumnList.Select(n => $"@{n}{index}"))})";
 
   async Task<KeyValuePair<int, TState>> IDomainEventStorage<TEventBase>.ReadStateFromStorage<TState>(
     Guid streamId,
@@ -83,59 +63,7 @@ internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
 
     try
     {
-      var parameters = new List<NpgsqlParameter>();
-      var insertSql = new StringBuilder();
-      insertSql.Append($"INSERT INTO \"{Constants.SchemaName}\".\"{Constants.MessageTableName}\" ({_insertColumnNameList}) VALUES ");
-
-      var valueSql = string.Join(
-        ", ",
-        updates.Select(
-          (ev, valueIndex) =>
-          {
-            parameters.AddRange(
-              new NpgsqlParameter(GetInsertParameterName(0, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid) { Value = ev.Metadata.EventId },
-              new NpgsqlParameter(GetInsertParameterName(1, valueIndex), NpgsqlTypes.NpgsqlDbType.Varchar)
-              {
-                Value = ev.Metadata.StreamType,
-              },
-              new NpgsqlParameter(GetInsertParameterName(2, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid) { Value = ev.Metadata.StreamId },
-              new NpgsqlParameter(GetInsertParameterName(3, valueIndex), NpgsqlTypes.NpgsqlDbType.Integer)
-              {
-                Value = ev.Metadata.StreamVersion,
-              },
-              new NpgsqlParameter(GetInsertParameterName(4, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid)
-              {
-                Value = ev.Metadata.TenantId ?? (object?)DBNull.Value,
-              },
-              new NpgsqlParameter(GetInsertParameterName(5, valueIndex), NpgsqlTypes.NpgsqlDbType.TimestampTz)
-              {
-                Value = ev.Metadata.CreatedAt,
-              },
-              new NpgsqlParameter(GetInsertParameterName(6, valueIndex), NpgsqlTypes.NpgsqlDbType.Uuid)
-              {
-                Value = ev.Metadata.CreatedByUserId ?? (object?)DBNull.Value,
-              },
-              new NpgsqlParameter(GetInsertParameterName(7, valueIndex), NpgsqlTypes.NpgsqlDbType.Bytea)
-              {
-                Value = ev.Metadata.TraceId ?? (object?)DBNull.Value,
-              },
-              new NpgsqlParameter(GetInsertParameterName(8, valueIndex), NpgsqlTypes.NpgsqlDbType.Bytea)
-              {
-                Value = ev.Metadata.SpanId ?? (object?)DBNull.Value,
-              },
-              new NpgsqlParameter(GetInsertParameterName(9, valueIndex), NpgsqlTypes.NpgsqlDbType.Jsonb)
-              {
-                Value = JsonSerializer.Serialize(ev.Payload, _options.JsonOptions.Options),
-              }
-            );
-
-            return GetInsertParameterNameList(valueIndex);
-          }
-        )
-      );
-
-      insertSql.Append(valueSql);
-      insertSql.Append(';');
+      var insertSql = _dbProvider.GenerateInsertSql(updates, _options.JsonOptions.Options);
 
       await using var strategyDbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
@@ -146,7 +74,9 @@ internal partial class PostgreSQLDomainEventStorage<TEventBase, TDbContext>(
           await using var dbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
           await using var transaction = await dbContext.Database.BeginTransactionAsync().ConfigureAwait(false);
 
-          var insertedCount = await dbContext.Database.ExecuteSqlRawAsync(insertSql.ToString(), parameters).ConfigureAwait(false);
+          var insertedCount = await dbContext
+            .Database.ExecuteSqlRawAsync(insertSql.InsertScript, insertSql.Parameters)
+            .ConfigureAwait(false);
 
           if (insertedCount != updates.Count)
           {

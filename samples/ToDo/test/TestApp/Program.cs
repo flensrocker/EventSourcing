@@ -1,6 +1,7 @@
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
+using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Domain;
@@ -18,7 +19,7 @@ var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOpti
 builder
   .Services.AddFlensrockerEventSourcingCore()
   .AddPostgreSQLDomainEventStorage(() =>
-    new PostgreSQLDomainEventStorageOptions { ConnectionName = "DefaultConnection", JsonOptions = globalJsonOptions }
+    new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = "DefaultConnection", JsonOptions = globalJsonOptions }
   )
   .ForToDoEvents();
 

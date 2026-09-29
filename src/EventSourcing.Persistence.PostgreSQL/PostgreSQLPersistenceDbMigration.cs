@@ -1,16 +1,17 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-internal class PostgreSQLDomainEventStorageDbMigration(
+internal class PostgreSQLPersistenceDbMigration(
   IDbContextFactory<EventSourcingDbContext> dbContextFactory,
-  ILogger<PostgreSQLDomainEventStorageDbMigration> logger
+  ILogger<PostgreSQLPersistenceDbMigration> logger
 ) : IDbMigration
 {
   private readonly IDbContextFactory<EventSourcingDbContext> _dbContextFactory = dbContextFactory;
-  private readonly ILogger<PostgreSQLDomainEventStorageDbMigration> _logger = logger;
+  private readonly ILogger<PostgreSQLPersistenceDbMigration> _logger = logger;
 
   public async Task MigrateAsync()
   {
@@ -24,7 +25,7 @@ internal class PostgreSQLDomainEventStorageDbMigration(
       var createSlot = $"""
         DO $$
         BEGIN
-          SELECT * FROM pg_create_logical_replication_slot('{Constants.PublicationSlotName}', 'pgoutput');
+          SELECT * FROM pg_create_logical_replication_slot('{PostgreSQLPersistenceConstants.PublicationSlotName}', 'pgoutput');
           EXCEPTION WHEN OTHERS THEN NULL;
         END$$;
         """;

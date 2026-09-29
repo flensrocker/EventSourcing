@@ -1,5 +1,6 @@
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
+using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.Measure.Orleans.Abstractions;
 using Flensrocker.Measure.WebApi;
@@ -22,7 +23,7 @@ builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 builder.Services.AddFlensrockerEventSourcingCore();
 builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
-    new PostgreSQLDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions }
+    new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions }
   )
   .ForToDoEvents();
 

@@ -63,12 +63,16 @@ internal partial class PostgreSQLMessageSubscriber(
               await using var conn = new LogicalReplicationConnection(state.ConnectionString);
               await conn.Open(cancellationToken).ConfigureAwait(false);
 
-              var slot = new PgOutputReplicationSlot(Constants.PublicationSlotName);
+              var slot = new PgOutputReplicationSlot(PostgreSQLPersistenceConstants.PublicationSlotName);
 
               await foreach (
                 var message in conn.StartReplication(
                     slot,
-                    new PgOutputReplicationOptions(Constants.PublicationName, PgOutputProtocolVersion.V4, binary: true),
+                    new PgOutputReplicationOptions(
+                      PostgreSQLPersistenceConstants.PublicationName,
+                      PgOutputProtocolVersion.V4,
+                      binary: true
+                    ),
                     cancellationToken
                   )
                   .ConfigureAwait(false)

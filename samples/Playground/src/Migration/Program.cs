@@ -1,4 +1,5 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.ToDo.Abstractions;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
@@ -16,7 +17,7 @@ builder.Services.AddFlensrockerEventSourcingCore();
 builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
   {
-    return new PostgreSQLDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions };
+    return new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions };
   })
   .ForToDoEvents();
 

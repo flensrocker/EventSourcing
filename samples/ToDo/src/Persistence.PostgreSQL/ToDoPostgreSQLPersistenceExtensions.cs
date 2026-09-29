@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
-using Flensrocker.EventSourcing.Persistence.PostgreSQL;
+using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.ToDo.Abstractions.Tasks;
 using Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -58,9 +58,9 @@ public static class ToDoPostgreSQLPersistenceExtensions
     }
   }
 
-  extension(PostgreSQLDomainEventStorageBuilder builder)
+  extension(EntityFrameworkCoreDomainEventStorageBuilder builder)
   {
-    public PostgreSQLDomainEventStorageBuilder ForToDoEvents()
+    public EntityFrameworkCoreDomainEventStorageBuilder ForToDoEvents()
     {
       return builder.ForDomainEvents<TaskEvent, ToDoDbContext>();
     }

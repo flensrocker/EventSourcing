@@ -23,7 +23,7 @@ public class ToDoDbContext : DbContext
   {
     // NOTE BEST PRACTICE
     // This is only needed if you implement strong consistent projections on your DbContext
-    modelBuilder.ApplyEventSourcingConfiguration(excludeFromMigrations: true);
+    modelBuilder.ApplyPostgreSQLEventSourcingConfiguration(excludeFromMigrations: true);
 
     modelBuilder.HasDefaultSchema(ToDoPostgreSQLPersistenceConstants.SchemaName);
 
