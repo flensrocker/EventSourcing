@@ -1,5 +1,4 @@
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
@@ -14,6 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Build JsonSerializerOptions for all relevant parts of the application
 var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions();
+
+// Register the migration service as early as possible so it runs before all other hosted services
+builder.Services.AddHostedService<MigrationService>();
 
 // Activate core event sourcing services and PostgreSQL storage for "ToDo" events
 builder
@@ -69,20 +71,6 @@ builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 });
 
 using var app = builder.Build();
-
-// Create and migrate database on startup for easier setup
-await using (var migrationScope = app.Services.CreateAsyncScope())
-{
-  var logger = app.Services.GetRequiredService<ILogger<Program>>();
-
-  logger.LogInformation("Starting Migrations");
-  await migrationScope.ServiceProvider.RunDbMigrationsAsync();
-  logger.LogInformation("Finished Migrations");
-
-  logger.LogInformation("Starting Rebuilds");
-  await migrationScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync();
-  logger.LogInformation("Finished Rebuilds");
-}
 
 // Map the "ToDo" endpoints for the integration tests
 app.MapToDo();
