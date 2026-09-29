@@ -13,6 +13,11 @@
                 <Attribute>^System\.Diagnostics\.CodeAnalysis\.ExcludeFromCodeCoverageAttribute$</Attribute>
               </Exclude>
             </Attributes>
+            <Sources>
+              <Exclude>
+                <Source>.*\\Migrations\\.*\.cs</Source>
+              </Exclude>
+            </Sources>
           </CodeCoverage>
         </Configuration>
       </DataCollector>

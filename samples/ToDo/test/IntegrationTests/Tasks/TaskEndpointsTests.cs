@@ -203,8 +203,6 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.HasCount(1, listResult.ItemList);
     Assert.AreEqual(noteResult.TaskId, listResult.ItemList.First().TaskId);
 
-    // TODO add test for DailyStats query => wait for async projection
-
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
@@ -299,5 +297,14 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.HasCount(2, detailsList);
     Assert.AreEqual(1, detailsList[0].Version);
     Assert.AreEqual(2, detailsList[1].Version);
+
+    // when multiple TaskView.Details got streamed, the async projection is hopefully processed
+    var dailyStatsRequest = TaskQueryRequest.DailyStats.Create(tenantId: null, userId: null, fromDate: null, toDate: null);
+    var dailyStatsResult = await _client
+      .GetFromJsonAsync<TaskQueryResponse.DailyStats>($"{ToDoRoutes.TaskRoute}/dailystats", ToDoJsonSerializerContext.Default.Options, _cancellationToken)
+      .ConfigureAwait(false);
+    Assert.IsNotNull(dailyStatsResult);
+    Assert.IsNotEmpty(dailyStatsResult.ItemList);
+    Assert.IsGreaterThan(0, dailyStatsResult.ItemList.First().CountNoted);
   }
 }
