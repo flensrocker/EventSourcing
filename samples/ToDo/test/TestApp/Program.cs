@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
@@ -44,7 +45,10 @@ builder
 builder.UseOrleans(siloBuilder =>
 {
   // Real apps should use a dedicated storage provider for clustering like Redis/Garnet, Azure Tables etc.
-  siloBuilder.UseLocalhostClustering();
+  // The TestApp generates random ports so multiple instances can run in parallel
+  var siloPort = RandomNumberGenerator.GetInt32(11000, 12000);
+  var gatewayPort = RandomNumberGenerator.GetInt32(30000, 31000);
+  siloBuilder.UseLocalhostClustering(siloPort, gatewayPort);
 
   // Implicit subscription don't need persistent storage
   // The explicit subscriptions used in this example don't need to survive grain activiation
