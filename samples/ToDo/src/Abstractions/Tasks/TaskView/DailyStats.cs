@@ -22,30 +22,39 @@ public abstract partial record TaskView
     static Expression<Func<DailyStats, bool>> IWhereKey<DailyStats>.GetWhereKey(DomainEventMetadata metadata)
     {
       var (day, tenantId, userId) = GetKey(metadata);
-      return item => item.Day == day && item.TenantId == tenantId && item.UserId == userId;
+      return item =>
+        item.Day == day
+        && item.TenantId.HasValue == tenantId.HasValue
+        && item.TenantId == tenantId
+        && item.UserId.HasValue == userId.HasValue
+        && item.UserId == userId;
     }
 
     [Id(0)]
     [JsonInclude]
-    public DateOnly Day { get; internal set; }
+    public Guid DailyStatsId { get; internal set; }
 
     [Id(1)]
     [JsonInclude]
-    public Guid? TenantId { get; internal set; }
+    public DateOnly Day { get; internal set; }
 
     [Id(2)]
     [JsonInclude]
-    public Guid? UserId { get; internal set; }
+    public Guid? TenantId { get; internal set; }
 
     [Id(3)]
     [JsonInclude]
-    public int CountNoted { get; internal set; }
+    public Guid? UserId { get; internal set; }
 
     [Id(4)]
     [JsonInclude]
-    public int CountCompleted { get; internal set; }
+    public int CountNoted { get; internal set; }
 
     [Id(5)]
+    [JsonInclude]
+    public int CountCompleted { get; internal set; }
+
+    [Id(6)]
     [JsonInclude]
     public int CountDismissed { get; internal set; }
 

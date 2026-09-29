@@ -6,13 +6,11 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 
 internal class TaskViewDailyStatsEntityConfiguration : IEntityTypeConfiguration<TaskView.DailyStats>
 {
-  private const string _idColumn = "Id";
-
   public void Configure(EntityTypeBuilder<TaskView.DailyStats> builder)
   {
     builder.ToTable(ToDoPostgreSQLPersistenceConstants.TaskDailyStatsTableName, ToDoPostgreSQLPersistenceConstants.SchemaName);
 
-    builder.Property<Guid>(_idColumn).IsRequired();
+    builder.Property(e => e.DailyStatsId).IsRequired();
     builder.Property(e => e.Day);
     builder.Property(e => e.TenantId);
     builder.Property(e => e.UserId);
@@ -20,7 +18,7 @@ internal class TaskViewDailyStatsEntityConfiguration : IEntityTypeConfiguration<
     builder.Property(e => e.CountCompleted);
     builder.Property(e => e.CountDismissed);
 
-    builder.HasKey(_idColumn);
+    builder.HasKey(e => e.DailyStatsId);
     builder
       .HasIndex(e => new
       {

@@ -67,11 +67,11 @@ public static class EntityFrameworkCoreExtensions
       if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > lastExpectedVersion)
         return projection;
 
-      var addToDbContext = false;
+      var entityState = EntityState.Modified;
       if (projection is null)
       {
         projection = new();
-        addToDbContext = true;
+        entityState = EntityState.Added;
       }
 
       var entity = dbContext.Attach(projection);
@@ -107,9 +107,7 @@ public static class EntityFrameworkCoreExtensions
 
       projection.ApplyEvents(domainEvents);
 
-      if (addToDbContext)
-        entity.State = EntityState.Added;
-
+      entity.State = entityState;
       await dbContext.SaveChangesAsync().ConfigureAwait(false);
     }
     catch (Exception ex)

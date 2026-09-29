@@ -18,7 +18,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
         schema: "ToDo",
         columns: table => new
         {
-          Id = table.Column<Guid>(type: "uuid", nullable: false),
+          DailyStatsId = table.Column<Guid>(type: "uuid", nullable: false),
           Day = table.Column<DateOnly>(type: "date", nullable: false),
           TenantId = table.Column<Guid>(type: "uuid", nullable: true),
           UserId = table.Column<Guid>(type: "uuid", nullable: true),
@@ -28,7 +28,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
         },
         constraints: table =>
         {
-          table.PrimaryKey("PK_TaskDailyStats", x => x.Id);
+          table.PrimaryKey("PK_TaskDailyStats", x => x.DailyStatsId);
         }
       );
 
