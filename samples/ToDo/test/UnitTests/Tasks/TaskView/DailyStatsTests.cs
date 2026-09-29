@@ -9,7 +9,7 @@ public sealed class DailyStatsTests
   private readonly TimeProvider _timeProvider = new FakeTimeProvider();
 
   [TestMethod]
-  public void GivenCompletedEventThenReturnViewWithCountCompleted1()
+  public void GivenCompletedEventThenReturnViewWithCountCompletedIncremented()
   {
     var tenantId = Guid.CreateVersion7();
     var userId = Guid.CreateVersion7();
@@ -33,7 +33,7 @@ public sealed class DailyStatsTests
   }
 
   [TestMethod]
-  public void GivenDismissedEventThenReturnViewWithCountDismissed1()
+  public void GivenDismissedEventThenReturnViewWithCountDismissedIncremented()
   {
     var tenantId = Guid.CreateVersion7();
     var userId = Guid.CreateVersion7();
@@ -57,7 +57,7 @@ public sealed class DailyStatsTests
   }
 
   [TestMethod]
-  public void GivenNotedEventThenReturnViewWithCountNoted1()
+  public void GivenNotedEventThenReturnViewWithCountNotedIncremented()
   {
     var tenantId = Guid.CreateVersion7();
     var userId = Guid.CreateVersion7();
@@ -82,7 +82,7 @@ public sealed class DailyStatsTests
   }
 
   [TestMethod]
-  public void GivenReopenedEventThenReturnViewWithCountNoted1()
+  public void GivenReopenedEventThenReturnViewWithCountNotedIncremented()
   {
     var tenantId = Guid.CreateVersion7();
     var userId = Guid.CreateVersion7();
