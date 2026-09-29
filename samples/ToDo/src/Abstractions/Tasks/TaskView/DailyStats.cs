@@ -8,11 +8,11 @@ public abstract partial record TaskView
 {
   [GenerateSerializer]
   [Alias(TaskConstants.TaskView.DailyStats)]
-  public sealed record DailyStats : TaskView, ITaskEventProjectable, IWhereId<DailyStats>
+  public sealed record DailyStats : TaskView, ITaskEventProjectable, IWhereKey<DailyStats>
   {
     public const int ProjectionVersion = 1;
 
-    public static (DateOnly Day, Guid TenantId, Guid UserId) GetIndex(DomainEventMetadata metadata)
+    public static (DateOnly Day, Guid TenantId, Guid UserId) GetKey(DomainEventMetadata metadata)
     {
       // for simplicity timezones don't matter in this statistic
       (var day, _, _) = metadata.CreatedAt;
@@ -22,9 +22,9 @@ public abstract partial record TaskView
       return (day, metadata.TenantId ?? Guid.Empty, metadata.CreatedByUserId ?? Guid.Empty);
     }
 
-    static Expression<Func<DailyStats, bool>> IWhereId<DailyStats>.GetWhereId(DomainEventMetadata metadata)
+    static Expression<Func<DailyStats, bool>> IWhereKey<DailyStats>.GetWhereKey(DomainEventMetadata metadata)
     {
-      var (day, tenantId, userId) = GetIndex(metadata);
+      var (day, tenantId, userId) = GetKey(metadata);
       return item => item.Day == day && item.TenantId == tenantId && item.UserId == userId;
     }
 
@@ -75,7 +75,7 @@ public abstract partial record TaskView
 
     public void Apply(DomainEvent @event)
     {
-      (Day, TenantId, UserId) = GetIndex(@event.Metadata);
+      (Day, TenantId, UserId) = GetKey(@event.Metadata);
 
       ((ITaskEventProjectable)this).ApplyTaskEvent(@event);
     }

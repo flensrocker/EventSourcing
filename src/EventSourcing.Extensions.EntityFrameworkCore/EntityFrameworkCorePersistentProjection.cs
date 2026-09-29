@@ -12,7 +12,7 @@ public abstract class EntityFrameworkCorePersistentProjection<TDbContext, TEntit
   PersistentProjectionOptions projectionOptions
 ) : IPersistentProjection
   where TDbContext : DbContext
-  where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
+  where TEntity : class, IDomainEventProjectable, IWhereKey<TEntity>, new()
   where TEventBase : class
 {
   private readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;

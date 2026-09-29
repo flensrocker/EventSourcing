@@ -19,7 +19,7 @@ public static class EntityFrameworkCoreExtensions
     )
       where TProjection : EntityFrameworkCorePersistentProjection<TDbContext, TEntity, TEventBase>
       where TDbContext : DbContext
-      where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
+      where TEntity : class, IDomainEventProjectable, IWhereKey<TEntity>, new()
       where TEventBase : class => services.AddPersistentProjection<TProjection>(projectionTypeName, currentVersion);
 
     public IServiceCollection AddEntityFrameworkCoreStrongConsistentProjection<TEventBase, TDbContext, TProjection>()
@@ -43,7 +43,7 @@ public static class EntityFrameworkCoreExtensions
     ILogger logger
   )
     where TDbContext : DbContext
-    where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
+    where TEntity : class, IDomainEventProjectable, IWhereKey<TEntity>, new()
     where TEventBase : class
   {
     var firstEvent = domainEvents.FirstOrDefault();
@@ -61,7 +61,7 @@ public static class EntityFrameworkCoreExtensions
       projection ??= await dbContext
         .Set<TEntity>()
         .AsNoTracking()
-        .Where(TEntity.GetWhereId(firstEvent.Metadata))
+        .Where(TEntity.GetWhereKey(firstEvent.Metadata))
         .FirstOrDefaultAsync()
         .ConfigureAwait(false);
       if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > lastExpectedVersion)
@@ -135,7 +135,7 @@ public static class EntityFrameworkCoreExtensions
     CancellationToken cancellationToken
   )
     where TDbContext : DbContext
-    where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
+    where TEntity : class, IDomainEventProjectable, IWhereKey<TEntity>, new()
     where TEventBase : class
   {
     var batchSize = 1000;
@@ -172,7 +172,7 @@ public static class EntityFrameworkCoreExtensions
           {
             projection = await dbContext
               .Set<TEntity>()
-              .Where(TEntity.GetWhereId(domainEvent.Metadata))
+              .Where(TEntity.GetWhereKey(domainEvent.Metadata))
               .FirstOrDefaultAsync(cancellationToken)
               .ConfigureAwait(false);
             if (projection is null)

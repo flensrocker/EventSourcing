@@ -8,7 +8,7 @@ public abstract partial record TaskView
 {
   [GenerateSerializer]
   [Alias(TaskConstants.TaskView.ListItem)]
-  public sealed record ListItem : TaskView, IDomainEventVersionable, ITaskEventProjectable, IWhereId<ListItem>
+  public sealed record ListItem : TaskView, IDomainEventVersionable, ITaskEventProjectable, IWhereKey<ListItem>
   {
     public const int ProjectionVersion = 1;
 
@@ -36,7 +36,7 @@ public abstract partial record TaskView
     [JsonInclude]
     public TaskStatus Status { get; internal set; }
 
-    static Expression<Func<ListItem, bool>> IWhereId<ListItem>.GetWhereId(DomainEventMetadata metadata) =>
+    static Expression<Func<ListItem, bool>> IWhereKey<ListItem>.GetWhereKey(DomainEventMetadata metadata) =>
       item => item.TaskId == metadata.StreamId;
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Completed payload)

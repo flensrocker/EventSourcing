@@ -15,7 +15,7 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
     IStreamSubscriptionObserver,
     IAsyncObserver<DomainEvent>
   where TDbContext : DbContext
-  where TEntity : class, IDomainEventProjectable, IWhereId<TEntity>, new()
+  where TEntity : class, IDomainEventProjectable, IWhereKey<TEntity>, new()
   where TEventBase : class
 {
   private readonly OrleansEntityFrameworkCoreProjectionMetrics _metrics;

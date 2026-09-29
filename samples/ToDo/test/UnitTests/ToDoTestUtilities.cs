@@ -46,8 +46,8 @@ internal static class ToDoTestUtilities
   }
 
   internal static bool TestWhereId<T>(T item, DomainEventMetadata metadata)
-    where T : IWhereId<T>
+    where T : IWhereKey<T>
   {
-    return T.GetWhereId(metadata).Compile().Invoke(item);
+    return T.GetWhereKey(metadata).Compile().Invoke(item);
   }
 }
