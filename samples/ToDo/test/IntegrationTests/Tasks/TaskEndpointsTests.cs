@@ -117,42 +117,6 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(expectedVersion, noteResult.Version);
     Assert.AreNotEqual(Guid.Empty, noteResult.TaskId);
 
-    // TODO test streaming
-    // var streamSetupTask = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-    // var streamTask = Task.Factory.StartNew(async () =>
-    // {
-    //   using var streamRequest = new HttpRequestMessage(HttpMethod.Get, $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/stream");
-    //   streamRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
-    //   using var streamResponse = await _client
-    //     .SendAsync(streamRequest, HttpCompletionOption.ResponseHeadersRead, _cancellationToken)
-    //     .ConfigureAwait(false);
-
-    //   Assert.AreEqual(HttpStatusCode.OK, streamResponse.StatusCode);
-    //   await using var stream = await streamResponse.Content.ReadAsStreamAsync(_cancellationToken).ConfigureAwait(false);
-
-    //   var detailsList = new List<TaskView.Details>();
-
-    //   await foreach (
-    //     var sseItem in SseParser
-    //       .Create(stream, (_, data) => JsonSerializer.Deserialize<TaskView.Details>(data, ToDoJsonSerializerContext.Default.Options)!)
-    //       .EnumerateAsync(_cancellationToken)
-    //       .ConfigureAwait(false)
-    //   )
-    //   {
-    //     if (detailsList.Count == 0)
-    //       streamSetupTask.SetResult();
-
-    //     detailsList.Add(sseItem.Data);
-
-    //     if (sseItem.Data.Version == 4)
-    //       break;
-    //   }
-
-    //   return detailsList;
-    // }, TaskCreationOptions.RunContinuationsAsynchronously);
-    // await streamSetupTask.Task.ConfigureAwait(false);
-
     var dismissRequest = new DismissDto { Reason = "Some Reason" };
     using var dismissResponse = await _client
       .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/dismiss", dismissRequest, _cancellationToken)
@@ -241,10 +205,6 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
     // TODO add test for DailyStats query => wait for async projection
 
-    // TODO assert stream result
-    // var detailsList = await streamTask.ConfigureAwait(false);
-    // Assert.HasCount(4, detailsList);
-
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
@@ -258,5 +218,86 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(dismissRequest.Reason, dismissedEvent.Reason);
     Assert.IsInstanceOfType<TaskEvent.Reopened>(taskEventList[2].Payload);
     Assert.IsInstanceOfType<TaskEvent.Completed>(taskEventList[3].Payload);
+  }
+
+  [TestMethod]
+  public async Task GivenStreamRequestThenReturnServerSentEvents()
+  {
+    var expectedVersion = 0;
+
+    var noteRequest = new NoteDto { Title = "Some Title" };
+    var noteStartTimestamp = DateTimeOffset.UtcNow;
+    using var noteResponse = await _client
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", noteRequest, _cancellationToken)
+      .ConfigureAwait(false);
+    var noteEndTimestamp = DateTimeOffset.UtcNow;
+    expectedVersion++;
+
+    Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
+    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(noteResult);
+    Assert.AreEqual(expectedVersion, noteResult.Version);
+    Assert.AreNotEqual(Guid.Empty, noteResult.TaskId);
+
+    _testContext.WriteLine("Setup SSE stream");
+    var streamSetupTask = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+    using var streamCancellation = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken);
+    var streamCancellationToken = streamCancellation.Token;
+    var waitForCount = 2;
+    var streamTask = Task.Run(async () =>
+    {
+      using var streamRequest = new HttpRequestMessage(HttpMethod.Get, $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/stream");
+      streamRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+
+      using var streamResponse = await _client
+        .SendAsync(streamRequest, HttpCompletionOption.ResponseHeadersRead, streamCancellationToken)
+        .ConfigureAwait(false);
+
+      Assert.AreEqual(HttpStatusCode.OK, streamResponse.StatusCode);
+      await using var stream = await streamResponse.Content.ReadAsStreamAsync(streamCancellationToken).ConfigureAwait(false);
+      _testContext.WriteLine("SSE stream requested");
+
+      var detailsList = new List<TaskView.Details>();
+
+      await foreach (
+        var sseItem in SseParser
+          .Create(stream, (_, data) => JsonSerializer.Deserialize<TaskView.Details>(data, ToDoJsonSerializerContext.Default.Options)!)
+          .EnumerateAsync(streamCancellationToken)
+          .ConfigureAwait(false)
+      )
+      {
+        _testContext.WriteLine($"Received version {sseItem.Data.Version}");
+
+        if (detailsList.Count == 0)
+        {
+          _testContext.WriteLine("First event received, setup completed");
+          streamSetupTask.SetResult();
+        }
+
+        detailsList.Add(sseItem.Data);
+
+        if (detailsList.Count >= waitForCount)
+          break;
+      }
+
+      return detailsList;
+    });
+    _testContext.WriteLine("Waiting for SSE stream setup");
+    await streamSetupTask.Task.ConfigureAwait(false);
+
+    using var completeResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.OK, completeResponse.StatusCode);
+
+    _testContext.WriteLine("Waiting for stream to finish");
+    var detailsList = await streamTask.ConfigureAwait(false);
+    _testContext.WriteLine("SSE stream finished");
+
+    Assert.HasCount(2, detailsList);
+    Assert.AreEqual(1, detailsList[0].Version);
+    Assert.AreEqual(2, detailsList[1].Version);
   }
 }
