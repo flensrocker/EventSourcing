@@ -1,12 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
-using Flensrocker.EventSourcing.Orleans.Server;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans.Streams;
 
-namespace Flensrocker.ToDo.Orleans.Server;
+namespace Flensrocker.EventSourcing.Orleans.Server;
 
 public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection>
   : Grain,
