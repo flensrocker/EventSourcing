@@ -24,6 +24,7 @@ public sealed class DailyStatsTests
     testState.Apply(completedEvent);
 
     (var notedDay, _, _) = completedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, completedEvent.Metadata));
     Assert.AreEqual(notedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
@@ -48,6 +49,7 @@ public sealed class DailyStatsTests
     testState.Apply(dismissedEvent);
 
     (var notedDay, _, _) = dismissedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, dismissedEvent.Metadata));
     Assert.AreEqual(notedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
@@ -73,6 +75,7 @@ public sealed class DailyStatsTests
     testState.Apply(notedEvent);
 
     (var notedDay, _, _) = notedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent.Metadata));
     Assert.AreEqual(notedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
@@ -97,6 +100,7 @@ public sealed class DailyStatsTests
     testState.Apply(reopenedEvent);
 
     (var notedDay, _, _) = reopenedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, reopenedEvent.Metadata));
     Assert.AreEqual(notedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
