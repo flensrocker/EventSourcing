@@ -10,23 +10,16 @@ using Orleans.Streams.Core;
 namespace Flensrocker.ToDo.Orleans.Server.Tasks;
 
 [ImplicitStreamSubscription(TaskConstants.TaskEvent.Base)]
-public class TaskDailyStatsProjectionRouterGrain : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent>
+public class TaskViewDailyStatsRouterGrain : Grain, IGrainWithGuidKey, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent>
 {
-  private readonly ILogger<TaskDailyStatsProjectionRouterGrain> _logger;
-  private IStreamProvider _streamProvider = default!;
+  private readonly ILogger<TaskViewDailyStatsRouterGrain> _logger;
 
-  public TaskDailyStatsProjectionRouterGrain(ILogger<TaskDailyStatsProjectionRouterGrain> logger)
+  public TaskViewDailyStatsRouterGrain(ILogger<TaskViewDailyStatsRouterGrain> logger)
   {
     _logger = logger;
   }
 
-  public override Task OnActivateAsync(CancellationToken cancellationToken)
-  {
-    _streamProvider = this.GetStreamProvider(OrleansConstants.DomainEventStreamProviderName);
-
-    return Task.CompletedTask;
-  }
-
+  // TODO extract stream handling to base class, e.g. DomainEventRouterGrain => how to handle Guid/string keys?
   public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
   {
     var handle = handleFactory.Create<DomainEvent>();
@@ -37,9 +30,8 @@ public class TaskDailyStatsProjectionRouterGrain : Grain, IGrainWithGuidKey, ISt
   {
     var dailyStatsId = TaskView.DailyStats.GetKey(domainEvent.Metadata);
 
-    var streamId = StreamId.Create(TaskConstants.TaskView.DailyStats, dailyStatsId);
-    var stream = _streamProvider.GetStream<DomainEvent>(streamId);
-    await stream.OnNextAsync(domainEvent);
+    var dailyStatsGrain = GrainFactory.GetGrain<IUpdateDomainEventProjectionGrainWithStringKey<TaskView.DailyStats>>(dailyStatsId);
+    await dailyStatsGrain.UpdateProjection(domainEvent);
   }
 
   public Task OnErrorAsync(Exception ex)
@@ -51,11 +43,10 @@ public class TaskDailyStatsProjectionRouterGrain : Grain, IGrainWithGuidKey, ISt
   }
 }
 
-[ImplicitStreamSubscription(TaskConstants.TaskView.DailyStats)]
-public class TaskDailyStatsProjectionGrain
-  : EntityFrameworkCoreProjectionGrain<ToDoDbContext, TaskView.DailyStats, TaskEvent>,
-    IGrainWithStringKey
+public class TaskViewDailyStatsUpdateGrain
+  : EntityFrameworkCoreUpdateProjectionGrain<ToDoDbContext, TaskView.DailyStats, TaskEvent>,
+    IUpdateDomainEventProjectionGrainWithStringKey<TaskView.DailyStats>
 {
-  public TaskDailyStatsProjectionGrain()
+  public TaskViewDailyStatsUpdateGrain()
     : base(TaskConstants.TaskView.DailyStats) { }
 }

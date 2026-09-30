@@ -1,6 +1,7 @@
 ﻿using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
+using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,10 +10,11 @@ using Orleans.Streams.Core;
 
 namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 
-public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TEventBase>
+public abstract class EntityFrameworkCoreUpdateProjectionGrain<TDbContext, TEntity, TEventBase>
   : Grain,
     IStreamSubscriptionObserver,
-    IAsyncObserver<DomainEvent>
+    IAsyncObserver<DomainEvent>,
+    IUpdateDomainEventProjectionGrain<TEntity>
   where TDbContext : DbContext
   where TEntity : class, IDomainEventProjectable, IWhereKey<TEntity>, new()
   where TEventBase : class
@@ -23,7 +25,7 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
 
   private TEntity? _projection;
 
-  protected EntityFrameworkCoreProjectionGrain(string projectionTypeName)
+  protected EntityFrameworkCoreUpdateProjectionGrain(string projectionTypeName)
   {
     _metrics = ServiceProvider.GetRequiredService<OrleansEntityFrameworkCoreProjectionMetrics>();
     _logger = ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
@@ -40,6 +42,23 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
   {
     _metrics.ProjectionMessagesReceived();
 
+    await UpdateProjection(domainEvent);
+
+    _metrics.ProjectionMessagesSaved();
+  }
+
+  public Task OnErrorAsync(Exception ex)
+  {
+    _metrics.ProjectionStreamErrored();
+
+    // TODO add error handling
+    _logger.LogError(ex, "Error from Orleans Stream");
+
+    return Task.CompletedTask;
+  }
+
+  public async Task UpdateProjection(DomainEvent domainEvent)
+  {
     var expectedVersion = domainEvent.Metadata.StreamVersion - 1;
     if (_projection is IDomainEventVersionable versionable && versionable.Version > expectedVersion)
     {
@@ -60,17 +79,5 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
 
         _projection = await dbContext.UpdateProjectionAsync(eventStore, [domainEvent], _projection, _projectionOptions.TypeName, _logger);
       });
-
-    _metrics.ProjectionMessagesSaved();
-  }
-
-  public Task OnErrorAsync(Exception ex)
-  {
-    _metrics.ProjectionStreamErrored();
-
-    // TODO add error handling
-    _logger.LogError(ex, "Error from Orleans Stream");
-
-    return Task.CompletedTask;
   }
 }
