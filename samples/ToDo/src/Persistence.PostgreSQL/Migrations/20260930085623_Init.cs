@@ -18,7 +18,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
         schema: "ToDo",
         columns: table => new
         {
-          DailyStatsId = table.Column<Guid>(type: "uuid", nullable: false),
+          DailyStatsId = table.Column<string>(type: "character varying(72)", maxLength: 72, nullable: false),
           Day = table.Column<DateOnly>(type: "date", nullable: false),
           TenantId = table.Column<Guid>(type: "uuid", nullable: true),
           UserId = table.Column<Guid>(type: "uuid", nullable: true),
@@ -48,14 +48,6 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
         {
           table.PrimaryKey("PK_TaskListItem", x => x.TaskId);
         }
-      );
-
-      migrationBuilder.CreateIndex(
-        name: "IX_TaskDailyStats_Day_TenantId_UserId",
-        schema: "ToDo",
-        table: "TaskDailyStats",
-        columns: new[] { "Day", "TenantId", "UserId" },
-        unique: true
       );
 
       migrationBuilder.CreateIndex(

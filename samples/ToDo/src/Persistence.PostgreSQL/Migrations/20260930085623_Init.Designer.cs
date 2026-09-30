@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 {
     [DbContext(typeof(ToDoDbContext))]
-    [Migration("20260929180439_Init")]
+    [Migration("20260930085623_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -89,9 +89,9 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 
             modelBuilder.Entity("Flensrocker.ToDo.Abstractions.Tasks.TaskView+DailyStats", b =>
                 {
-                    b.Property<Guid>("DailyStatsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("DailyStatsId")
+                        .HasMaxLength(72)
+                        .HasColumnType("character varying(72)");
 
                     b.Property<int>("CountCompleted")
                         .HasColumnType("integer");
@@ -112,9 +112,6 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("DailyStatsId");
-
-                    b.HasIndex("Day", "TenantId", "UserId")
-                        .IsUnique();
 
                     b.ToTable("TaskDailyStats", "ToDo");
                 });

@@ -10,7 +10,7 @@ internal class TaskViewDailyStatsEntityConfiguration : IEntityTypeConfiguration<
   {
     builder.ToTable(ToDoPostgreSQLPersistenceConstants.TaskDailyStatsTableName, ToDoPostgreSQLPersistenceConstants.SchemaName);
 
-    builder.Property(e => e.DailyStatsId).IsRequired();
+    builder.Property(e => e.DailyStatsId).HasMaxLength(72).IsRequired();
     builder.Property(e => e.Day);
     builder.Property(e => e.TenantId);
     builder.Property(e => e.UserId);
@@ -19,13 +19,5 @@ internal class TaskViewDailyStatsEntityConfiguration : IEntityTypeConfiguration<
     builder.Property(e => e.CountDismissed);
 
     builder.HasKey(e => e.DailyStatsId);
-    builder
-      .HasIndex(e => new
-      {
-        e.Day,
-        e.TenantId,
-        e.UserId,
-      })
-      .IsUnique();
   }
 }

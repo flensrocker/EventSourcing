@@ -12,25 +12,34 @@ public abstract partial record TaskView
   {
     public const int ProjectionVersion = 1;
 
-    public static (DateOnly Day, Guid? TenantId, Guid? UserId) GetKey(DomainEventMetadata metadata)
+    private const string _nullIdKeyPart = "________________________________";
+
+    private static string ToKeyPart(Guid? id)
+    {
+      return id.HasValue ? id.Value.ToString("N") : _nullIdKeyPart;
+    }
+
+    private static string ToKeyPart(DateOnly day)
+    {
+      return day.ToString("yyyyMMdd");
+    }
+
+    public static string GetKey(DomainEventMetadata metadata)
     {
       // for simplicity timezones don't matter in this statistic
       (var day, _, _) = metadata.CreatedAt;
-      return (day, metadata.TenantId, metadata.CreatedByUserId);
+      return $"{ToKeyPart(day)}{ToKeyPart(metadata.TenantId)}{ToKeyPart(metadata.CreatedByUserId)}";
     }
 
     static Expression<Func<DailyStats, bool>> IWhereKey<DailyStats>.GetWhereKey(DomainEventMetadata metadata)
     {
-      var (day, tenantId, userId) = GetKey(metadata);
-      return item =>
-        item.Day == day
-        && (!item.TenantId.HasValue && !tenantId.HasValue || item.TenantId == tenantId)
-        && (!item.UserId.HasValue && !userId.HasValue || item.UserId == userId);
+      var dailyStatsId = GetKey(metadata);
+      return item => item.DailyStatsId == dailyStatsId;
     }
 
     [Id(0)]
     [JsonInclude]
-    public Guid DailyStatsId { get; internal set; }
+    public string DailyStatsId { get; internal set; } = "";
 
     [Id(1)]
     [JsonInclude]
@@ -79,7 +88,10 @@ public abstract partial record TaskView
 
     public void Apply(DomainEvent @event)
     {
-      (Day, TenantId, UserId) = GetKey(@event.Metadata);
+      DailyStatsId = GetKey(@event.Metadata);
+      (Day, _, _) = @event.Metadata.CreatedAt;
+      TenantId = @event.Metadata.TenantId;
+      UserId = @event.Metadata.CreatedByUserId;
 
       ((ITaskEventProjectable)this).ApplyTaskEvent(@event);
     }

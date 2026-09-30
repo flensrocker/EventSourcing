@@ -86,9 +86,9 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
 
             modelBuilder.Entity("Flensrocker.ToDo.Abstractions.Tasks.TaskView+DailyStats", b =>
                 {
-                    b.Property<Guid>("DailyStatsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("DailyStatsId")
+                        .HasMaxLength(72)
+                        .HasColumnType("character varying(72)");
 
                     b.Property<int>("CountCompleted")
                         .HasColumnType("integer");
@@ -109,9 +109,6 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("DailyStatsId");
-
-                    b.HasIndex("Day", "TenantId", "UserId")
-                        .IsUnique();
 
                     b.ToTable("TaskDailyStats", "ToDo");
                 });

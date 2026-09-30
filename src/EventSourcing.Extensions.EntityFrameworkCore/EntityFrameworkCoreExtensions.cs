@@ -74,7 +74,7 @@ public static class EntityFrameworkCoreExtensions
         entityState = EntityState.Added;
       }
 
-      var entity = dbContext.Attach(projection);
+      var entityEntry = dbContext.Attach(projection);
 
       if (projection is IDomainEventVersionable withVersion && withVersion.Version < firstExpectedVersion)
       {
@@ -107,7 +107,7 @@ public static class EntityFrameworkCoreExtensions
 
       projection.ApplyEvents(domainEvents);
 
-      entity.State = entityState;
+      entityEntry.State = entityState;
       await dbContext.SaveChangesAsync().ConfigureAwait(false);
     }
     catch (Exception ex)

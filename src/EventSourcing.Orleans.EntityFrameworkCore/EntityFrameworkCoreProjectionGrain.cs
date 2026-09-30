@@ -11,7 +11,6 @@ namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 
 public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TEventBase>
   : Grain,
-    IGrainWithGuidKey,
     IStreamSubscriptionObserver,
     IAsyncObserver<DomainEvent>
   where TDbContext : DbContext
@@ -50,10 +49,17 @@ public abstract class EntityFrameworkCoreProjectionGrain<TDbContext, TEntity, TE
 
     await using var scope = ServiceProvider.CreateAsyncScope();
 
-    var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
-    var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+    var strategyDbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
 
-    _projection = await dbContext.UpdateProjectionAsync(eventStore, [domainEvent], _projection, _projectionOptions.TypeName, _logger);
+    await strategyDbContext
+      .Database.CreateExecutionStrategy()
+      .ExecuteAsync(async () =>
+      {
+        var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
+        var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+
+        _projection = await dbContext.UpdateProjectionAsync(eventStore, [domainEvent], _projection, _projectionOptions.TypeName, _logger);
+      });
 
     _metrics.ProjectionMessagesSaved();
   }

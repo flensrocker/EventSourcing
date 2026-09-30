@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Time.Testing;
-using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskView;
+using SuT = Flensrocker.ToDo.Abstractions.Tasks;
 
 namespace Flensrocker.ToDo.UnitTests.Tasks.TaskView;
 
@@ -7,6 +7,33 @@ namespace Flensrocker.ToDo.UnitTests.Tasks.TaskView;
 public sealed class DailyStatsTests
 {
   private readonly TimeProvider _timeProvider = new FakeTimeProvider();
+
+  [TestMethod]
+  [DataRow("20260930", "", "")]
+  [DataRow("20260930", "f41abcd8-f1ab-4f90-a974-6c56e7f45815", "")]
+  [DataRow("20260930", "", "ee7dd1da-7509-4646-8b92-9f5567748543")]
+  [DataRow("20260930", "6965f1ce-ef67-4fa7-8fde-442c950f149a", "33a8f44a-b038-479b-89bd-266f3e9be286")]
+  public void IdHasLength72(string dayData, string? tenantIdData, string? userIdData)
+  {
+    var day = DateOnly.ParseExact(dayData, "yyyyMMdd");
+    var tenantId = string.IsNullOrWhiteSpace(tenantIdData) ? (Guid?)null : Guid.Parse(tenantIdData);
+    var userId = string.IsNullOrWhiteSpace(userIdData) ? (Guid?)null : Guid.Parse(userIdData);
+
+    var dailyStatsId = SuT.TaskView.DailyStats.GetKey(
+      new EventSourcing.Abstractions.DomainEventMetadata
+      {
+        EventId = Guid.CreateVersion7(),
+        StreamType = SuT.TaskConstants.TaskEvent.Base,
+        StreamId = Guid.CreateVersion7(),
+        StreamVersion = 1,
+        TenantId = tenantId,
+        CreatedAt = new DateTimeOffset(day, TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay), TimeSpan.Zero),
+        CreatedByUserId = userId,
+      }
+    );
+
+    Assert.AreEqual(72, dailyStatsId.Length);
+  }
 
   [TestMethod]
   public void GivenCompletedEventThenReturnViewWithCountCompletedIncremented()
@@ -17,10 +44,10 @@ public sealed class DailyStatsTests
     var taskId = Guid.CreateVersion7();
     var taskVersion = 1;
 
-    var completedPayload = new Abstractions.Tasks.TaskEvent.Completed { };
+    var completedPayload = new SuT.TaskEvent.Completed { };
     var completedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, completedPayload);
 
-    var testState = new SuT.DailyStats();
+    var testState = new SuT.TaskView.DailyStats();
     testState.Apply(completedEvent);
 
     (var notedDay, _, _) = completedEvent.Metadata.CreatedAt;
@@ -42,10 +69,10 @@ public sealed class DailyStatsTests
     var taskId = Guid.CreateVersion7();
     var taskVersion = 1;
 
-    var dismissedPayload = new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" };
+    var dismissedPayload = new SuT.TaskEvent.Dismissed { Reason = "Some Reason" };
     var dismissedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, dismissedPayload);
 
-    var testState = new SuT.DailyStats();
+    var testState = new SuT.TaskView.DailyStats();
     testState.Apply(dismissedEvent);
 
     (var notedDay, _, _) = dismissedEvent.Metadata.CreatedAt;
@@ -68,10 +95,10 @@ public sealed class DailyStatsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedPayload = new SuT.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
     var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
 
-    var testState = new SuT.DailyStats();
+    var testState = new SuT.TaskView.DailyStats();
     testState.Apply(notedEvent);
 
     (var notedDay, _, _) = notedEvent.Metadata.CreatedAt;
@@ -93,10 +120,10 @@ public sealed class DailyStatsTests
     var taskId = Guid.CreateVersion7();
     var taskVersion = 1;
 
-    var reopenedPayload = new Abstractions.Tasks.TaskEvent.Reopened { };
+    var reopenedPayload = new SuT.TaskEvent.Reopened { };
     var reopenedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, reopenedPayload);
 
-    var testState = new SuT.DailyStats();
+    var testState = new SuT.TaskView.DailyStats();
     testState.Apply(reopenedEvent);
 
     (var notedDay, _, _) = reopenedEvent.Metadata.CreatedAt;
