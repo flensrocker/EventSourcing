@@ -40,6 +40,24 @@ public sealed class DailyStatsTests
   }
 
   [TestMethod]
+  public void GivenTaskEventThenGetKeyReturnTaskId()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+
+    var notedPayload = new SuT.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+
+    var key = ToDoTestUtilities.TestGetKey<SuT.TaskView.DailyStats>(notedEvent);
+    var stringKey = Assert.IsInstanceOfType<string>(key);
+    Assert.AreEqual(72, stringKey.Length);
+  }
+
+  [TestMethod]
   public void GivenCompletedEventThenReturnViewWithCountCompletedIncremented()
   {
     var tenantId = Guid.CreateVersion7();

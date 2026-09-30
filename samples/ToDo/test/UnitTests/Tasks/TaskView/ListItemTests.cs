@@ -9,6 +9,24 @@ public sealed class ListItemTests
   private readonly TimeProvider _timeProvider = new FakeTimeProvider();
 
   [TestMethod]
+  public void GivenTaskEventThenGetKeyReturnTaskId()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+
+    var key = ToDoTestUtilities.TestGetKey<SuT.ListItem>(notedEvent);
+    var guidKey = Assert.IsInstanceOfType<Guid>(key);
+    Assert.AreEqual(taskId, guidKey);
+  }
+
+  [TestMethod]
   public void GivenNotedEventThenReturnViewWithOpenedStatus()
   {
     var tenantId = Guid.CreateVersion7();
