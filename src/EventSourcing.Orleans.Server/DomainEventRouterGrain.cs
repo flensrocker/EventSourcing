@@ -8,6 +8,7 @@ using Orleans.Streams.Core;
 namespace Flensrocker.EventSourcing.Orleans.Server;
 
 public abstract partial class DomainEventRouterGrain<TProjection> : Grain, IStreamSubscriptionObserver, IAsyncObserver<DomainEvent>
+  where TProjection : IWhereKey<TProjection>
 {
   private readonly ILogger _logger;
 
@@ -15,9 +16,6 @@ public abstract partial class DomainEventRouterGrain<TProjection> : Grain, IStre
   {
     _logger = ServiceProvider.GetRequiredService<ILogger<DomainEventRouterGrain<TProjection>>>();
   }
-
-  // TODO change return type to union(string, Guid) in C# 15/.NET 11
-  protected abstract object GetTargetKey(DomainEvent domainEvent);
 
   public async Task OnSubscribed(IStreamSubscriptionHandleFactory handleFactory)
   {
@@ -27,7 +25,7 @@ public abstract partial class DomainEventRouterGrain<TProjection> : Grain, IStre
 
   public async Task OnNextAsync(DomainEvent domainEvent, StreamSequenceToken? token = null)
   {
-    var targetKey = GetTargetKey(domainEvent);
+    var targetKey = TProjection.GetKey(domainEvent);
 
     IUpdateDomainEventProjectionGrain<TProjection>? targetGrain = targetKey switch
     {

@@ -1,5 +1,4 @@
-﻿using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Orleans.Abstractions;
+﻿using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Orleans.Server;
 using Flensrocker.ToDo.Abstractions.Tasks;
@@ -9,22 +8,16 @@ namespace Flensrocker.ToDo.Orleans.Server.Tasks;
 
 // NOTE BEST PRACTICE
 // If you want to aggregate the events of multiple streams into one "database row" (whatever that is):
-// - subscribe to the stream of the domain events,
-// - calculate the target key from that data,
-// - and call the "update grain" with the events.
+// - implement IWhereKey<T> on your projection,
+// - create a grain derived from DomainEventRouterGrain to subscribe to the domain events,
+// - create a grain derived from either IUpdateDomainEventProjectionGrainWithStringKey
+//   or IUpdateDomainEventProjectionGrainWithGuidKey to implement the update of the projection,
+// DomainEventRouterGrain will use IWhereKey<T>.GetKey to get the target key
+// and calls IUpdateDomainEventProjectionGrain.UpdateProjection on the "update grain" with the observed event.
 // With this you avoid concurrent access on that one "database row".
-// The DomainEventRouterGrain helps you, it will call the IUpdateDomainEventProjectionGrain.UpdateProjection method of the target.
-// Just return the target key as string or Guid from the GetTargetKey override.
-// And implement one grain derived from either IUpdateDomainEventProjectionGrainWithStringKey or IUpdateDomainEventProjectionGrainWithGuidKey.
 
 [ImplicitStreamSubscription(TaskConstants.TaskEvent.Base)]
-public class TaskViewDailyStatsRouterGrain : DomainEventRouterGrain<TaskView.DailyStats>, IGrainWithGuidKey
-{
-  protected override object GetTargetKey(DomainEvent domainEvent)
-  {
-    return TaskView.DailyStats.GetKey(domainEvent);
-  }
-}
+public class TaskViewDailyStatsRouterGrain : DomainEventRouterGrain<TaskView.DailyStats>, IGrainWithGuidKey { }
 
 public class TaskViewDailyStatsUpdateGrain
   : EntityFrameworkCoreUpdateProjectionGrain<ToDoDbContext, TaskView.DailyStats, TaskEvent>,
