@@ -36,8 +36,10 @@ public abstract partial record TaskView
     [JsonInclude]
     public TaskStatus Status { get; internal set; }
 
-    static Expression<Func<ListItem, bool>> IWhereKey<ListItem>.GetWhereKey(DomainEventMetadata metadata) =>
-      item => item.TaskId == metadata.StreamId;
+    static object IWhereKey<ListItem>.GetKey(DomainEvent domainEvent) => domainEvent.Metadata.StreamId;
+
+    static Expression<Func<ListItem, bool>> IWhereKey<ListItem>.GetWhereKey(DomainEvent domainEvent) =>
+      item => item.TaskId == domainEvent.Metadata.StreamId;
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Completed payload)
     {

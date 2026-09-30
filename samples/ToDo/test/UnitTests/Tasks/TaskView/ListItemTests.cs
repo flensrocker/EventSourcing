@@ -24,7 +24,7 @@ public sealed class ListItemTests
     var testState = new SuT.ListItem();
     testState.Apply(notedEvent);
 
-    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent.Metadata));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -52,7 +52,7 @@ public sealed class ListItemTests
     testState.Apply(notedEvent);
     testState.Apply(completedEvent);
 
-    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent.Metadata));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -80,7 +80,7 @@ public sealed class ListItemTests
     testState.Apply(notedEvent);
     testState.Apply(dismissedEvent);
 
-    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent.Metadata));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -111,7 +111,7 @@ public sealed class ListItemTests
     testState.Apply(completedEvent);
     testState.Apply(reopenedEvent);
 
-    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent.Metadata));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);
@@ -142,7 +142,7 @@ public sealed class ListItemTests
     testState.Apply(dismissedEvent);
     testState.Apply(reopenedEvent);
 
-    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent.Metadata));
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(tenantId, testState.TenantId);

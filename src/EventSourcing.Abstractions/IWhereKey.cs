@@ -4,5 +4,7 @@ namespace Flensrocker.EventSourcing.Abstractions;
 
 public interface IWhereKey<T>
 {
-  static abstract Expression<Func<T, bool>> GetWhereKey(DomainEventMetadata metadata);
+  static abstract object GetKey(DomainEvent domainEvent);
+
+  static abstract Expression<Func<T, bool>> GetWhereKey(DomainEvent domainEvent);
 }

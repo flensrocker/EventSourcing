@@ -22,7 +22,7 @@ public class TaskViewDailyStatsRouterGrain : DomainEventRouterGrain<TaskView.Dai
 {
   protected override object GetTargetKey(DomainEvent domainEvent)
   {
-    return TaskView.DailyStats.GetKey(domainEvent.Metadata);
+    return TaskView.DailyStats.GetKey(domainEvent);
   }
 }
 
