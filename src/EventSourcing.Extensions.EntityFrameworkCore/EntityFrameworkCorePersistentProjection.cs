@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 
-public abstract class EntityFrameworkCorePersistentProjection<TDbContext, TEntity, TEventBase>(
+public abstract partial class EntityFrameworkCorePersistentProjection<TDbContext, TEntity, TEventBase>(
   IDbContextFactory<TDbContext> dbContextFactory,
   IDomainEventStorage<TEventBase> eventStore,
   ILogger logger,
@@ -22,22 +22,24 @@ public abstract class EntityFrameworkCorePersistentProjection<TDbContext, TEntit
 
   public async Task RebuildAsync()
   {
-    _logger.LogInformation(
-      "Rebuild starting on DbContext {DbContext}, entity {Entity} on events {EventBase}",
-      typeof(TDbContext),
-      typeof(TEntity),
-      typeof(TEventBase)
-    );
+    LogRebuildStarting(_logger, typeof(TDbContext), typeof(TEntity), typeof(TEventBase));
 
     await _dbContextFactory
       .RebuildProjectionAsync<TDbContext, TEntity, TEventBase>(_eventStore, _logger, _projectionOptions, default)
       .ConfigureAwait(false);
 
-    _logger.LogInformation(
-      "Rebuild finished on DbContext {DbContext}, entity {Entity} on events {EventBase}",
-      typeof(TDbContext),
-      typeof(TEntity),
-      typeof(TEventBase)
-    );
+    LogRebuildFinished(_logger, typeof(TDbContext), typeof(TEntity), typeof(TEventBase));
   }
+
+  [LoggerMessage(
+    Level = LogLevel.Information,
+    Message = "Rebuild starting on DbContext {DbContext}, entity {Entity} on events {EventBase}"
+  )]
+  internal static partial void LogRebuildStarting(ILogger logger, Type dbContext, Type entity, Type eventBase);
+
+  [LoggerMessage(
+    Level = LogLevel.Information,
+    Message = "Rebuild finished on DbContext {DbContext}, entity {Entity} on events {EventBase}"
+  )]
+  internal static partial void LogRebuildFinished(ILogger logger, Type dbContext, Type entity, Type eventBase);
 }

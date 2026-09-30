@@ -10,7 +10,7 @@ using Orleans.Streams.Core;
 
 namespace Flensrocker.EventSourcing.Orleans.EntityFrameworkCore;
 
-public abstract class EntityFrameworkCoreUpdateProjectionGrain<TDbContext, TEntity, TEventBase>
+public abstract partial class EntityFrameworkCoreUpdateProjectionGrain<TDbContext, TEntity, TEventBase>
   : Grain,
     IStreamSubscriptionObserver,
     IAsyncObserver<DomainEvent>,
@@ -51,8 +51,7 @@ public abstract class EntityFrameworkCoreUpdateProjectionGrain<TDbContext, TEnti
   {
     _metrics.ProjectionStreamErrored();
 
-    // TODO add error handling
-    _logger.LogError(ex, "Error from Orleans Stream");
+    LogStreamError(_logger, ex);
 
     return Task.CompletedTask;
   }
@@ -80,4 +79,7 @@ public abstract class EntityFrameworkCoreUpdateProjectionGrain<TDbContext, TEnti
         _projection = await dbContext.UpdateProjectionAsync(eventStore, [domainEvent], _projection, _projectionOptions.TypeName, _logger);
       });
   }
+
+  [LoggerMessage(LogLevel.Error, Message = "Unexpected error from the Orleans Stream")]
+  internal static partial void LogStreamError(ILogger logger, Exception ex);
 }

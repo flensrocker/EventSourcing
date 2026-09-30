@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-internal class PostgreSQLPersistenceDbMigration(
+internal partial class PostgreSQLPersistenceDbMigration(
   IDbContextFactory<EventSourcingDbContext> dbContextFactory,
   ILogger<PostgreSQLPersistenceDbMigration> logger
 ) : IDbMigration
@@ -15,7 +15,7 @@ internal class PostgreSQLPersistenceDbMigration(
 
   public async Task MigrateAsync()
   {
-    _logger.LogInformation("Migration starting on DbContext {DbContext}", typeof(EventSourcingDbContext));
+    LogMigrationStarting(_logger, typeof(EventSourcingDbContext));
 
     using (var migrationDbContext = _dbContextFactory.CreateDbContext())
       await migrationDbContext.Database.MigrateAsync().ConfigureAwait(false);
@@ -33,6 +33,12 @@ internal class PostgreSQLPersistenceDbMigration(
       await slotDbContext.Database.ExecuteSqlRawAsync(createSlot).ConfigureAwait(false);
     }
 
-    _logger.LogInformation("Migration finished on DbContext {DbContext}", typeof(EventSourcingDbContext));
+    LogMigrationFinished(_logger, typeof(EventSourcingDbContext));
   }
+
+  [LoggerMessage(Level = LogLevel.Information, Message = "Migration starting on DbContext {DbContext}")]
+  internal static partial void LogMigrationStarting(ILogger logger, Type dbContext);
+
+  [LoggerMessage(Level = LogLevel.Information, Message = "Migration finished on DbContext {DbContext}")]
+  internal static partial void LogMigrationFinished(ILogger logger, Type dbContext);
 }
