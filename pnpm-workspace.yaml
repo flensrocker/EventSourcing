@@ -1,0 +1,14 @@
+packages:
+  - samples/Playground/src/Frontend
+allowBuilds:
+  "@parcel/watcher": true
+  esbuild: true
+  lmdb: true
+  msgpackr-extract: true
+tasks:
+  build:
+    dependsOn:
+      - ^build
+  test:
+    dependsOn:
+      - build

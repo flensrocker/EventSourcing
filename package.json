@@ -1,0 +1,14 @@
+{
+  "name": "@flensrocker/event-sourcing",
+  "version": "0.0.1",
+  "license": "MIT",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.9.1",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.9.1",
+  "type": "module"
+}
