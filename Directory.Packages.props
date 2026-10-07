@@ -3,14 +3,14 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Aspire.Hosting.Docker" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Garnet" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Nats" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.Orleans" Version="13.6.0" />
-    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.0" />
-    <PackageVersion Include="Aspire.NATS.Net" Version="13.6.0" />
-    <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.6.0" />
+    <PackageVersion Include="Aspire.Hosting.Docker" Version="13.6.1" />
+    <PackageVersion Include="Aspire.Hosting.Garnet" Version="13.6.1" />
+    <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.1" />
+    <PackageVersion Include="Aspire.Hosting.Nats" Version="13.6.1" />
+    <PackageVersion Include="Aspire.Hosting.Orleans" Version="13.6.1" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.1" />
+    <PackageVersion Include="Aspire.NATS.Net" Version="13.6.1" />
+    <PackageVersion Include="Aspire.StackExchange.Redis" Version="13.6.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12" />
@@ -19,15 +19,15 @@
     <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.10.0" />
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.10.0" />
-    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Clustering.Redis" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.EventSourcing" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Persistence.AdoNet" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Persistence.Memory" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.3.1" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="10.3.1-alpha.1" />
+    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Clustering.Redis" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.EventSourcing" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Persistence.AdoNet" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Persistence.Memory" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="10.4.0-alpha.1" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
