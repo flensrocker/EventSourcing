@@ -10,5 +10,10 @@
     }
   },
   "packageManager": "pnpm@12.9.1",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "test": "pnpm -r run test"
+  }
 }
