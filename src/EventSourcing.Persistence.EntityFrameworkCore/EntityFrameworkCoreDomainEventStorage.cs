@@ -88,14 +88,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
 
           foreach (var strongConsistentProjection in _strongConsistentProjections)
           {
-            try
-            {
-              await strongConsistentProjection.ApplyEvents(this, dbContext, updates).ConfigureAwait(false);
-            }
-            catch (Exception projectionEx)
-            {
-              LogProjectionUpdateError(_logger, projectionEx, strongConsistentProjection.GetType());
-            }
+            await strongConsistentProjection.ApplyEvents(this, dbContext, updates).ConfigureAwait(false);
           }
 
           await transaction.CommitAsync().ConfigureAwait(false);

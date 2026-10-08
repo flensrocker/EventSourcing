@@ -56,71 +56,57 @@ public static class EntityFrameworkCoreExtensions
     var firstExpectedVersion = firstEvent.Metadata.StreamVersion - 1;
     var lastExpectedVersion = lastEvent.Metadata.StreamVersion - 1;
 
-    try
+    projection ??= await dbContext
+      .Set<TEntity>()
+      .AsNoTracking()
+      .Where(TEntity.GetWhereKey(firstEvent))
+      .FirstOrDefaultAsync()
+      .ConfigureAwait(false);
+    if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > lastExpectedVersion)
+      return projection;
+
+    var entityState = EntityState.Modified;
+    if (projection is null)
     {
-      projection ??= await dbContext
-        .Set<TEntity>()
-        .AsNoTracking()
-        .Where(TEntity.GetWhereKey(firstEvent))
-        .FirstOrDefaultAsync()
-        .ConfigureAwait(false);
-      if (projection is IDomainEventVersionable hasVersion && hasVersion.Version > lastExpectedVersion)
-        return projection;
-
-      var entityState = EntityState.Modified;
-      if (projection is null)
-      {
-        projection = new();
-        entityState = EntityState.Added;
-      }
-
-      var entityEntry = dbContext.Attach(projection);
-
-      if (projection is IDomainEventVersionable withVersion && withVersion.Version < firstExpectedVersion)
-      {
-        logger.LogWarning(
-          "Entity {ProjectionType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}",
-          projectionTypeName,
-          entityId,
-          firstExpectedVersion,
-          withVersion.Version
-        );
-
-        var fromVersion = Math.Max(1, withVersion.Version);
-        var missingEvents = await eventStore
-          .ReadEventsFromStorage(entityId, fromVersion, firstExpectedVersion + 1, default)
-          .ConfigureAwait(false);
-        if (missingEvents is null)
-        {
-          logger.LogError(
-            "Failure in retrieving missing events from storage for type {ProjectionType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}",
-            projectionTypeName,
-            entityId,
-            fromVersion,
-            firstExpectedVersion
-          );
-          return projection;
-        }
-
-        projection.ApplyEvents(missingEvents);
-      }
-
-      projection.ApplyEvents(domainEvents);
-
-      entityEntry.State = entityState;
-      await dbContext.SaveChangesAsync().ConfigureAwait(false);
+      projection = new();
+      entityState = EntityState.Added;
     }
-    catch (Exception ex)
+
+    var entityEntry = dbContext.Attach(projection);
+
+    if (projection is IDomainEventVersionable withVersion && withVersion.Version < firstExpectedVersion)
     {
-      logger.LogError(
-        ex,
-        "Failure in applying updates to projection of type {ProjectionType}, entity-id {EntityId} and expected version {FirstExpectedVersion}-{LastExpectedVersion}",
+      logger.LogWarning(
+        "Entity {ProjectionType}, entity-id {EntityId} is missing some events, expected version {ExpectedVersion}, got version {ActualVersion}",
         projectionTypeName,
         entityId,
         firstExpectedVersion,
-        lastExpectedVersion
+        withVersion.Version
       );
+
+      var fromVersion = Math.Max(1, withVersion.Version);
+      var missingEvents = await eventStore
+        .ReadEventsFromStorage(entityId, fromVersion, firstExpectedVersion + 1, default)
+        .ConfigureAwait(false);
+      if (missingEvents is null)
+      {
+        logger.LogError(
+          "Failure in retrieving missing events from storage for type {ProjectionType}, entity-id {EntityId} and version range {FromVersion} to {ExpectedVersion}",
+          projectionTypeName,
+          entityId,
+          fromVersion,
+          firstExpectedVersion
+        );
+        return projection;
+      }
+
+      projection.ApplyEvents(missingEvents);
     }
+
+    projection.ApplyEvents(domainEvents);
+
+    entityEntry.State = entityState;
+    await dbContext.SaveChangesAsync().ConfigureAwait(false);
 
     return projection;
   }
