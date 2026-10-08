@@ -1,5 +1,6 @@
 packages:
-  - samples/Playground/src/Frontend
+  - "src/EventSourcing.Frontend/*"
+  - "samples/Playground/src/Frontend"
 allowBuilds:
   "@parcel/watcher": true
   esbuild: true
