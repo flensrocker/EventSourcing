@@ -1,5 +1,6 @@
 packages:
   - "src/EventSourcing.Frontend/*"
+  - "samples/ToDo/src/Frontend/*"
   - "samples/Playground/src/Frontend"
 allowBuilds:
   "@parcel/watcher": true

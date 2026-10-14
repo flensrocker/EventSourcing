@@ -5,7 +5,7 @@ import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['**/*.ts'],
     ignores: ['dist'],
     plugins: { eslint },
     extends: [eslint.configs.recommended, tseslint.configs.recommended, tseslint.configs.stylistic],
@@ -15,6 +15,8 @@ export default defineConfig([
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    rules: {
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+    },
   },
-  tseslint.configs.recommended,
 ]);

@@ -195,6 +195,9 @@ importers:
       '@flensrocker/event-sourcing-core':
         specifier: workspace:*
         version: link:../../../../src/EventSourcing.Frontend/Core
+      '@flensrocker/to-do-core':
+        specifier: workspace:*
+        version: link:../../../ToDo/src/Frontend/Core
       rxjs:
         specifier: 7.8.2
         version: 7.8.2
@@ -235,6 +238,28 @@ importers:
       vitest:
         specifier: 5.0.4
         version: 5.0.4(jsdom@30.1.2)(vite@8.3.0(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
+
+  samples/ToDo/src/Frontend/Core:
+    dependencies:
+      '@flensrocker/event-sourcing-core':
+        specifier: workspace:*
+        version: link:../../../../../src/EventSourcing.Frontend/Core
+    devDependencies:
+      '@eslint/js':
+        specifier: 10.0.1
+        version: 10.0.1(eslint@10.12.0(supports-color@8.1.1))
+      eslint:
+        specifier: 10.12.0
+        version: 10.12.0(supports-color@8.1.1)
+      globals:
+        specifier: 17.13.0
+        version: 17.13.0
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      typescript-eslint:
+        specifier: 8.71.2
+        version: 8.71.2(eslint@10.12.0(supports-color@8.1.1))(supports-color@8.1.1)(typescript@6.0.3)
 
   src/EventSourcing.Frontend/Core:
     devDependencies:

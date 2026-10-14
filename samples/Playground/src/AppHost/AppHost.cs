@@ -4,7 +4,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 builder.AddDockerComposeEnvironment("compose");
 
-var garnetClusteringStorage = builder.AddGarnet(ServiceKeys.OrleansClustering).WithOrleansProviderType("Redis")
+// TODO not working anymore?
+//var garnetClusteringStorage = builder.AddGarnet(ServiceKeys.OrleansClustering).WithOrleansProviderType("Redis");
+var garnetClusteringStorage = builder.AddRedis(ServiceKeys.OrleansClustering)
 // We don't need persistent clustering data because we always restart the whole thing and sometimes it tries to connect to the old silo
 //.WithDataVolume("playground-garnet-data")
 ;

@@ -6,6 +6,7 @@ import angular from 'angular-eslint';
 export default defineConfig([
   {
     files: ['**/*.ts'],
+    ignores: ['dist'],
     extends: [eslint.configs.recommended, tseslint.configs.recommended, tseslint.configs.stylistic, angular.configs.tsRecommended],
     processor: angular.processInlineTemplates,
     languageOptions: {
@@ -30,6 +31,7 @@ export default defineConfig([
           style: 'kebab-case',
         },
       ],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     },
   },
   {

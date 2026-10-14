@@ -21,9 +21,8 @@ public static class TaskEndpoints
     public string? Title { get; init; }
   }
 
-  public record NotedDto
+  public record NotedDto : ExecutionResult
   {
-    public required int Version { get; init; }
     public required Guid TaskId { get; init; }
   }
 
