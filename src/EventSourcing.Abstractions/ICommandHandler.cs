@@ -7,8 +7,8 @@ public interface ICommandHandler<TEventBase, TCommandBase, TCommandState>
 }
 
 [GenerateSerializer]
-[Alias(EventSourcingConstants.ExecutionResult.Base)]
-public record ExecutionResult
+[Alias(EventSourcingConstants.CommandResult.Base)]
+public record CommandResult
 {
   [Id(0)]
   public int Version { get; init; }
@@ -19,5 +19,5 @@ public record ExecutionResult
 public interface ICommandHandler<TCommandBase>
 {
   /// <returns>The current version of the state</returns>
-  Task<DomainResult<ExecutionResult>> ExecuteCommand(TCommandBase command);
+  Task<DomainResult<CommandResult>> ExecuteCommand(TCommandBase command);
 }

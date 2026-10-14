@@ -230,7 +230,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     expectedVersion++;
 
     Assert.AreEqual(HttpStatusCode.OK, dismissResponse.StatusCode);
-    var dismissResult = await dismissResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken).ConfigureAwait(false);
+    var dismissResult = await dismissResponse.Content.ReadFromJsonAsync<CommandResult>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(dismissResult);
     Assert.AreEqual(expectedVersion, dismissResult.Version);
 
@@ -241,7 +241,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
     Assert.AreEqual(HttpStatusCode.OK, secondDismissResponse.StatusCode);
     var secondDismissResult = await secondDismissResponse
-      .Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken)
+      .Content.ReadFromJsonAsync<CommandResult>(_cancellationToken)
       .ConfigureAwait(false);
     Assert.IsNotNull(secondDismissResult);
     Assert.AreEqual(expectedVersion, secondDismissResult.Version);
@@ -252,7 +252,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     expectedVersion++;
 
     Assert.AreEqual(HttpStatusCode.OK, reopenResponse.StatusCode);
-    var reopenResult = await reopenResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken).ConfigureAwait(false);
+    var reopenResult = await reopenResponse.Content.ReadFromJsonAsync<CommandResult>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(reopenResult);
     Assert.AreEqual(expectedVersion, reopenResult.Version);
 
@@ -261,9 +261,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, secondReopenResponse.StatusCode);
-    var secondReopenResult = await secondReopenResponse
-      .Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken)
-      .ConfigureAwait(false);
+    var secondReopenResult = await secondReopenResponse.Content.ReadFromJsonAsync<CommandResult>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(secondReopenResult);
     Assert.AreEqual(expectedVersion, secondReopenResult.Version);
 
@@ -273,7 +271,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     expectedVersion++;
 
     Assert.AreEqual(HttpStatusCode.OK, completeResponse.StatusCode);
-    var completeResult = await completeResponse.Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken).ConfigureAwait(false);
+    var completeResult = await completeResponse.Content.ReadFromJsonAsync<CommandResult>(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(completeResult);
     Assert.AreEqual(expectedVersion, completeResult.Version);
 
@@ -283,7 +281,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
     Assert.AreEqual(HttpStatusCode.OK, secondCompleteResponse.StatusCode);
     var secondCompleteResult = await secondCompleteResponse
-      .Content.ReadFromJsonAsync<ExecutionResult>(_cancellationToken)
+      .Content.ReadFromJsonAsync<CommandResult>(_cancellationToken)
       .ConfigureAwait(false);
     Assert.IsNotNull(secondCompleteResult);
     Assert.AreEqual(expectedVersion, secondCompleteResult.Version);

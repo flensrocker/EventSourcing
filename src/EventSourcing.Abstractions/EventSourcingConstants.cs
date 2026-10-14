@@ -22,8 +22,8 @@ public static class EventSourcingConstants
     internal const string Unauthorized = $"{Base}_Unauthorized";
   }
 
-  internal static class ExecutionResult
+  internal static class CommandResult
   {
-    internal const string Base = $"{AliasBase}_ExecutionResult";
+    internal const string Base = $"{AliasBase}_CommandResult";
   }
 }

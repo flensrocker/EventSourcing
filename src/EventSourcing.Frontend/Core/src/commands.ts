@@ -1,3 +1,3 @@
-export type ExecutionResult = Readonly<{
+export type CommandResult = Readonly<{
   Version: number;
 }>;
