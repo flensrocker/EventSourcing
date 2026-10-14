@@ -5,12 +5,9 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc --build",
-    "lint": "eslint src/**",
-    "start": "tsc --build --watch"
-  },
-  "prettier": {
-    "printWidth": 140,
-    "singleQuote": true
+    "start": "tsc --build --watch",
+    "format": "prettier . --write",
+    "lint": "eslint src/**"
   },
   "dependencies": {
     "@flensrocker/event-sourcing-core": "workspace:*"
@@ -19,6 +16,7 @@
     "@eslint/js": "10.0.1",
     "eslint": "10.12.0",
     "globals": "17.13.0",
+    "prettier": "3.9.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2"
   }

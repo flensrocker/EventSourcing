@@ -9,22 +9,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "format": "prettier . --write",
     "lint": "ng lint"
   },
-  "prettier": {
-    "printWidth": 140,
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
-  },
   "private": true,
-  "packageManager": "pnpm@12.0.0+sha512.9e2e3dc3911995868dc94b8175c217c27e95408fa03b4a22749778f2b34f773b77cdd3b39ede8171b22fcd53be6a35342e9fac9948a68ef58df6488ce89a7e67",
   "dependencies": {
     "@angular/cdk": "22.2.2",
     "@angular/common": "22.2.2",
@@ -47,6 +35,7 @@
     "angular-eslint": "22.6.0",
     "eslint": "10.12.0",
     "jsdom": "30.1.2",
+    "prettier": "3.9.10",
     "run-script-os": "1.1.6",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2",
