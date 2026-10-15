@@ -3,3 +3,4 @@
  */
 
 export * from './lib/to-do-angular';
+export * from './lib/tasks/task-client';

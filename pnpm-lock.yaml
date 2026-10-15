@@ -265,6 +265,9 @@ importers:
       '@angular/router':
         specifier: 22.2.2
         version: 22.2.2(@angular/common@22.2.2(@angular/core@22.2.2(@angular/compiler@22.2.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.2(@angular/compiler@22.2.2)(rxjs@7.8.2))(@angular/platform-browser@22.2.2(@angular/common@22.2.2(@angular/core@22.2.2(@angular/compiler@22.2.2)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.2(@angular/compiler@22.2.2)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@flensrocker/event-sourcing-core':
+        specifier: workspace:*
+        version: link:../../../../../src/EventSourcing.Frontend/Core
       '@flensrocker/to-do-core':
         specifier: workspace:*
         version: link:../Core

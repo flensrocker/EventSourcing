@@ -13,7 +13,13 @@
     "composite": true,
     "skipLibCheck": true,
     "paths": {
-      "@flensrocker/to-do-angular": ["./samples/ToDo/src/Frontend/Angular/dist"]
+      "@flensrocker/event-sourcing-core": [
+        "./src/EventSourcing.Frontend/Core/dist"
+      ],
+      "@flensrocker/to-do-angular": [
+        "./samples/ToDo/src/Frontend/Angular/dist"
+      ],
+      "@flensrocker/to-do-core": ["./samples/ToDo/src/Frontend/Core/dist"]
     }
   }
 }
