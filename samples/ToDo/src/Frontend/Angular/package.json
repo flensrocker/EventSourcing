@@ -1,0 +1,42 @@
+{
+  "name": "@flensrocker/to-do-angular",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test --watch=false",
+    "test:watch": "ng test",
+    "format": "prettier . --write",
+    "lint": "ng lint"
+  },
+  "private": true,
+  "packageManager": "pnpm@12.11.2",
+  "dependencies": {
+    "tslib": "2.8.1"
+  },
+  "peerDependencies": {
+    "@angular/common": "22.2.2",
+    "@angular/compiler": "22.2.2",
+    "@angular/core": "22.2.2",
+    "@angular/forms": "22.2.2",
+    "@angular/platform-browser": "22.2.2",
+    "@angular/router": "22.2.2",
+    "@flensrocker/to-do-core": "workspace:*",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@angular/build": "22.2.2",
+    "@angular/cli": "^22.2.2",
+    "@angular/compiler-cli": "22.2.2",
+    "@eslint/js": "10.0.1",
+    "angular-eslint": "22.6.0",
+    "eslint": "10.12.0",
+    "jsdom": "^30.0.0",
+    "ng-packagr": "22.2.2",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.4"
+  }
+}
