@@ -17,7 +17,7 @@
         "./src/EventSourcing.Frontend/Core/dist"
       ],
       "@flensrocker/to-do-angular": [
-        "./samples/ToDo/src/Frontend/Angular/dist"
+        "./samples/ToDo/src/Frontend/Angular/dist/to-do-angular"
       ],
       "@flensrocker/to-do-core": ["./samples/ToDo/src/Frontend/Core/dist"]
     }

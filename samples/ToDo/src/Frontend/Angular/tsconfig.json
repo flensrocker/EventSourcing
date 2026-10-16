@@ -3,9 +3,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "paths": {
-      "@flensrocker/to-do-angular": ["./dist"]
-    },
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
@@ -15,7 +12,10 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+    "paths": {
+      "@flensrocker/to-do-angular": ["./dist/to-do-angular"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -25,10 +25,10 @@
   "files": [],
   "references": [
     {
-      "path": "./tsconfig.lib.json"
+      "path": "./projects/to-do-angular/tsconfig.lib.json"
     },
     {
-      "path": "./tsconfig.spec.json"
+      "path": "./projects/to-do-angular/tsconfig.spec.json"
     }
   ]
 }

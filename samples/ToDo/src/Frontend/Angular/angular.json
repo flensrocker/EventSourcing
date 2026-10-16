@@ -6,20 +6,20 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "@flensrocker/to-do-angular": {
+    "to-do-angular": {
       "projectType": "library",
-      "root": "",
-      "sourceRoot": "src",
+      "root": "projects/to-do-angular",
+      "sourceRoot": "projects/to-do-angular/src",
       "prefix": "to-do",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "tsconfig.lib.prod.json"
+              "tsConfig": "projects/to-do-angular/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "tsconfig.lib.json"
+              "tsConfig": "projects/to-do-angular/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -27,13 +27,13 @@
         "test": {
           "builder": "@angular/build:unit-test",
           "options": {
-            "tsConfig": "tsconfig.spec.json"
+            "tsConfig": "projects/to-do-angular/tsconfig.spec.json"
           }
         },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            "lintFilePatterns": ["projects/**/*.ts", "projects/**/*.html"]
           }
         }
       }
