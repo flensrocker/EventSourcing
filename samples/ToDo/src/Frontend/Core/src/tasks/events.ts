@@ -2,6 +2,7 @@ import { isObjectOfType, WithoutType, WithType, withType } from '@flensrocker/ev
 
 import { TaskEventType } from './constants';
 
+// TODO create validation schema for event types
 export type TaskEvent_Completed = WithType<typeof TaskEventType.Completed>;
 const completed = withType<TaskEvent_Completed>({}, TaskEventType.Completed);
 export const createTaskEventCompleted = () => completed;

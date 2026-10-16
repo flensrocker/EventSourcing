@@ -1,5 +1,6 @@
 import { getToDoTaskRoute, TaskStatus } from './constants';
 
+// TODO create validation schema
 export type TaskView_Details = Readonly<{
   Version: number;
   Title: string;

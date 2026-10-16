@@ -2,6 +2,7 @@ import { CommandResult, isObjectOfType, WithoutType, withType, WithType } from '
 
 import { getToDoTaskRoute, TaskCommandType } from './constants';
 
+// TODO create validation schema for command types
 export type TaskCommand_Complete = WithType<typeof TaskCommandType.Complete>;
 export type TaskCommand_Complete_Response = CommandResult;
 const complete = withType<TaskCommand_Complete>({}, TaskCommandType.Complete);

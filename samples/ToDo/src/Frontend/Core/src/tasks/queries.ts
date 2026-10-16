@@ -1,5 +1,6 @@
 import { getToDoTaskRoute, TaskStatus } from './constants';
 
+// TODO create validation schema for all types
 export type TaskQueryRequest_DailyStats = Readonly<{
   TenantId: string | null;
   UserId: string | null;

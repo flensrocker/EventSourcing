@@ -26,20 +26,26 @@ export class ToDoTaskClient {
   readonly #http = inject(HttpClient);
 
   complete(taskId: string): Observable<TaskCommand_Complete_Response> {
-    return this.#http.put<TaskCommand_Complete_Response>(getTaskCommandCompleteRoute(taskId), createTaskCommandComplete());
+    return this.#http.put<TaskCommand_Complete_Response>(getTaskCommandCompleteRoute(taskId), createTaskCommandComplete(), {
+      keepalive: true,
+    });
   }
 
   dismiss(taskId: string, command: WithoutType<TaskCommand_Dismiss>): Observable<TaskCommand_Dismiss_Response> {
-    return this.#http.put<TaskCommand_Dismiss_Response>(getTaskCommandDismissRoute(taskId), createTaskCommandDismiss(command));
+    return this.#http.put<TaskCommand_Dismiss_Response>(getTaskCommandDismissRoute(taskId), createTaskCommandDismiss(command), {
+      keepalive: true,
+    });
   }
 
   note(command: WithoutType<TaskCommand_Note>): Observable<TaskCommand_Note_Response> {
-    return this.#http.post<TaskCommand_Note_Response>(getTaskCommandNoteRoute(), createTaskCommandNote(command));
+    return this.#http.post<TaskCommand_Note_Response>(getTaskCommandNoteRoute(), createTaskCommandNote(command), {
+      keepalive: true,
+    });
   }
 
   reopen(taskId: string): Observable<TaskCommand_Reopen_Response> {
-    return this.#http.put<TaskCommand_Reopen_Response>(getTaskCommandReopenRoute(taskId), createTaskCommandReopen());
+    return this.#http.put<TaskCommand_Reopen_Response>(getTaskCommandReopenRoute(taskId), createTaskCommandReopen(), {
+      keepalive: true,
+    });
   }
-
-  // TODO views & queries
 }
