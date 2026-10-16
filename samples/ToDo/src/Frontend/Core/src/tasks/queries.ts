@@ -1,4 +1,4 @@
-import { TaskStatus } from './constants';
+import { getToDoTaskRoute, TaskStatus } from './constants';
 
 export type TaskQueryRequest_DailyStats = Readonly<{
   TenantId: string | null;
@@ -6,7 +6,6 @@ export type TaskQueryRequest_DailyStats = Readonly<{
   FromDate: string | null;
   ToDate: string | null;
 }>;
-
 export type TaskQueryResponse_DailyStats_DailyStatsItem = Readonly<{
   Day: string;
   UserId: string | null;
@@ -17,11 +16,11 @@ export type TaskQueryResponse_DailyStats_DailyStatsItem = Readonly<{
 export type TaskQueryResponse_DailyStats = Readonly<{
   ItemList: readonly TaskQueryResponse_DailyStats_DailyStatsItem[];
 }>;
+export const getTaskQueryDailyStatsRoute = () => getToDoTaskRoute('dailystats');
 
 export type TaskQueryRequest_List = Readonly<{
   TenantId: string | null;
 }>;
-
 export type TaskQueryResponse_List_ListItem = Readonly<{
   TaskId: string;
   Version: number;
@@ -32,3 +31,4 @@ export type TaskQueryResponse_List_ListItem = Readonly<{
 export type TaskQueryResponse_List = Readonly<{
   ItemList: readonly TaskQueryResponse_List_ListItem[];
 }>;
+export const getTaskQueryListRoute = () => getToDoTaskRoute();

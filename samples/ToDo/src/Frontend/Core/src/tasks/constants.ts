@@ -10,6 +10,24 @@ export const enum TaskStatus {
 }
 
 export const TaskRoute = `${ToDoConstants.BaseRoute}/task`;
+export function getToDoTaskRoute(): string;
+export function getToDoTaskRoute(suffix: string): string;
+export function getToDoTaskRoute(suffix: string, taskId: string): string;
+export function getToDoTaskRoute(suffix?: string, taskId?: string): string {
+  if (taskId == null || taskId === '') {
+    if (suffix == null || suffix === '') {
+      return TaskRoute;
+    }
+
+    return `${TaskRoute}/${suffix}`;
+  }
+
+  if (suffix == null || suffix === '') {
+    return `${TaskRoute}/${encodeURIComponent(taskId)}`;
+  }
+
+  return `${TaskRoute}/${encodeURIComponent(taskId)}/${suffix}`;
+}
 
 export const TaskCommandType_Base = `${ToDoConstants.Module}_TaskCommand`;
 export type TaskCommandType_Base = typeof TaskCommandType_Base;
