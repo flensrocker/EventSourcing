@@ -24,6 +24,8 @@ const defaultStatus: EventSourceStatus<undefined> = { status: EventSource.CONNEC
 
 export const isEventSourceStatus = <TData>(data: EventSourceData<TData>): data is EventSourceStatus<TData> => 'status' in data;
 export const isEventSourceValue = <TData>(data: EventSourceData<TData>): data is EventSourceValue<TData> => 'value' in data;
+export const getEventSourceValue = <TData>(data: EventSourceData<TData>): TData | undefined =>
+  isEventSourceStatus(data) ? data.lastValue : data.value;
 
 export const fromEventSource = <TData = string>(
   sse: EventSource,
@@ -58,21 +60,10 @@ export const fromEventSource = <TData = string>(
   );
 
   return merge(...events$, error$).pipe(
-    scan<EventSourceData<TData>, [EventSourceData<TData>, EventSourceData<TData>]>(
-      (last, data) => {
-        if (isEventSourceStatus(data)) {
-          if (isEventSourceValue(last[1])) {
-            data = { ...data, lastValue: last[1].value };
-          } else {
-            data = { ...data, lastValue: last[1].lastValue };
-          }
-        }
-
-        return [data, data];
-      },
-      [defaultStatus, defaultStatus],
+    scan<EventSourceData<TData>, EventSourceData<TData>>(
+      (last, data) => (isEventSourceStatus(data) ? { ...data, lastValue: getEventSourceValue(last) } : data),
+      defaultStatus,
     ),
-    map(([_, data]) => data),
     shareReplay({ refCount: true }),
   );
 };
