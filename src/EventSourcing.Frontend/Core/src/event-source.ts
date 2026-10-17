@@ -15,14 +15,19 @@ export const eventSourceParseJson = <TData>(_: string, message: string): TData =
 export type EventSourceStatus<TData> = Readonly<{
   status: 'CONNECTING' | 'ERROR';
   lastValue: TData | undefined;
+  error: unknown;
 }>;
 export type EventSourceValue<TData> = Readonly<{
   value: TData;
 }>;
 export type EventSourceData<TData> = EventSourceStatus<TData> | EventSourceValue<TData>;
 
-const eventSourceErrorStatus: EventSourceStatus<undefined> = { status: 'ERROR', lastValue: undefined };
-export const eventSourceInitialConnectingStatus: EventSourceStatus<undefined> = { status: 'CONNECTING', lastValue: undefined };
+const eventSourceErrorStatus: EventSourceStatus<undefined> = { status: 'ERROR', lastValue: undefined, error: undefined };
+export const eventSourceInitialConnectingStatus: EventSourceStatus<undefined> = {
+  status: 'CONNECTING',
+  lastValue: undefined,
+  error: undefined,
+};
 
 export const isEventSourceStatus = <TData>(data: EventSourceData<TData>): data is EventSourceStatus<TData> => 'status' in data;
 export const isEventSourceValue = <TData>(data: EventSourceData<TData>): data is EventSourceValue<TData> => 'value' in data;
@@ -47,7 +52,10 @@ export const fromEventSource = <TData = string>(
           };
         } catch (error) {
           console.error('Error while parsing message', { message: event.data, error });
-          return eventSourceErrorStatus;
+          return {
+            ...eventSourceErrorStatus,
+            error,
+          };
         }
       }),
     ),
