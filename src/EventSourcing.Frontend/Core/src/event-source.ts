@@ -1,4 +1,4 @@
-import { NEVER, Observable, defer, filter, finalize, fromEvent, map, merge, of, scan, shareReplay, startWith, switchMap } from 'rxjs';
+import { NEVER, Observable, defer, filter, finalize, fromEvent, map, merge, of, scan, shareReplay, switchMap } from 'rxjs';
 
 type EventSourceMessageParseFn<TData> = (eventType: string, message: string) => TData;
 
@@ -65,7 +65,6 @@ export const fromEventSource = <TData = string>(
 
       return of(eventSourceInitialConnectingStatus);
     }),
-    startWith(eventSourceInitialConnectingStatus),
   );
 
   return merge(...events$, error$).pipe(

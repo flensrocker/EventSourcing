@@ -5,7 +5,13 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 
 import { connectEventSource, eventSourceParseJson } from '@flensrocker/event-sourcing-core';
-import { getTaskViewDetailsRoute, getTaskViewDetailsStreamRoute, isToDoTaskIdValid, TaskView_Details } from '@flensrocker/to-do-core';
+import {
+  getTaskViewDetailsRoute,
+  getTaskViewDetailsStreamRoute,
+  isToDoTaskIdValid,
+  TaskView_Details,
+  TaskViewType,
+} from '@flensrocker/to-do-core';
 
 export const toDoTaskViewDetails = (taskId: Signal<string | null | undefined>, injector?: Injector) =>
   httpResource<TaskView_Details>(
@@ -25,7 +31,7 @@ export const toDoTaskViewDetailsStream = (taskId: Signal<string | null | undefin
         ? connectEventSource<TaskView_Details>(
             getTaskViewDetailsStreamRoute(taskId),
             { withCredentials: true },
-            { parseFn: eventSourceParseJson },
+            { eventTypes: [TaskViewType.Details], parseFn: eventSourceParseJson },
           )
         : of(undefined),
     injector,

@@ -1,6 +1,7 @@
 module.exports = {
   '/api/**': {
-    target: process.env['services__playground-webapi__https__0'] || process.env['services__playground-webapi__http__0'],
-    secure: process.env['NODE_ENV'] !== 'development',
+    target: process.env.PLAYGROUND_WEBAPI_HTTP,
+    secure: false,
+    changeOrigin: true,
   },
 };
