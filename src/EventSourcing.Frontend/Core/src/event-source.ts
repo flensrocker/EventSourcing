@@ -10,9 +10,10 @@ export type EventSourceOptions<TData> = Readonly<{
 
 const defaultEventTypes = ['message'];
 const defaultParseFn: EventSourceMessageParseFn<string> = (_, message) => message;
+export const eventSourceParseJson = <TData>(_: string, message: string): TData => JSON.parse(message);
 
 export type EventSourceStatus<TData> = Readonly<{
-  status: typeof EventSource.CONNECTING;
+  status: 'CONNECTING' | 'ERROR';
   lastValue: TData | undefined;
 }>;
 export type EventSourceValue<TData> = Readonly<{
@@ -20,7 +21,8 @@ export type EventSourceValue<TData> = Readonly<{
 }>;
 export type EventSourceData<TData> = EventSourceStatus<TData> | EventSourceValue<TData>;
 
-const defaultStatus: EventSourceStatus<undefined> = { status: EventSource.CONNECTING, lastValue: undefined };
+const eventSourceErrorStatus: EventSourceStatus<undefined> = { status: 'ERROR', lastValue: undefined };
+export const eventSourceInitialConnectingStatus: EventSourceStatus<undefined> = { status: 'CONNECTING', lastValue: undefined };
 
 export const isEventSourceStatus = <TData>(data: EventSourceData<TData>): data is EventSourceStatus<TData> => 'status' in data;
 export const isEventSourceValue = <TData>(data: EventSourceData<TData>): data is EventSourceValue<TData> => 'value' in data;
@@ -38,31 +40,38 @@ export const fromEventSource = <TData = string>(
   const events$ = eventTypes.map((eventType) =>
     fromEvent<MessageEvent<string>>(sse, eventType).pipe(
       filter((event) => allowedOrigins == null || allowedOrigins.includes(event.origin)),
-      map((event): EventSourceData<TData> => ({
-        value: parseFn(eventType, event.data),
-      })),
+      map((event): EventSourceData<TData> => {
+        try {
+          return {
+            value: parseFn(eventType, event.data),
+          };
+        } catch (error) {
+          console.error('Error while parsing message', { message: event.data, error });
+          return eventSourceErrorStatus;
+        }
+      }),
     ),
   );
 
   const error$: Observable<EventSourceStatus<TData>> = fromEvent<Event>(sse, 'error').pipe(
     switchMap((): Observable<EventSourceStatus<TData>> => {
       if (sse.readyState === EventSource.CLOSED) {
-        throw new Error(`An error occurred while attempting to connect${sse?.url ? `: ${sse.url}` : '.'}`);
+        throw new Error(`An error occurred while attempting to connect to ${sse.url}`);
       }
 
       if (sse.readyState === EventSource.OPEN) {
         return NEVER;
       }
 
-      return of(defaultStatus);
+      return of(eventSourceInitialConnectingStatus);
     }),
-    startWith(defaultStatus),
+    startWith(eventSourceInitialConnectingStatus),
   );
 
   return merge(...events$, error$).pipe(
     scan<EventSourceData<TData>, EventSourceData<TData>>(
       (last, data) => (isEventSourceStatus(data) ? { ...data, lastValue: getEventSourceValue(last) } : data),
-      defaultStatus,
+      eventSourceInitialConnectingStatus,
     ),
     shareReplay({ refCount: true }),
   );
