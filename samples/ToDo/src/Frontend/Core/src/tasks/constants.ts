@@ -3,11 +3,12 @@ import * as ToDoConstants from '../constants';
 export const TaskTitleMaxLength = 100;
 export const TaskDismissReasonMaxLength = 200;
 
-export const enum TaskStatus {
-  Open = 0,
-  Completed = 1,
-  Dismissed = 2,
-}
+export const TaskStatus = {
+  Open: 0,
+  Completed: 1,
+  Dismissed: 2,
+} as const;
+export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
 
 export const isToDoTaskIdValid = (taskId: string | null | undefined): taskId is string =>
   taskId != null && typeof taskId === 'string' && taskId.length > 0;

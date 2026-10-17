@@ -13,6 +13,9 @@
     "composite": true,
     "skipLibCheck": true,
     "paths": {
+      "@flensrocker/event-sourcing-angular": [
+        "./src/EventSourcing.Frontend/Angular/dist/event-sourcing-angular"
+      ],
       "@flensrocker/event-sourcing-core": [
         "./src/EventSourcing.Frontend/Core/dist"
       ],

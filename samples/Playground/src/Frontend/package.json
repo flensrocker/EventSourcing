@@ -24,6 +24,7 @@
     "@angular/material": "22.2.2",
     "@angular/platform-browser": "22.2.2",
     "@angular/router": "22.2.2",
+    "@flensrocker/event-sourcing-angular": "workspace:*",
     "@flensrocker/event-sourcing-core": "workspace:*",
     "@flensrocker/to-do-angular": "workspace:*",
     "@flensrocker/to-do-core": "workspace:*",

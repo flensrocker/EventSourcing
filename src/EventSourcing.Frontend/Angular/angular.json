@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "packageManager": "pnpm",
+    "analytics": false
+  },
+  "newProjectRoot": "projects",
+  "projects": {
+    "event-sourcing-angular": {
+      "projectType": "library",
+      "root": "projects/event-sourcing-angular",
+      "sourceRoot": "projects/event-sourcing-angular/src",
+      "prefix": "fr-es",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/event-sourcing-angular/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/event-sourcing-angular/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/event-sourcing-angular/tsconfig.spec.json"
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["projects/**/*.ts", "projects/**/*.html"]
+          }
+        }
+      }
+    }
+  }
+}

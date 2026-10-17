@@ -1,71 +1,16 @@
-import { Component, computed, inject, input, linkedSignal, Signal, signal } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { finalize } from 'rxjs';
 
-import { getEventSourceValue, IDomainEventVersionable } from '@flensrocker/event-sourcing-core';
+import { busyTracker, versionTracker } from '@flensrocker/event-sourcing-angular';
+import { getEventSourceValue } from '@flensrocker/event-sourcing-core';
 import { TaskStatus, emptyTaskViewDetails } from '@flensrocker/to-do-core';
 
 import { ToDoTaskClient } from './client';
 import { toDoTaskViewDetailsStream } from './views';
-
-// TODO extract & generalize helper
-
-type IdVersion = Readonly<{
-  id: string;
-  version: number;
-}>;
-
-const versionTracker = <T extends IDomainEventVersionable>(id: Signal<string>, data: Signal<T | null | undefined>) => {
-  const actualVersion = computed(() => data()?.Version ?? 0);
-
-  const expectedVersion = linkedSignal<IdVersion, IdVersion>({
-    source: () => ({ id: id(), version: actualVersion() }),
-    computation: (source, previous) => {
-      const prevId = previous?.value.id;
-      const prevVersion = previous?.value.version ?? 0;
-
-      if (prevId !== source.id) {
-        return { ...source, version: 0 };
-      }
-
-      if (prevVersion < source.version) {
-        return source;
-      }
-
-      return { ...source, version: prevVersion };
-    },
-  });
-
-  const expectUpdate = computed(() => expectedVersion().version > actualVersion());
-
-  const setExpectedVersion = (id: string, version: number) => expectedVersion.update((v) => (v.id === id ? { ...v, version } : v));
-
-  return {
-    expectUpdate,
-    setExpectedVersion,
-  };
-};
-
-const submitCounter = () => {
-  const submitCount = signal(0);
-
-  const stopSubmit = () => submitCount.update((count) => (count > 0 ? count - 1 : 0));
-
-  const start = () => {
-    submitCount.update((count) => count + 1);
-    return stopSubmit;
-  };
-
-  const isSubmitting = computed(() => submitCount() > 0);
-
-  return {
-    start,
-    isSubmitting,
-  };
-};
 
 @Component({
   selector: 'to-do-task-details',
@@ -105,10 +50,10 @@ export class ToDoTaskDetails {
   });
 
   readonly #versionTracker = versionTracker(this.taskId, this.#details);
-  readonly #submitCounter = submitCounter();
+  readonly #busyTracker = busyTracker();
 
   protected readonly isLoading = computed(
-    () => this.#detailsStream.isLoading() || this.#submitCounter.isSubmitting() || this.#versionTracker.expectUpdate(),
+    () => this.#detailsStream.isLoading() || this.#busyTracker.isBusy() || this.#versionTracker.updateExpected(),
   );
 
   protected readonly title = computed(() => this.#details().Title);
@@ -127,7 +72,7 @@ export class ToDoTaskDetails {
     const taskId = this.taskId();
 
     // TODO error handling
-    const stopSubmit = this.#submitCounter.start();
+    const stopSubmit = this.#busyTracker.start();
     this.#client
       .complete(taskId)
       .pipe(finalize(stopSubmit))
@@ -145,7 +90,7 @@ export class ToDoTaskDetails {
     const Reason = "I don't want to";
 
     // TODO error handling
-    const stopSubmit = this.#submitCounter.start();
+    const stopSubmit = this.#busyTracker.start();
     this.#client
       .dismiss(taskId, { Reason })
       .pipe(finalize(stopSubmit))
@@ -160,7 +105,7 @@ export class ToDoTaskDetails {
     const taskId = this.taskId();
 
     // TODO error handling
-    const stopSubmit = this.#submitCounter.start();
+    const stopSubmit = this.#busyTracker.start();
     this.#client
       .reopen(taskId)
       .pipe(finalize(stopSubmit))
