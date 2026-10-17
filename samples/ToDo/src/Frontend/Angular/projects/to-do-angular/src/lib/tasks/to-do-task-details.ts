@@ -51,14 +51,19 @@ const versionTracker = <T extends IDomainEventVersionable>(id: Signal<string>, d
 
 const submitCounter = () => {
   const submitCount = signal(0);
-  const stopSubmit = () => submitCount.update((c) => (c > 0 ? c - 1 : 0));
+
+  const stopSubmit = () => submitCount.update((count) => (count > 0 ? count - 1 : 0));
+
+  const start = () => {
+    submitCount.update((count) => count + 1);
+    return stopSubmit;
+  };
+
+  const isSubmitting = computed(() => submitCount() > 0);
 
   return {
-    start: () => {
-      submitCount.update((c) => c + 1);
-      return stopSubmit;
-    },
-    isSubmitting: computed(() => submitCount() > 0),
+    start,
+    isSubmitting,
   };
 };
 
