@@ -9,5 +9,12 @@ export type TaskView_Details = IDomainEventVersionable &
     Status: TaskStatus;
     DismissReason: string | null;
   }>;
+export const emptyTaskViewDetails: TaskView_Details = {
+  Version: 0,
+  Title: '',
+  Status: TaskStatus.Open,
+  DismissReason: null,
+};
+
 export const getTaskViewDetailsRoute = (taskId: string) => getToDoTaskRoute('', taskId);
 export const getTaskViewDetailsStreamRoute = (taskId: string) => getToDoTaskRoute('stream', taskId);
