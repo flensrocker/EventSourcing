@@ -9,12 +9,15 @@ export const enum TaskStatus {
   Dismissed = 2,
 }
 
+export const isToDoTaskIdValid = (taskId: string | null | undefined): taskId is string =>
+  taskId != null && typeof taskId === 'string' && taskId.length > 0;
+
 export const TaskRoute = `${ToDoConstants.BaseRoute}/task`;
 export function getToDoTaskRoute(): string;
 export function getToDoTaskRoute(suffix: string): string;
 export function getToDoTaskRoute(suffix: string, taskId: string): string;
 export function getToDoTaskRoute(suffix?: string, taskId?: string): string {
-  if (taskId == null || taskId === '') {
+  if (!isToDoTaskIdValid(taskId)) {
     if (suffix == null || suffix === '') {
       return TaskRoute;
     }
