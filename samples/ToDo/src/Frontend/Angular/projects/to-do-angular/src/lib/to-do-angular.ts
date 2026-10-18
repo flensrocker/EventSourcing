@@ -12,7 +12,7 @@ import { isToDoTaskIdValid } from '@flensrocker/to-do-core';
   styles: ``,
   template: `<mat-form-field>
       <mat-label>Task-Id</mat-label>
-      <input type="text" matInput [value]="taskId()" (input)="taskId.set($event.data ?? '')" />
+      <input type="text" matInput [value]="taskId()" (change)="taskId.set($event.target.value)" />
     </mat-form-field>
     @if (isValidTaskId()) {
       <to-do-task-details [taskId]="taskId()" />

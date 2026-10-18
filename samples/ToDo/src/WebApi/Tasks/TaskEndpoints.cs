@@ -118,9 +118,13 @@ public static class TaskEndpoints
 
     builder.MapGet(
       "{taskId}/stream",
-      static (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
+      static async (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
       {
-        // TODO return NotFound if the stream is empty (how?)
+        // TODO is this the way to handle a NotFound etc.?
+        var result = await context.RequestServices.GetProjection<TaskView.Details>(taskId, cancellationToken);
+        if (!result.IsSuccess())
+          return result.ToTypedResult();
+
         var toDoStream = context.RequestServices.StreamProjection<TaskView.Details>(taskId, cancellationToken);
         return TypedResults.ServerSentEvents(toDoStream, eventType: TaskConstants.TaskView.Details);
       }

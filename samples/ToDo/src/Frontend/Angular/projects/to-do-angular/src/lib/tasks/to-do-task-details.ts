@@ -15,6 +15,11 @@ import { toDoTaskViewDetailsStream } from './views';
 @Component({
   selector: 'to-do-task-details',
   imports: [MatButtonModule, MatCardModule, MatProgressBarModule],
+  styles: `
+    .error {
+      color: var(--mat-sys-error);
+    }
+  `,
   template: `<mat-card>
     <mat-card-header>
       <mat-card-title>{{ title() }}</mat-card-title>
@@ -22,12 +27,17 @@ import { toDoTaskViewDetailsStream } from './views';
     <mat-card-content>
       @if (isLoading()) {
         <mat-progress-bar mode="indeterminate" />
-      } @else if (isOpen()) {
-        open
-      } @else if (isCompleted()) {
-        completed
-      } @else if (isDismissed()) {
-        dismissed with reason &quot;{{ dismissReason() }}&quot;
+      } @else {
+        @let errMsg = detailsError();
+        @if (errMsg) {
+          <div class="error">ERROR: {{ errMsg }}</div>
+        } @else if (isOpen()) {
+          open
+        } @else if (isCompleted()) {
+          completed
+        } @else if (isDismissed()) {
+          dismissed with reason &quot;{{ dismissReason() }}&quot;
+        }
       }
     </mat-card-content>
     <mat-card-actions>
@@ -44,9 +54,17 @@ export class ToDoTaskDetails {
 
   readonly #detailsStream = toDoTaskViewDetailsStream(this.taskId);
   readonly #details = computed(() => {
+    if (!this.#detailsStream.hasValue()) {
+      return emptyTaskViewDetails;
+    }
+
     const data = this.#detailsStream.value();
     const details = data == null ? emptyTaskViewDetails : getEventSourceValue(data);
     return details ?? emptyTaskViewDetails;
+  });
+  protected readonly detailsError = computed(() => {
+    const error = this.#detailsStream.error();
+    return error?.message;
   });
 
   readonly #versionTracker = versionTracker(this.taskId, this.#details);
@@ -64,9 +82,15 @@ export class ToDoTaskDetails {
   protected readonly isCompleted = computed(() => this.status() === TaskStatus.Completed);
   protected readonly isDismissed = computed(() => this.status() === TaskStatus.Dismissed);
 
-  protected readonly completeDisabled = computed(() => this.isLoading() || this.status() !== TaskStatus.Open);
-  protected readonly dismissDisabled = computed(() => this.isLoading() || this.status() !== TaskStatus.Open);
-  protected readonly reopenDisabled = computed(() => this.isLoading() || this.status() === TaskStatus.Open);
+  protected readonly completeDisabled = computed(
+    () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
+  );
+  protected readonly dismissDisabled = computed(
+    () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
+  );
+  protected readonly reopenDisabled = computed(
+    () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() === TaskStatus.Open,
+  );
 
   protected complete() {
     const taskId = this.taskId();
