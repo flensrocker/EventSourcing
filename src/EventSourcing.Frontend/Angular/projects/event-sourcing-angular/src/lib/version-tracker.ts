@@ -16,11 +16,7 @@ export const versionTracker = <T extends IDomainEventVersionable>(id: Signal<str
       const prevId = previous?.value.id;
       const prevVersion = previous?.value.version ?? 0;
 
-      if (prevId !== source.id) {
-        return { ...source, version: 0 };
-      }
-
-      if (prevVersion < source.version) {
+      if (prevVersion < source.version || prevId !== source.id) {
         return source;
       }
 
