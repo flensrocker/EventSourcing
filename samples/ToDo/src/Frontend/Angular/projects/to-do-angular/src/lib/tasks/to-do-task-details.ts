@@ -39,9 +39,9 @@ import { toDoTaskViewDetailsStream } from './views';
       }
     </mat-card-content>
     <mat-card-actions>
-      <button type="button" matButton [disabled]="completeDisabled()" (click)="complete()">Complete</button>
-      <button type="button" matButton [disabled]="dismissDisabled()" (click)="dismiss()">Dismiss</button>
-      <button type="button" matButton [disabled]="reopenDisabled()" (click)="reopen()">Reopen</button>
+      <button type="button" matButton [disabled]="complete.disabled()" (click)="complete.submit()">Complete</button>
+      <button type="button" matButton [disabled]="dismiss.disabled()" (click)="dismiss.submit()">Dismiss</button>
+      <button type="button" matButton [disabled]="reopen.disabled()" (click)="reopen.submit()">Reopen</button>
     </mat-card-actions>
   </mat-card>`,
 })
@@ -67,7 +67,6 @@ export class ToDoTaskDetails {
 
   readonly #busyTracker = busyTracker();
   readonly #versionTracker = versionTracker(this.taskId, this.#details);
-  readonly #commandHandler = commandHandler(this.#busyTracker, this.#versionTracker);
 
   protected readonly isLoading = computed(
     () => this.#detailsStream.isLoading() || this.#busyTracker.isBusy() || this.#versionTracker.updateExpected(),
@@ -81,34 +80,23 @@ export class ToDoTaskDetails {
   protected readonly isCompleted = computed(() => this.status() === TaskStatus.Completed);
   protected readonly isDismissed = computed(() => this.status() === TaskStatus.Dismissed);
 
-  protected readonly completeDisabled = computed(
-    () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
-  );
-  protected readonly dismissDisabled = computed(
-    () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
-  );
-  protected readonly reopenDisabled = computed(
-    () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() === TaskStatus.Open,
-  );
-
-  protected complete() {
-    const taskId = this.taskId();
-
-    this.#commandHandler.submit(this.#client.complete(taskId), taskId);
-  }
-
-  protected dismiss() {
-    const taskId = this.taskId();
-
+  protected readonly complete = commandHandler({
+    createCommand: () => [this.taskId(), this.#client.complete(this.taskId())],
+    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
+    busyTracker: this.#busyTracker,
+    versionTracker: this.#versionTracker,
+  });
+  protected readonly dismiss = commandHandler({
     // TODO show dialog to enter reason
-    const Reason = "I don't want to";
-
-    this.#commandHandler.submit(this.#client.dismiss(taskId, { Reason }), taskId);
-  }
-
-  protected reopen() {
-    const taskId = this.taskId();
-
-    this.#commandHandler.submit(this.#client.reopen(taskId), taskId);
-  }
+    createCommand: () => [this.taskId(), this.#client.dismiss(this.taskId(), { Reason: "I don't want to!" })],
+    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
+    busyTracker: this.#busyTracker,
+    versionTracker: this.#versionTracker,
+  });
+  protected readonly reopen = commandHandler({
+    createCommand: () => [this.taskId(), this.#client.reopen(this.taskId())],
+    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() === TaskStatus.Open,
+    busyTracker: this.#busyTracker,
+    versionTracker: this.#versionTracker,
+  });
 }
