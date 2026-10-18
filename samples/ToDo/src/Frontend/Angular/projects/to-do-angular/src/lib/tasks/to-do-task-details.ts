@@ -3,9 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
-import { finalize } from 'rxjs';
-
-import { busyTracker, versionTracker } from '@flensrocker/event-sourcing-angular';
+import { busyTracker, commandHandler, versionTracker } from '@flensrocker/event-sourcing-angular';
 import { getEventSourceValue } from '@flensrocker/event-sourcing-core';
 import { TaskStatus, emptyTaskViewDetails } from '@flensrocker/to-do-core';
 
@@ -67,8 +65,9 @@ export class ToDoTaskDetails {
     return error?.message;
   });
 
-  readonly #versionTracker = versionTracker(this.taskId, this.#details);
   readonly #busyTracker = busyTracker();
+  readonly #versionTracker = versionTracker(this.taskId, this.#details);
+  readonly #commandHandler = commandHandler(this.#busyTracker, this.#versionTracker);
 
   protected readonly isLoading = computed(
     () => this.#detailsStream.isLoading() || this.#busyTracker.isBusy() || this.#versionTracker.updateExpected(),
@@ -95,16 +94,7 @@ export class ToDoTaskDetails {
   protected complete() {
     const taskId = this.taskId();
 
-    // TODO error handling
-    const stopSubmit = this.#busyTracker.start();
-    this.#client
-      .complete(taskId)
-      .pipe(finalize(stopSubmit))
-      .subscribe({
-        next: (response) => {
-          this.#versionTracker.setExpectedVersion(taskId, response.Version);
-        },
-      });
+    this.#commandHandler.submit(this.#client.complete(taskId), taskId);
   }
 
   protected dismiss() {
@@ -113,30 +103,12 @@ export class ToDoTaskDetails {
     // TODO show dialog to enter reason
     const Reason = "I don't want to";
 
-    // TODO error handling
-    const stopSubmit = this.#busyTracker.start();
-    this.#client
-      .dismiss(taskId, { Reason })
-      .pipe(finalize(stopSubmit))
-      .subscribe({
-        next: (response) => {
-          this.#versionTracker.setExpectedVersion(taskId, response.Version);
-        },
-      });
+    this.#commandHandler.submit(this.#client.dismiss(taskId, { Reason }), taskId);
   }
 
   protected reopen() {
     const taskId = this.taskId();
 
-    // TODO error handling
-    const stopSubmit = this.#busyTracker.start();
-    this.#client
-      .reopen(taskId)
-      .pipe(finalize(stopSubmit))
-      .subscribe({
-        next: (response) => {
-          this.#versionTracker.setExpectedVersion(taskId, response.Version);
-        },
-      });
+    this.#commandHandler.submit(this.#client.reopen(taskId), taskId);
   }
 }
