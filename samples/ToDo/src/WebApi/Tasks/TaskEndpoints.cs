@@ -120,6 +120,7 @@ public static class TaskEndpoints
       "{taskId}/stream",
       static (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
       {
+        // TODO return NotFound if the stream is empty (how?)
         var toDoStream = context.RequestServices.StreamProjection<TaskView.Details>(taskId, cancellationToken);
         return TypedResults.ServerSentEvents(toDoStream, eventType: TaskConstants.TaskView.Details);
       }
