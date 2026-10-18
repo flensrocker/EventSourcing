@@ -1,16 +1,28 @@
-import { computed, signal } from '@angular/core';
+import { computed, Signal, signal } from '@angular/core';
 
-export const busyTracker = () => {
-  const busyCount = signal(0);
+export type BusyTracker = Readonly<{
+  /**
+   * Use the returned callback to "stop" the busy-tracker.
+   */
+  start: () => () => void;
+  /**
+   * Signals `true` if there are more `start` called than stopped.
+   */
+  isBusy: Signal<boolean>;
+}>;
 
-  const stop = () => busyCount.update((count) => (count > 0 ? count - 1 : 0));
+export const busyTracker = (): BusyTracker => {
+  let nextId = 1;
+  const busyIds = signal<readonly number[]>([]);
 
   const start = () => {
-    busyCount.update((count) => count + 1);
-    return stop;
+    const busyId = nextId++;
+    busyIds.update((count) => [...count, busyId]);
+
+    return () => busyIds.update((ids) => ids.filter((id) => id !== busyId));
   };
 
-  const isBusy = computed(() => busyCount() > 0);
+  const isBusy = computed(() => busyIds().length > 0);
 
   return {
     start,
