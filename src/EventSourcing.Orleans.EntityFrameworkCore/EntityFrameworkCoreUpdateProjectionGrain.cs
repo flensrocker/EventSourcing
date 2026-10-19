@@ -76,7 +76,17 @@ public abstract partial class EntityFrameworkCoreUpdateProjectionGrain<TDbContex
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
         var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
 
-        _projection = await dbContext.UpdateProjectionAsync(eventStore, [domainEvent], _projection, _projectionOptions.TypeName, _logger);
+        try
+        {
+          _projection = await dbContext.UpdateProjectionAsync(eventStore, [domainEvent], _projection, _projectionOptions.TypeName, _logger);
+        }
+        catch
+        {
+          // if anything fails while updating the projection it's in a not persisted/consistent state
+          // force a reload to be save on the next retry executed by the db-strategy
+          _projection = null;
+          throw;
+        }
       });
   }
 
