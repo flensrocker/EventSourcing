@@ -8,8 +8,15 @@ var configuration = Argument("configuration", "Release");
 
 var pnpm = new CommandSettings { ToolName = "pnpm", ToolExecutableNames = ["pnpm"] };
 
+Task("Install-Tools")
+  .Does(() =>
+  {
+    DotNetToolRestore();
+  });
+
 Task("Install")
   .WithCriteria(c => HasArgument("install") || target == "Install")
+  .IsDependentOn("Install-Tools")
   .Does(() =>
   {
     DotNetToolRestore();
@@ -39,6 +46,14 @@ Task("Test")
   {
     DotNetTest(solution, new DotNetTestSettings { Configuration = configuration, NoBuild = true });
     Command(pnpm, new ProcessArgumentBuilder().Append("test"));
+  });
+
+Task("Format")
+  .IsDependentOn("Install-Tools")
+  .Does(() =>
+  {
+    Command(["dotnet", "dotnet.exe"], "csharpier format .");
+    Command(pnpm, new ProcessArgumentBuilder().Append("format"));
   });
 
 RunTarget(target);
