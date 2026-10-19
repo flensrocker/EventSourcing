@@ -18,5 +18,6 @@ export const emptyTaskViewDetails: TaskView_Details = {
   DismissReason: null,
 };
 
+export const getTaskViewDetailsId = (details: TaskView_Details) => details.TaskId;
 export const getTaskViewDetailsRoute = (taskId: string) => getToDoTaskRoute('', taskId);
 export const getTaskViewDetailsStreamRoute = (taskId: string) => getToDoTaskRoute('stream', taskId);

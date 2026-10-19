@@ -5,7 +5,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { busyTracker, commandHandler, versionTracker } from '@flensrocker/event-sourcing-angular';
 import { getEventSourceValue } from '@flensrocker/event-sourcing-core';
-import { TaskStatus, emptyTaskViewDetails } from '@flensrocker/to-do-core';
+import { TaskStatus, emptyTaskViewDetails, getTaskViewDetailsId } from '@flensrocker/to-do-core';
 
 import { ToDoTaskClient } from './client';
 import { toDoTaskViewDetailsStream } from './views';
@@ -66,7 +66,7 @@ export class ToDoTaskDetails {
   });
 
   readonly #busyTracker = busyTracker();
-  readonly #versionTracker = versionTracker(this.taskId, this.#details);
+  readonly #versionTracker = versionTracker(this.taskId, this.#details, getTaskViewDetailsId);
 
   protected readonly isLoading = computed(
     () => this.#detailsStream.isLoading() || this.#busyTracker.isBusy() || this.#versionTracker.updateExpected(),
