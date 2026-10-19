@@ -5,11 +5,13 @@ import { getToDoTaskRoute, TaskStatus } from './constants';
 // TODO create validation schema
 export type TaskView_Details = IDomainEventVersionable &
   Readonly<{
+    TaskId: string;
     Title: string;
     Status: TaskStatus;
     DismissReason: string | null;
   }>;
 export const emptyTaskViewDetails: TaskView_Details = {
+  TaskId: '',
   Version: 0,
   Title: '',
   Status: TaskStatus.Open,

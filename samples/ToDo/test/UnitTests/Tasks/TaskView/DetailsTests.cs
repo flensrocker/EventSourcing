@@ -24,6 +24,7 @@ public sealed class DetailsTests
     var testState = new SuT.Details();
     testState.Apply(notedEvent);
 
+    Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
@@ -49,6 +50,7 @@ public sealed class DetailsTests
     testState.Apply(notedEvent);
     testState.Apply(completedEvent);
 
+    Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Completed, testState.Status);
@@ -74,6 +76,7 @@ public sealed class DetailsTests
     testState.Apply(notedEvent);
     testState.Apply(dismissedEvent);
 
+    Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Dismissed, testState.Status);
@@ -102,6 +105,7 @@ public sealed class DetailsTests
     testState.Apply(completedEvent);
     testState.Apply(reopenedEvent);
 
+    Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
@@ -130,6 +134,7 @@ public sealed class DetailsTests
     testState.Apply(dismissedEvent);
     testState.Apply(reopenedEvent);
 
+    Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);

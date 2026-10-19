@@ -11,17 +11,21 @@ public abstract partial record TaskView
   {
     [Id(0)]
     [JsonInclude]
-    public int Version { get; internal set; }
+    public Guid TaskId { get; internal set; }
 
     [Id(1)]
     [JsonInclude]
-    public string Title { get; internal set; } = "";
+    public int Version { get; internal set; }
 
     [Id(2)]
     [JsonInclude]
-    public TaskStatus Status { get; internal set; }
+    public string Title { get; internal set; } = "";
 
     [Id(3)]
+    [JsonInclude]
+    public TaskStatus Status { get; internal set; }
+
+    [Id(4)]
     [JsonInclude]
     public string? DismissReason { get; internal set; }
 
@@ -52,6 +56,7 @@ public abstract partial record TaskView
 
     public void Apply(DomainEvent @event)
     {
+      TaskId = @event.Metadata.StreamId;
       Version = @event.Metadata.StreamVersion;
 
       ((ITaskEventProjectable)this).ApplyTaskEvent(@event);

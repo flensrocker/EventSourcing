@@ -294,6 +294,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
       )
       .ConfigureAwait(false);
     Assert.IsNotNull(detailsResult);
+    Assert.AreEqual(noteResult.TaskId, detailsResult.TaskId);
     Assert.AreEqual(expectedVersion, detailsResult.Version);
     Assert.AreEqual(noteRequest.Title, detailsResult.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Completed, detailsResult.Status);
@@ -399,7 +400,9 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     _testContext.WriteLine("SSE stream finished");
 
     Assert.HasCount(2, detailsList);
+    Assert.AreEqual(noteResult.TaskId, detailsList[0].TaskId);
     Assert.AreEqual(1, detailsList[0].Version);
+    Assert.AreEqual(noteResult.TaskId, detailsList[1].TaskId);
     Assert.AreEqual(2, detailsList[1].Version);
 
     // when multiple TaskView.Details got streamed, the async projection is hopefully processed
