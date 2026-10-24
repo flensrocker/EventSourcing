@@ -29,6 +29,67 @@ public sealed class DetailsTests
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
     Assert.IsNull(testState.DismissReason);
+    Assert.IsNull(testState.StartedByUserId);
+  }
+
+  [TestMethod]
+  public void GivenNotedAndStartedEventThenReturnViewWithStartedStatus()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+    var taskStartedAt = taskCreatedAt.AddMinutes(1.0);
+
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+    var startedPayload = new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId };
+    var startedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, startedPayload);
+
+    var testState = new SuT.Details();
+    testState.Apply(notedEvent);
+    testState.Apply(startedEvent);
+
+    Assert.AreEqual(taskId, testState.TaskId);
+    Assert.AreEqual(taskVersion - 1, testState.Version);
+    Assert.AreEqual(notedPayload.Title, testState.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Started, testState.Status);
+    Assert.IsNull(testState.DismissReason);
+    Assert.AreEqual(userId, testState.StartedByUserId);
+  }
+
+  [TestMethod]
+  public void GivenNotedStartedAndPausedEventThenReturnViewWithPausedStatus()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+    var taskStartedAt = taskCreatedAt.AddMinutes(1.0);
+    var taskPausedAt = taskStartedAt.AddMinutes(1.0);
+
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+    var startedPayload = new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId };
+    var startedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, startedPayload);
+    var pausedPayload = new Abstractions.Tasks.TaskEvent.Paused { PausedAt = taskPausedAt };
+    var pausedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, pausedPayload);
+
+    var testState = new SuT.Details();
+    testState.Apply(notedEvent);
+    testState.Apply(startedEvent);
+    testState.Apply(pausedEvent);
+
+    Assert.AreEqual(taskId, testState.TaskId);
+    Assert.AreEqual(taskVersion - 1, testState.Version);
+    Assert.AreEqual(notedPayload.Title, testState.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Paused, testState.Status);
+    Assert.IsNull(testState.DismissReason);
+    Assert.IsNull(testState.StartedByUserId);
   }
 
   [TestMethod]
@@ -55,6 +116,7 @@ public sealed class DetailsTests
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Completed, testState.Status);
     Assert.IsNull(testState.DismissReason);
+    Assert.IsNull(testState.StartedByUserId);
   }
 
   [TestMethod]
@@ -81,6 +143,7 @@ public sealed class DetailsTests
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Dismissed, testState.Status);
     Assert.AreEqual(dismissedPayload.Reason, testState.DismissReason);
+    Assert.IsNull(testState.StartedByUserId);
   }
 
   [TestMethod]
@@ -110,6 +173,7 @@ public sealed class DetailsTests
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
     Assert.IsNull(testState.DismissReason);
+    Assert.IsNull(testState.StartedByUserId);
   }
 
   [TestMethod]
@@ -139,6 +203,7 @@ public sealed class DetailsTests
     Assert.AreEqual(notedPayload.Title, testState.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
     Assert.IsNull(testState.DismissReason);
+    Assert.IsNull(testState.StartedByUserId);
   }
 
   [TestMethod]

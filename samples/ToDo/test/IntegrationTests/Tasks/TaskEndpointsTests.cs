@@ -64,7 +64,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
   [TestMethod]
   [DataRow("2026-09-28", "2026-09-27")]
-  public async Task GivenInvalidDismissRequestWhenNoteThenReturnBadRequest(string? fromDate, string? toDate)
+  public async Task GivenInvalidDismissRequestWhenGetDailyStatsThenReturnBadRequest(string? fromDate, string? toDate)
   {
     using var testResponse = await _client
       .GetAsync($"{ToDoRoutes.TaskRoute}/dailystats?fromDate={fromDate}&toDate={toDate}", _cancellationToken)
@@ -119,7 +119,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   )]
   [DataRow("With\nLinebreak")]
   [DataRow("With\rCarriage Return")]
-  public async Task GivenInvalidDismissRequestWhenNoteThenReturnBadRequest(string? invalidReason)
+  public async Task GivenInvalidDismissRequestWhenDismissThenReturnBadRequest(string? invalidReason)
   {
     var taskId = Guid.CreateVersion7();
 

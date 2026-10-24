@@ -52,6 +52,68 @@ public sealed class ListItemTests
   }
 
   [TestMethod]
+  public void GivenNotedAndStartedEventThenReturnViewWithStartedStatus()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+    var taskStartedAt = taskCreatedAt.AddMinutes(1.0);
+
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+    var startedPayload = new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId };
+    var startedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, startedPayload);
+
+    var testState = new SuT.ListItem();
+    testState.Apply(notedEvent);
+    testState.Apply(startedEvent);
+
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
+    Assert.AreEqual(taskId, testState.TaskId);
+    Assert.AreEqual(taskVersion - 1, testState.Version);
+    Assert.AreEqual(tenantId, testState.TenantId);
+    Assert.AreEqual(notedPayload.CreatedAt, testState.CreatedAt);
+    Assert.AreEqual(notedPayload.Title, testState.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Started, testState.Status);
+  }
+
+  [TestMethod]
+  public void GivenNotedStartedAndPausedEventThenReturnViewWithPausedStatus()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+    var taskStartedAt = taskCreatedAt.AddMinutes(1.0);
+    var taskPausedAt = taskStartedAt.AddMinutes(1.0);
+
+    var notedPayload = new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
+    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+    var startedPayload = new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId };
+    var startedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, startedPayload);
+    var pausedPayload = new Abstractions.Tasks.TaskEvent.Paused { PausedAt = taskPausedAt };
+    var pausedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, pausedPayload);
+
+    var testState = new SuT.ListItem();
+    testState.Apply(notedEvent);
+    testState.Apply(startedEvent);
+    testState.Apply(pausedEvent);
+
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
+    Assert.AreEqual(taskId, testState.TaskId);
+    Assert.AreEqual(taskVersion - 1, testState.Version);
+    Assert.AreEqual(tenantId, testState.TenantId);
+    Assert.AreEqual(notedPayload.CreatedAt, testState.CreatedAt);
+    Assert.AreEqual(notedPayload.Title, testState.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Paused, testState.Status);
+  }
+
+  [TestMethod]
   public void GivenNotedAndCompletedEventThenReturnViewWithCompletedStatus()
   {
     var tenantId = Guid.CreateVersion7();

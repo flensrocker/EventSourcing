@@ -157,4 +157,56 @@ public sealed class DailyStatsTests
     Assert.AreEqual(0, testState.CountCompleted);
     Assert.AreEqual(0, testState.CountDismissed);
   }
+
+  [TestMethod]
+  public void GivenPausedEventThenReturnViewWithCountZero()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskPausedAt = _timeProvider.GetUtcNow();
+
+    var pausedPayload = new SuT.TaskEvent.Paused { PausedAt = taskPausedAt };
+    var pausedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, pausedPayload);
+
+    var testState = new SuT.TaskView.DailyStats();
+    testState.Apply(pausedEvent);
+
+    (var notedDay, _, _) = pausedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, pausedEvent));
+    Assert.AreEqual(notedDay, testState.Day);
+    Assert.AreEqual(tenantId, testState.TenantId);
+    Assert.AreEqual(userId, testState.UserId);
+    Assert.AreEqual(0, testState.CountNoted);
+    Assert.AreEqual(0, testState.CountCompleted);
+    Assert.AreEqual(0, testState.CountDismissed);
+  }
+
+  [TestMethod]
+  public void GivenStartedEventThenReturnViewWithCountZero()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskStartedAt = _timeProvider.GetUtcNow();
+
+    var startedPayload = new SuT.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId };
+    var startedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, startedPayload);
+
+    var testState = new SuT.TaskView.DailyStats();
+    testState.Apply(startedEvent);
+
+    (var notedDay, _, _) = startedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, startedEvent));
+    Assert.AreEqual(notedDay, testState.Day);
+    Assert.AreEqual(tenantId, testState.TenantId);
+    Assert.AreEqual(userId, testState.UserId);
+    Assert.AreEqual(0, testState.CountNoted);
+    Assert.AreEqual(0, testState.CountCompleted);
+    Assert.AreEqual(0, testState.CountDismissed);
+  }
 }
