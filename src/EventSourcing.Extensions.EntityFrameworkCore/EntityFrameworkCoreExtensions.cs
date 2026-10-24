@@ -47,11 +47,11 @@ public static class EntityFrameworkCoreExtensions
       where TEntity : class, IDomainEventProjectable, IWhereKey<TEntity>, new()
       where TEventBase : class
     {
-      var firstEvent = domainEvents.FirstOrDefault();
-      if (firstEvent is null)
+      if (domainEvents.Count == 0)
         return projection;
 
-      var lastEvent = domainEvents.Last();
+      var firstEvent = domainEvents[0];
+      var lastEvent = domainEvents[domainEvents.Count - 1];
 
       var entityId = firstEvent.Metadata.StreamId;
       var firstExpectedVersion = firstEvent.Metadata.StreamVersion - 1;
