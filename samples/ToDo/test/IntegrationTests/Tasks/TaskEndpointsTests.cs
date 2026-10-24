@@ -19,6 +19,44 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     : base(testContext) { }
 
   [TestMethod]
+  public async Task GivenNotExistingTaskIdWhenPauseThenReturnNotFound()
+  {
+    var taskId = Guid.CreateVersion7();
+    var pauseRequest = new PauseDto { };
+
+    using var testResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{taskId}/pause", pauseRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
+
+    await using var assertScope = _factory.Services.CreateAsyncScope();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+
+    var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
+    Assert.IsNull(taskEventList);
+  }
+
+  [TestMethod]
+  public async Task GivenNotExistingTaskIdWhenStartThenReturnNotFound()
+  {
+    var taskId = Guid.CreateVersion7();
+    var startRequest = new StartDto { };
+
+    using var testResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{taskId}/start", startRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
+
+    await using var assertScope = _factory.Services.CreateAsyncScope();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+
+    var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
+    Assert.IsNull(taskEventList);
+  }
+
+  [TestMethod]
   public async Task GivenNotExistingTaskIdWhenCompleteThenReturnNotFound()
   {
     var taskId = Guid.CreateVersion7();
