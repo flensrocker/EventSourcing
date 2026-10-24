@@ -39,7 +39,7 @@ internal class TaskListItemStrongConsistentProjection(ILogger<TaskListItemStrong
   async Task IDbStrongConsistentProjection<TaskEvent, ToDoDbContext>.ApplyEvents(
     IDomainEventStorage<TaskEvent> eventStore,
     ToDoDbContext dbContext,
-    IEnumerable<DomainEvent> domainEvents
+    IReadOnlyList<DomainEvent> domainEvents
   )
   {
     _listItem = await dbContext

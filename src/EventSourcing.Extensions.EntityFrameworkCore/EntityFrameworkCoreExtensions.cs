@@ -39,7 +39,7 @@ public static class EntityFrameworkCoreExtensions
   {
     public async Task<TEntity?> UpdateProjectionAsync<TEntity, TEventBase>(
       IDomainEventStorage<TEventBase> eventStore,
-      IEnumerable<DomainEvent> domainEvents,
+      IReadOnlyList<DomainEvent> domainEvents,
       TEntity? projection,
       string projectionTypeName,
       ILogger logger

@@ -11,5 +11,5 @@ public interface IDbStrongConsistentProjection<TEventBase, TDbContext>
   where TEventBase : class
   where TDbContext : DbContext
 {
-  Task ApplyEvents(IDomainEventStorage<TEventBase> eventStore, TDbContext dbContext, IEnumerable<DomainEvent> domainEvents);
+  Task ApplyEvents(IDomainEventStorage<TEventBase> eventStore, TDbContext dbContext, IReadOnlyList<DomainEvent> domainEvents);
 }
