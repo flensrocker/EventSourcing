@@ -22,6 +22,8 @@ public sealed class StartCommandTests
   [TestMethod]
   public void IsJsonSerializable()
   {
-    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Start>(SuT.Start.Create(startedAt: DateTimeOffset.UtcNow, byUserId: Guid.CreateVersion7()));
+    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Start>(
+      SuT.Start.Create(startedAt: DateTimeOffset.UtcNow, byUserId: Guid.CreateVersion7())
+    );
   }
 }

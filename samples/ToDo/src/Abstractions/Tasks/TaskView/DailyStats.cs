@@ -82,9 +82,7 @@ public abstract partial record TaskView
       CountNoted++;
     }
 
-    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Paused payload)
-    {
-    }
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Paused payload) { }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload)
     {
@@ -92,9 +90,7 @@ public abstract partial record TaskView
       CountNoted++;
     }
 
-    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload)
-    {
-    }
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload) { }
 
     public void Apply(DomainEvent @event)
     {
