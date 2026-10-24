@@ -26,6 +26,17 @@ public static class TaskEndpoints
     public required Guid TaskId { get; init; }
   }
 
+  public record PauseDto
+  {
+    public DateTimeOffset? PausedAt { get; init; }
+  }
+
+  public record StartDto
+  {
+    public DateTimeOffset? StartedAt { get; init; }
+    public Guid? ByUserId { get; init; }
+  }
+
   internal static TBuilder MapTasks<TBuilder>(this TBuilder builder, string taskRoute)
     where TBuilder : IEndpointRouteBuilder
   {
@@ -69,11 +80,33 @@ public static class TaskEndpoints
     );
 
     builder.MapPut(
+      "{taskId}/pause",
+      static async (HttpContext context, Guid taskId, [FromBody] PauseDto dto) =>
+      {
+        return await TaskCommand
+          .Pause.Create(pausedAt: dto.PausedAt)
+          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+          .ToTypedResult();
+      }
+    );
+
+    builder.MapPut(
       "{taskId}/reopen",
       static async (HttpContext context, Guid taskId) =>
       {
         return await TaskCommand
           .Reopen.Create()
+          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+          .ToTypedResult();
+      }
+    );
+
+    builder.MapPut(
+      "{taskId}/start",
+      static async (HttpContext context, Guid taskId, [FromBody] StartDto dto) =>
+      {
+        return await TaskCommand
+          .Start.Create(startedAt: dto.StartedAt, byUserId: dto.ByUserId)
           .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
           .ToTypedResult();
       }

@@ -7,6 +7,8 @@ export const TaskStatus = {
   Open: 0,
   Completed: 1,
   Dismissed: 2,
+  Started: 3,
+  Paused: 4,
 } as const;
 export type TaskStatus = (typeof TaskStatus)[keyof typeof TaskStatus];
 
@@ -40,7 +42,9 @@ export const TaskCommandType = {
   Complete: `${TaskCommandType_Base}_Complete`,
   Dismiss: `${TaskCommandType_Base}_Dismiss`,
   Note: `${TaskCommandType_Base}_Note`,
+  Pause: `${TaskCommandType_Base}_Pause`,
   Reopen: `${TaskCommandType_Base}_Reopen`,
+  Start: `${TaskCommandType_Base}_Start`,
 } as const;
 
 export const TaskEventType_Base = `${ToDoConstants.Module}_TaskEvent`;
@@ -50,7 +54,9 @@ export const TaskEventType = {
   Completed: `${TaskEventType_Base}_Completed`,
   Dismissed: `${TaskEventType_Base}_Dismissed`,
   Noted: `${TaskEventType_Base}_Noted`,
+  Paused: `${TaskEventType_Base}_Paused`,
   Reopened: `${TaskEventType_Base}_Reopened`,
+  Started: `${TaskEventType_Base}_Started`,
 } as const;
 
 export const TaskViewType_Base = `${ToDoConstants.Module}_TaskView`;

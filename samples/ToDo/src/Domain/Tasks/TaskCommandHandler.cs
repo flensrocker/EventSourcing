@@ -14,7 +14,9 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
       TaskCommand.Complete complete => Complete(state, complete),
       TaskCommand.Dismiss dismiss => Dismiss(state, dismiss),
       TaskCommand.Note note => Note(state, note),
+      TaskCommand.Pause pause => Pause(state, pause),
       TaskCommand.Reopen reopen => Reopen(state, reopen),
+      TaskCommand.Start start => Start(state, start),
       _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
     };
   }
@@ -26,8 +28,14 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
 
     if (state.Version == 0)
       return new DomainResult.NotFound("The task does not exist.");
-    if (state.Status != Abstractions.Tasks.TaskStatus.Open)
+    if (
+      state.Status != Abstractions.Tasks.TaskStatus.Open
+      && state.Status != Abstractions.Tasks.TaskStatus.Paused
+      && state.Status != Abstractions.Tasks.TaskStatus.Started
+    )
+    {
       return new DomainResult.BadRequest("The task is not open.");
+    }
 
     return (TaskEvent[])[new TaskEvent.Completed { }];
   }
@@ -39,8 +47,14 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
 
     if (state.Version == 0)
       return new DomainResult.NotFound("The task does not exist.");
-    if (state.Status != Abstractions.Tasks.TaskStatus.Open)
+    if (
+      state.Status != Abstractions.Tasks.TaskStatus.Open
+      && state.Status != Abstractions.Tasks.TaskStatus.Paused
+      && state.Status != Abstractions.Tasks.TaskStatus.Started
+    )
+    {
       return new DomainResult.BadRequest("The task is not open.");
+    }
 
     return (TaskEvent[])[new TaskEvent.Dismissed { Reason = command.Reason }];
   }
@@ -53,6 +67,19 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
     return (TaskEvent[])[new TaskEvent.Noted { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
   }
 
+  private DomainResult<TaskEvent[]> Pause(TaskCommandState state, TaskCommand.Pause command)
+  {
+    if (state.Status == Abstractions.Tasks.TaskStatus.Paused)
+      return (TaskEvent[])[];
+
+    if (state.Version == 0)
+      return new DomainResult.NotFound("The task does not exist.");
+    if (state.Status != Abstractions.Tasks.TaskStatus.Started)
+      return new DomainResult.BadRequest("The task is not started.");
+
+    return (TaskEvent[])[new TaskEvent.Paused { PausedAt = command.PausedAt ?? _timeProvider.GetUtcNow() }];
+  }
+
   private static DomainResult<TaskEvent[]> Reopen(TaskCommandState state, TaskCommand.Reopen command)
   {
     if (state.Version == 0)
@@ -60,7 +87,22 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
 
     if (state.Status == Abstractions.Tasks.TaskStatus.Open)
       return (TaskEvent[])[];
+    if (state.Status == Abstractions.Tasks.TaskStatus.Paused || state.Status == Abstractions.Tasks.TaskStatus.Started)
+      return new DomainResult.BadRequest("The task is not closed.");
 
     return (TaskEvent[])[new TaskEvent.Reopened { }];
+  }
+
+  private DomainResult<TaskEvent[]> Start(TaskCommandState state, TaskCommand.Start command)
+  {
+    if (state.Status == Abstractions.Tasks.TaskStatus.Started && state.StartedByUserId == command.ByUserId)
+      return (TaskEvent[])[];
+
+    if (state.Version == 0)
+      return new DomainResult.NotFound("The task does not exist.");
+    if (state.Status == Abstractions.Tasks.TaskStatus.Dismissed || state.Status == Abstractions.Tasks.TaskStatus.Completed)
+      return new DomainResult.BadRequest("The task is closed.");
+
+    return (TaskEvent[])[new TaskEvent.Started { StartedAt = command.StartedAt ?? _timeProvider.GetUtcNow(), ByUserId = command.ByUserId }];
   }
 }

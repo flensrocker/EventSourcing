@@ -123,4 +123,60 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.NotFound>(testResult);
   }
+
+  [TestMethod]
+  public async Task GivenPausedStateThenReturnBadRequest()
+  {
+    var userId = Guid.CreateVersion7();
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+    var taskStartedAt = taskCreatedAt.AddMinutes(1.0);
+    var taskPausedAt = taskStartedAt.AddMinutes(1.0);
+
+    var testState = new TaskCommandState();
+    testState.Apply(
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+    );
+    testState.Apply(
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId })
+    );
+    testState.Apply(CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Paused { PausedAt = taskPausedAt }));
+
+    await using var testScope = _serviceProvider.CreateAsyncScope();
+    var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
+    var testResult = await SuT
+      .Reopen.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
+
+    Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.BadRequest>(testResult);
+  }
+
+  [TestMethod]
+  public async Task GivenStartedStateThenReturnBadRequest()
+  {
+    var userId = Guid.CreateVersion7();
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+    var taskStartedAt = taskCreatedAt.AddMinutes(1.0);
+
+    var testState = new TaskCommandState();
+    testState.Apply(
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+    );
+    testState.Apply(
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId })
+    );
+
+    await using var testScope = _serviceProvider.CreateAsyncScope();
+    var testHandler = testScope.ServiceProvider.GetRequiredService<ICommandHandler<Abstractions.Tasks.TaskEvent, SuT, TaskCommandState>>();
+    var testResult = await SuT
+      .Reopen.Create()
+      .Pipe(async command => await testHandler.ExecuteCommandAsync(testState, command).ConfigureAwait(false))
+      .ConfigureAwait(false);
+
+    Assert.IsInstanceOfType<DomainResult<Abstractions.Tasks.TaskEvent[]>.BadRequest>(testResult);
+  }
 }

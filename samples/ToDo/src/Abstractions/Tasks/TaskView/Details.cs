@@ -29,16 +29,22 @@ public abstract partial record TaskView
     [JsonInclude]
     public string? DismissReason { get; internal set; }
 
+    [Id(5)]
+    [JsonInclude]
+    public Guid? StartedByUserId { get; internal set; }
+
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Completed payload)
     {
       Status = TaskStatus.Completed;
       DismissReason = null;
+      StartedByUserId = null;
     }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Dismissed payload)
     {
       Status = TaskStatus.Dismissed;
       DismissReason = payload.Reason;
+      StartedByUserId = null;
     }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
@@ -46,12 +52,26 @@ public abstract partial record TaskView
       Title = payload.Title;
       Status = TaskStatus.Open;
       DismissReason = null;
+      StartedByUserId = null;
+    }
+
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Paused payload)
+    {
+      Status = TaskStatus.Paused;
+      StartedByUserId = null;
     }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload)
     {
       Status = TaskStatus.Open;
       DismissReason = null;
+      StartedByUserId = null;
+    }
+
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload)
+    {
+      Status = TaskStatus.Started;
+      StartedByUserId = payload.ByUserId;
     }
 
     public void Apply(DomainEvent @event)

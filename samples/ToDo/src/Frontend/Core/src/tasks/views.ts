@@ -9,6 +9,7 @@ export type TaskView_Details = IDomainEventVersionable &
     Title: string;
     Status: TaskStatus;
     DismissReason: string | null;
+    StartedByUserId: string | null;
   }>;
 export const emptyTaskViewDetails: TaskView_Details = {
   TaskId: '',
@@ -16,6 +17,7 @@ export const emptyTaskViewDetails: TaskView_Details = {
   Title: '',
   Status: TaskStatus.Open,
   DismissReason: null,
+  StartedByUserId: null,
 };
 
 export const getTaskViewDetailsId = (details: TaskView_Details) => details.TaskId;

@@ -23,15 +23,33 @@ export type TaskCommand_Note_Response = CommandResult & Readonly<{ TaskId: strin
 export const createTaskCommandNote = (cmd: WithoutType<TaskCommand_Note>) => withType(cmd, TaskCommandType.Note);
 export const getTaskCommandNoteRoute = () => getToDoTaskRoute('note');
 
+export type TaskCommand_Pause = WithType<typeof TaskCommandType.Pause> & {
+  readonly PausedAt: string | null;
+};
+export type TaskCommand_Pause_Response = CommandResult;
+export const createTaskCommandPause = (cmd: WithoutType<TaskCommand_Pause>) => withType(cmd, TaskCommandType.Pause);
+export const getTaskCommandPauseRoute = (taskId: string) => getToDoTaskRoute('pause', taskId);
+
 export type TaskCommand_Reopen = WithType<typeof TaskCommandType.Reopen>;
 export type TaskCommand_Reopen_Response = CommandResult;
 const reopen = withType<TaskCommand_Reopen>({}, TaskCommandType.Reopen);
 export const createTaskCommandReopen = () => reopen;
 export const getTaskCommandReopenRoute = (taskId: string) => getToDoTaskRoute('reopen', taskId);
 
-export type TaskCommand = TaskCommand_Complete | TaskCommand_Dismiss | TaskCommand_Note | TaskCommand_Reopen;
+export type TaskCommand_Start = WithType<typeof TaskCommandType.Start> & {
+  readonly StartedAt: string | null;
+  readonly ByUserId: string | null;
+};
+export type TaskCommand_Start_Response = CommandResult;
+export const createTaskCommandStart = (cmd: WithoutType<TaskCommand_Start>) => withType(cmd, TaskCommandType.Start);
+export const getTaskCommandStartRoute = (taskId: string) => getToDoTaskRoute('Start', taskId);
+
+export type TaskCommand =
+  TaskCommand_Complete | TaskCommand_Dismiss | TaskCommand_Note | TaskCommand_Pause | TaskCommand_Reopen | TaskCommand_Start;
 
 export const isTaskCommandComplete = (event: TaskCommand) => isObjectOfType<TaskCommand_Complete>(event, TaskCommandType.Complete);
 export const isTaskCommandDismiss = (event: TaskCommand) => isObjectOfType<TaskCommand_Dismiss>(event, TaskCommandType.Dismiss);
 export const isTaskCommandNote = (event: TaskCommand) => isObjectOfType<TaskCommand_Note>(event, TaskCommandType.Note);
+export const isTaskCommandPause = (event: TaskCommand) => isObjectOfType<TaskCommand_Pause>(event, TaskCommandType.Pause);
 export const isTaskCommandReopen = (event: TaskCommand) => isObjectOfType<TaskCommand_Reopen>(event, TaskCommandType.Reopen);
+export const isTaskCommandStart = (event: TaskCommand) => isObjectOfType<TaskCommand_Start>(event, TaskCommandType.Start);

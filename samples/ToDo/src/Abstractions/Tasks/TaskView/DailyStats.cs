@@ -82,10 +82,18 @@ public abstract partial record TaskView
       CountNoted++;
     }
 
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Paused payload)
+    {
+    }
+
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload)
     {
       // for simplicity a reopening of a task is like noting a new task
       CountNoted++;
+    }
+
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload)
+    {
     }
 
     public void Apply(DomainEvent @event)
