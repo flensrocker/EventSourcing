@@ -50,7 +50,7 @@ public abstract partial record TaskView
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
     {
       Title = payload.Title;
-      Status = TaskStatus.Open;
+      Status = TaskStatus.Opened;
       DismissReason = null;
       StartedByUserId = null;
     }
@@ -63,7 +63,7 @@ public abstract partial record TaskView
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload)
     {
-      Status = TaskStatus.Open;
+      Status = TaskStatus.Opened;
       DismissReason = null;
       StartedByUserId = null;
     }

@@ -27,7 +27,7 @@ public sealed class DetailsTests
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
-    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
     Assert.IsNull(testState.DismissReason);
     Assert.IsNull(testState.StartedByUserId);
   }
@@ -171,7 +171,7 @@ public sealed class DetailsTests
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
-    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
     Assert.IsNull(testState.DismissReason);
     Assert.IsNull(testState.StartedByUserId);
   }
@@ -201,7 +201,7 @@ public sealed class DetailsTests
     Assert.AreEqual(taskId, testState.TaskId);
     Assert.AreEqual(taskVersion - 1, testState.Version);
     Assert.AreEqual(notedPayload.Title, testState.Title);
-    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
     Assert.IsNull(testState.DismissReason);
     Assert.IsNull(testState.StartedByUserId);
   }

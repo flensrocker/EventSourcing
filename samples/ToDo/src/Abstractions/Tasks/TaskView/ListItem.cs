@@ -60,7 +60,7 @@ public abstract partial record TaskView
       TenantId = metadata.TenantId;
       CreatedAt = payload.CreatedAt;
       Title = payload.Title;
-      Status = TaskStatus.Open;
+      Status = TaskStatus.Opened;
     }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Paused payload)
@@ -71,7 +71,7 @@ public abstract partial record TaskView
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload)
     {
       Version = metadata.StreamVersion;
-      Status = TaskStatus.Open;
+      Status = TaskStatus.Opened;
     }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload)

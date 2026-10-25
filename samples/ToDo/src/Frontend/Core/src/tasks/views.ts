@@ -15,7 +15,7 @@ export const emptyTaskViewDetails: TaskView_Details = {
   TaskId: '',
   Version: 0,
   Title: '',
-  Status: TaskStatus.Open,
+  Status: TaskStatus.Opened,
   DismissReason: null,
   StartedByUserId: null,
 };

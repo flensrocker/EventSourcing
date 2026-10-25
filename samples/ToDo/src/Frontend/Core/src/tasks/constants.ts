@@ -4,7 +4,7 @@ export const TaskTitleMaxLength = 100;
 export const TaskDismissReasonMaxLength = 200;
 
 export const TaskStatus = {
-  Open: 0,
+  Opened: 0,
   Completed: 1,
   Dismissed: 2,
   Started: 3,

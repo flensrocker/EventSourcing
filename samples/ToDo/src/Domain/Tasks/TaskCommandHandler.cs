@@ -7,102 +7,96 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
 {
   private readonly TimeProvider _timeProvider = timeProvider;
 
-  public Task<DomainResult<TaskEvent[]>> ExecuteCommandAsync(TaskCommandState state, TaskCommand command)
+  Task<DomainResult<TaskEvent[]>> ICommandHandler<TaskEvent, TaskCommand, TaskCommandState>.ExecuteCommandAsync(
+    TaskCommandState state,
+    TaskCommand command
+  )
+  {
+    return state.Status switch
+    {
+      Abstractions.Tasks.TaskStatus.Completed => FromCompletedTo(state, command),
+      Abstractions.Tasks.TaskStatus.Dismissed => FromDismissedTo(state, command),
+      Abstractions.Tasks.TaskStatus.Opened => FromOpenedTo(state, command),
+      Abstractions.Tasks.TaskStatus.Paused => FromPausedTo(state, command),
+      Abstractions.Tasks.TaskStatus.Started => FromStartedTo(state, command),
+      _ => new DomainResult.InternalError($"Unhandled state {state.Status}"),
+    };
+  }
+
+  private static DomainResult<TaskEvent[]> FromCompletedTo(TaskCommandState state, TaskCommand command)
   {
     return command switch
     {
-      TaskCommand.Complete complete => Complete(state, complete),
-      TaskCommand.Dismiss dismiss => Dismiss(state, dismiss),
-      TaskCommand.Note note => Note(state, note),
-      TaskCommand.Pause pause => Pause(state, pause),
-      TaskCommand.Reopen reopen => Reopen(state, reopen),
-      TaskCommand.Start start => Start(state, start),
+      TaskCommand.Complete => (TaskEvent[])[],
+      TaskCommand.Dismiss => new DomainResult.BadRequest("The task is not open."),
+      TaskCommand.Note => new DomainResult.BadRequest("The task already exists."),
+      TaskCommand.Pause => new DomainResult.BadRequest("The task is not open."),
+      TaskCommand.Reopen => (TaskEvent[])[new TaskEvent.Reopened { }],
+      TaskCommand.Start => new DomainResult.BadRequest("The task is not open."),
       _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
     };
   }
 
-  private static DomainResult<TaskEvent[]> Complete(TaskCommandState state, TaskCommand.Complete command)
+  private static DomainResult<TaskEvent[]> FromDismissedTo(TaskCommandState state, TaskCommand command)
   {
-    if (state.Status == Abstractions.Tasks.TaskStatus.Completed)
-      return (TaskEvent[])[];
-
-    if (state.Version == 0)
-      return new DomainResult.NotFound("The task does not exist.");
-    if (
-      state.Status != Abstractions.Tasks.TaskStatus.Open
-      && state.Status != Abstractions.Tasks.TaskStatus.Paused
-      && state.Status != Abstractions.Tasks.TaskStatus.Started
-    )
+    return command switch
     {
-      return new DomainResult.BadRequest("The task is not open.");
-    }
-
-    return (TaskEvent[])[new TaskEvent.Completed { }];
+      TaskCommand.Complete => new DomainResult.BadRequest("The task is already dismissed."),
+      TaskCommand.Dismiss cmd when cmd.Reason == state.DismissReason => (TaskEvent[])[],
+      TaskCommand.Dismiss => new DomainResult.BadRequest("The task is not open."),
+      TaskCommand.Note => new DomainResult.BadRequest("The task already exists."),
+      TaskCommand.Pause => new DomainResult.BadRequest("The task is not open."),
+      TaskCommand.Reopen => (TaskEvent[])[new TaskEvent.Reopened { }],
+      TaskCommand.Start => new DomainResult.BadRequest("The task is not open."),
+      _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
+    };
   }
 
-  private static DomainResult<TaskEvent[]> Dismiss(TaskCommandState state, TaskCommand.Dismiss command)
+  private DomainResult<TaskEvent[]> FromOpenedTo(TaskCommandState state, TaskCommand command)
   {
-    if (state.Status == Abstractions.Tasks.TaskStatus.Dismissed && state.DismissReason == command.Reason)
-      return (TaskEvent[])[];
-
-    if (state.Version == 0)
-      return new DomainResult.NotFound("The task does not exist.");
-    if (
-      state.Status != Abstractions.Tasks.TaskStatus.Open
-      && state.Status != Abstractions.Tasks.TaskStatus.Paused
-      && state.Status != Abstractions.Tasks.TaskStatus.Started
-    )
+    return command switch
     {
-      return new DomainResult.BadRequest("The task is not open.");
-    }
-
-    return (TaskEvent[])[new TaskEvent.Dismissed { Reason = command.Reason }];
+      not TaskCommand.Note when state.Version == 0 => new DomainResult.NotFound("The task does not exist."),
+      TaskCommand.Complete => (TaskEvent[])[new TaskEvent.Completed { }],
+      TaskCommand.Dismiss cmd => (TaskEvent[])[new TaskEvent.Dismissed { Reason = cmd.Reason }],
+      TaskCommand.Note when state.Version > 0 => new DomainResult.BadRequest("The task already exists."),
+      TaskCommand.Note cmd => (TaskEvent[])[new TaskEvent.Noted { CreatedAt = _timeProvider.GetUtcNow(), Title = cmd.Title }],
+      TaskCommand.Pause => new DomainResult.BadRequest("The task is not started."),
+      TaskCommand.Reopen => (TaskEvent[])[],
+      TaskCommand.Start cmd => (TaskEvent[])
+        [new TaskEvent.Started { StartedAt = cmd.StartedAt ?? _timeProvider.GetUtcNow(), ByUserId = cmd.ByUserId }],
+      _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
+    };
   }
 
-  private DomainResult<TaskEvent[]> Note(TaskCommandState state, TaskCommand.Note command)
+  private DomainResult<TaskEvent[]> FromPausedTo(TaskCommandState state, TaskCommand command)
   {
-    if (state.Version > 0)
-      return new DomainResult.BadRequest("A task with this id already exists.");
-
-    return (TaskEvent[])[new TaskEvent.Noted { CreatedAt = _timeProvider.GetUtcNow(), Title = command.Title }];
+    return command switch
+    {
+      TaskCommand.Complete => (TaskEvent[])[new TaskEvent.Completed { }],
+      TaskCommand.Dismiss cmd => (TaskEvent[])[new TaskEvent.Dismissed { Reason = cmd.Reason }],
+      TaskCommand.Note => new DomainResult.BadRequest("The task already exists."),
+      TaskCommand.Pause => (TaskEvent[])[],
+      TaskCommand.Reopen => new DomainResult.BadRequest("The task is not closed."),
+      TaskCommand.Start cmd => (TaskEvent[])
+        [new TaskEvent.Started { StartedAt = cmd.StartedAt ?? _timeProvider.GetUtcNow(), ByUserId = cmd.ByUserId }],
+      _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
+    };
   }
 
-  private DomainResult<TaskEvent[]> Pause(TaskCommandState state, TaskCommand.Pause command)
+  private DomainResult<TaskEvent[]> FromStartedTo(TaskCommandState state, TaskCommand command)
   {
-    if (state.Status == Abstractions.Tasks.TaskStatus.Paused)
-      return (TaskEvent[])[];
-
-    if (state.Version == 0)
-      return new DomainResult.NotFound("The task does not exist.");
-    if (state.Status != Abstractions.Tasks.TaskStatus.Started)
-      return new DomainResult.BadRequest("The task is not started.");
-
-    return (TaskEvent[])[new TaskEvent.Paused { PausedAt = command.PausedAt ?? _timeProvider.GetUtcNow() }];
-  }
-
-  private static DomainResult<TaskEvent[]> Reopen(TaskCommandState state, TaskCommand.Reopen command)
-  {
-    if (state.Version == 0)
-      return new DomainResult.NotFound("The task does not exist.");
-
-    if (state.Status == Abstractions.Tasks.TaskStatus.Open)
-      return (TaskEvent[])[];
-    if (state.Status == Abstractions.Tasks.TaskStatus.Paused || state.Status == Abstractions.Tasks.TaskStatus.Started)
-      return new DomainResult.BadRequest("The task is not closed.");
-
-    return (TaskEvent[])[new TaskEvent.Reopened { }];
-  }
-
-  private DomainResult<TaskEvent[]> Start(TaskCommandState state, TaskCommand.Start command)
-  {
-    if (state.Status == Abstractions.Tasks.TaskStatus.Started && state.StartedByUserId == command.ByUserId)
-      return (TaskEvent[])[];
-
-    if (state.Version == 0)
-      return new DomainResult.NotFound("The task does not exist.");
-    if (state.Status == Abstractions.Tasks.TaskStatus.Dismissed || state.Status == Abstractions.Tasks.TaskStatus.Completed)
-      return new DomainResult.BadRequest("The task is closed.");
-
-    return (TaskEvent[])[new TaskEvent.Started { StartedAt = command.StartedAt ?? _timeProvider.GetUtcNow(), ByUserId = command.ByUserId }];
+    return command switch
+    {
+      TaskCommand.Complete => (TaskEvent[])[new TaskEvent.Completed { }],
+      TaskCommand.Dismiss cmd => (TaskEvent[])[new TaskEvent.Dismissed { Reason = cmd.Reason }],
+      TaskCommand.Note => new DomainResult.BadRequest("The task already exists."),
+      TaskCommand.Pause cmd => (TaskEvent[])[new TaskEvent.Paused { PausedAt = cmd.PausedAt ?? _timeProvider.GetUtcNow() }],
+      TaskCommand.Reopen => new DomainResult.BadRequest("The task is not closed."),
+      TaskCommand.Start cmd when cmd.ByUserId == state.StartedByUserId => (TaskEvent[])[],
+      TaskCommand.Start cmd => (TaskEvent[])
+        [new TaskEvent.Started { StartedAt = cmd.StartedAt ?? _timeProvider.GetUtcNow(), ByUserId = cmd.ByUserId }],
+      _ => new DomainResult.InternalError($"Unhandled command type {command.GetType().FullName}"),
+    };
   }
 }

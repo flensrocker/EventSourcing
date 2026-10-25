@@ -35,7 +35,7 @@ public sealed class TaskCommandState : IDomainEventVersionable, ITaskEventProjec
 
   void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
   {
-    Status = Abstractions.Tasks.TaskStatus.Open;
+    Status = Abstractions.Tasks.TaskStatus.Opened;
     DismissReason = null;
     StartedByUserId = null;
   }
@@ -48,7 +48,7 @@ public sealed class TaskCommandState : IDomainEventVersionable, ITaskEventProjec
 
   void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload)
   {
-    Status = Abstractions.Tasks.TaskStatus.Open;
+    Status = Abstractions.Tasks.TaskStatus.Opened;
     DismissReason = null;
     StartedByUserId = null;
   }

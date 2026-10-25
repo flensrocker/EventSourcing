@@ -48,7 +48,7 @@ public sealed class ListItemTests
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(notedPayload.CreatedAt, testState.CreatedAt);
     Assert.AreEqual(notedPayload.Title, testState.Title);
-    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
   }
 
   [TestMethod]
@@ -197,7 +197,7 @@ public sealed class ListItemTests
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(notedPayload.CreatedAt, testState.CreatedAt);
     Assert.AreEqual(notedPayload.Title, testState.Title);
-    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
   }
 
   [TestMethod]
@@ -228,7 +228,7 @@ public sealed class ListItemTests
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(notedPayload.CreatedAt, testState.CreatedAt);
     Assert.AreEqual(notedPayload.Title, testState.Title);
-    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Open, testState.Status);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
   }
 
   [TestMethod]

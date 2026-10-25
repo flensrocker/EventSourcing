@@ -76,26 +76,26 @@ export class ToDoTaskDetails {
   protected readonly status = computed(() => this.#details().Status);
   protected readonly dismissReason = computed(() => this.#details().DismissReason ?? '');
 
-  protected readonly isOpen = computed(() => this.status() === TaskStatus.Open);
+  protected readonly isOpen = computed(() => this.status() === TaskStatus.Opened);
   protected readonly isCompleted = computed(() => this.status() === TaskStatus.Completed);
   protected readonly isDismissed = computed(() => this.status() === TaskStatus.Dismissed);
 
   protected readonly complete = commandHandler({
     createCommand: () => [this.taskId(), this.#client.complete(this.taskId())],
-    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
+    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Opened,
     busyTracker: this.#busyTracker,
     versionTracker: this.#versionTracker,
   });
   protected readonly dismiss = commandHandler({
     // TODO show dialog to enter reason
     createCommand: () => [this.taskId(), this.#client.dismiss(this.taskId(), { Reason: "I don't want to!" })],
-    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Open,
+    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() !== TaskStatus.Opened,
     busyTracker: this.#busyTracker,
     versionTracker: this.#versionTracker,
   });
   protected readonly reopen = commandHandler({
     createCommand: () => [this.taskId(), this.#client.reopen(this.taskId())],
-    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() === TaskStatus.Open,
+    disabledWhen: () => this.isLoading() || !this.#detailsStream.hasValue() || this.status() === TaskStatus.Opened,
     busyTracker: this.#busyTracker,
     versionTracker: this.#versionTracker,
   });
