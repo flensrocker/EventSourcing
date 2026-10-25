@@ -1,8 +1,11 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, viewChild } from '@angular/core';
+import { outputFromObservable, outputToObservable, toObservable } from '@angular/core/rxjs-interop';
 
 import { MatButtonModule } from '@angular/material/button';
-import { MatListModule } from '@angular/material/list';
+import { MatListModule, MatSelectionList } from '@angular/material/list';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+
+import { map, of, switchMap } from 'rxjs';
 
 import { TaskQueryRequest_List } from '@flensrocker/to-do-core';
 
@@ -17,19 +20,21 @@ import { ToDoTaskListItem } from './to-do-task-list-item';
       color: var(--mat-sys-error);
     }
   `,
-  template: `<mat-list>
-      @if (isLoading()) {
-        <mat-progress-bar mode="indeterminate" />
-      } @else if (listError(); as errMsg) {
-        <mat-list-item class="error">ERROR: {{ errMsg }}</mat-list-item>
-      } @else {
+  template: `@if (isLoading()) {
+      <mat-progress-bar mode="indeterminate" />
+    } @else if (listError(); as errMsg) {
+      <div class="error">ERROR: {{ errMsg }}</div>
+    } @else if (itemList().length === 0) {
+      <div>No tasks found.</div>
+    } @else {
+      <mat-selection-list #tasks [multiple]="false">
         @for (item of itemList(); track item.TaskId) {
-          <to-do-task-list-item [item]="item" />
-        } @empty {
-          <mat-list-item>No tasks found.</mat-list-item>
+          <mat-list-option [value]="item" togglePosition="before">
+            <to-do-task-list-item [item]="item" />
+          </mat-list-option>
         }
-      }
-    </mat-list>
+      </mat-selection-list>
+    }
     <div>
       <button type="button" matButton [disabled]="isLoading()" (click)="reload()">Reload</button>
     </div>`,
@@ -44,6 +49,17 @@ export class ToDoTaskList {
     return error?.message;
   });
   protected readonly itemList = computed(() => (this.#listQuery.hasValue() ? this.#listQuery.value().ItemList : []));
+
+  protected readonly selectionList = viewChild<MatSelectionList>('tasks');
+  readonly selectedTaskIds = outputFromObservable(
+    toObservable(this.selectionList).pipe(
+      switchMap((list) =>
+        list == null
+          ? of([])
+          : outputToObservable(list.selectionChange).pipe(map((_) => list.selectedOptions.selected.map((options) => options.value.TaskId))),
+      ),
+    ),
+  );
 
   protected reload() {
     this.#listQuery.reload();
