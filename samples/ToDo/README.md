@@ -45,3 +45,13 @@ stateDiagram-v2
         Dismissed --> [*]
     }
 ```
+
+The task transitions between states on applying a command to the task.
+Either an error or a success will be returned.
+
+- `NotFound`: if the task does not exist
+- `Forbidden`: if access to the task is denied
+- `BadRequest`: if the command is not allowed in the current state of the task
+- `InternalError`: if an unexpected error happens
+- `Success`: on a successful transition a list of domain events is returned which describes the transition;
+  the list can be empty if the transition doesn't change the state at all
