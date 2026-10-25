@@ -25,21 +25,18 @@ import { toDoTaskViewDetailsStream } from './views';
     <mat-card-content>
       @if (isLoading()) {
         <mat-progress-bar mode="indeterminate" />
-      } @else {
-        @let errMsg = detailsError();
-        @if (errMsg) {
-          <div class="error">ERROR: {{ errMsg }}</div>
-        } @else if (isOpened()) {
-          opened
-        } @else if (isStarted()) {
-          started by TODO
-        } @else if (isPaused()) {
-          paused
-        } @else if (isCompleted()) {
-          completed
-        } @else if (isDismissed()) {
-          dismissed with reason &quot;{{ dismissReason() }}&quot;
-        }
+      } @else if (detailsError(); as errMsg) {
+        <div class="error">ERROR: {{ errMsg }}</div>
+      } @else if (isOpened()) {
+        opened
+      } @else if (isStarted()) {
+        started by TODO
+      } @else if (isPaused()) {
+        paused
+      } @else if (isCompleted()) {
+        completed
+      } @else if (isDismissed()) {
+        dismissed with reason &quot;{{ dismissReason() }}&quot;
       }
     </mat-card-content>
     <mat-card-actions>
