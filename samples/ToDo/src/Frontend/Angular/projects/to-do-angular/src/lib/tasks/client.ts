@@ -8,18 +8,26 @@ import {
   createTaskCommandComplete,
   createTaskCommandDismiss,
   createTaskCommandOpen,
+  createTaskCommandPause,
   createTaskCommandReopen,
+  createTaskCommandStart,
   getTaskCommandCompleteRoute,
   getTaskCommandDismissRoute,
   getTaskCommandOpenRoute,
+  getTaskCommandPauseRoute,
   getTaskCommandReopenRoute,
+  getTaskCommandStartRoute,
   isToDoTaskIdValid,
   TaskCommand_Complete_Response,
   TaskCommand_Dismiss,
   TaskCommand_Dismiss_Response,
   TaskCommand_Open,
   TaskCommand_Open_Response,
+  TaskCommand_Pause,
+  TaskCommand_Pause_Response,
   TaskCommand_Reopen_Response,
+  TaskCommand_Start,
+  TaskCommand_Start_Response,
 } from '@flensrocker/to-do-core';
 
 @Service()
@@ -54,10 +62,28 @@ export class ToDoTaskClient {
     });
   }
 
+  pause(taskId: string, command: WithoutType<TaskCommand_Pause>): Observable<TaskCommand_Pause_Response> {
+    return (
+      this.#validate(taskId) ??
+      this.#http.put<TaskCommand_Pause_Response>(getTaskCommandPauseRoute(taskId), createTaskCommandPause(command), {
+        keepalive: true,
+      })
+    );
+  }
+
   reopen(taskId: string): Observable<TaskCommand_Reopen_Response> {
     return (
       this.#validate(taskId) ??
       this.#http.put<TaskCommand_Reopen_Response>(getTaskCommandReopenRoute(taskId), createTaskCommandReopen(), {
+        keepalive: true,
+      })
+    );
+  }
+
+  start(taskId: string, command: WithoutType<TaskCommand_Start>): Observable<TaskCommand_Start_Response> {
+    return (
+      this.#validate(taskId) ??
+      this.#http.put<TaskCommand_Start_Response>(getTaskCommandStartRoute(taskId), createTaskCommandStart(command), {
         keepalive: true,
       })
     );
