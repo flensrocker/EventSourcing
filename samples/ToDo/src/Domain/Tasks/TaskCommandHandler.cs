@@ -27,7 +27,7 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
   private static readonly FrozenDictionary<Type, string> _badRequestWhenCompleted = new Dictionary<Type, string>
   {
     { typeof(TaskCommand.Dismiss), "The task is already completed." },
-    { typeof(TaskCommand.Note), "The task already exists." },
+    { typeof(TaskCommand.Open), "The task already exists." },
     { typeof(TaskCommand.Pause), "The task is already completed." },
     { typeof(TaskCommand.Start), "The task is already completed." },
   }.ToFrozenDictionary();
@@ -47,7 +47,7 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
   {
     { typeof(TaskCommand.Complete), "The task is already dismissed." },
     { typeof(TaskCommand.Dismiss), "The task is already dismissed." },
-    { typeof(TaskCommand.Note), "The task already exists." },
+    { typeof(TaskCommand.Open), "The task already exists." },
     { typeof(TaskCommand.Pause), "The task is already dismissed." },
     { typeof(TaskCommand.Start), "The task is already dismissed." },
   }.ToFrozenDictionary();
@@ -72,11 +72,11 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
   {
     return command switch
     {
-      not TaskCommand.Note when state.Version == 0 => new DomainResult.NotFound("The task does not exist."),
-      TaskCommand.Note when state.Version > 0 => new DomainResult.BadRequest("The task already exists."),
+      not TaskCommand.Open when state.Version == 0 => new DomainResult.NotFound("The task does not exist."),
+      TaskCommand.Open when state.Version > 0 => new DomainResult.BadRequest("The task already exists."),
       TaskCommand.Complete => (TaskEvent[])[new TaskEvent.Completed { }],
       TaskCommand.Dismiss cmd => (TaskEvent[])[new TaskEvent.Dismissed { Reason = cmd.Reason }],
-      TaskCommand.Note cmd => (TaskEvent[])[new TaskEvent.Noted { CreatedAt = _timeProvider.GetUtcNow(), Title = cmd.Title }],
+      TaskCommand.Open cmd => (TaskEvent[])[new TaskEvent.Opened { OpenedAt = _timeProvider.GetUtcNow(), Title = cmd.Title }],
       TaskCommand.Reopen => (TaskEvent[])[],
       TaskCommand.Start cmd => (TaskEvent[])
         [new TaskEvent.Started { StartedAt = cmd.StartedAt ?? _timeProvider.GetUtcNow(), ByUserId = cmd.ByUserId }],
@@ -87,7 +87,7 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
 
   private static readonly FrozenDictionary<Type, string> _badRequestWhenPaused = new Dictionary<Type, string>
   {
-    { typeof(TaskCommand.Note), "The task already exists." },
+    { typeof(TaskCommand.Open), "The task already exists." },
     { typeof(TaskCommand.Reopen), "The task is not closed." },
   }.ToFrozenDictionary();
 
@@ -107,7 +107,7 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
 
   private static readonly FrozenDictionary<Type, string> _badRequestWhenStarted = new Dictionary<Type, string>
   {
-    { typeof(TaskCommand.Note), "The task already exists." },
+    { typeof(TaskCommand.Open), "The task already exists." },
     { typeof(TaskCommand.Reopen), "The task is not closed." },
   }.ToFrozenDictionary();
 

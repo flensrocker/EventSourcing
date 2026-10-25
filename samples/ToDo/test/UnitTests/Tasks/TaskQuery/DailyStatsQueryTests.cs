@@ -86,7 +86,7 @@ public sealed class DailyStatsQueryTests
           {
             Day = DateOnly.FromDateTime(DateTime.Today),
             UserId = Guid.CreateVersion7(),
-            CountNoted = 1,
+            CountOpened = 1,
             CountCompleted = 2,
             CountDismissed = 3,
           },

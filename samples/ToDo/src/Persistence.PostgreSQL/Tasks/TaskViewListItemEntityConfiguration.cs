@@ -14,7 +14,7 @@ internal class TaskViewListItemEntityConfiguration : IEntityTypeConfiguration<Ta
 
     builder.Property(e => e.Version);
     builder.Property(e => e.TenantId);
-    builder.Property(e => e.CreatedAt);
+    builder.Property(e => e.OpenedAt);
     builder.Property(e => e.Title).HasMaxLength(TaskConstants.TaskTitleMaxLength);
     builder.Property(e => e.Status);
 

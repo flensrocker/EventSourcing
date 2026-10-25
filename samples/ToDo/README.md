@@ -29,7 +29,7 @@ stateDiagram-v2
         Completed
         Dismissed
 
-        [*] --> Opened: note
+        [*] --> Opened: open
         Opened --> Opened: reopen
         Opened --> Started: start
         Opened --> Completed: complete

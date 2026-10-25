@@ -2,16 +2,16 @@
 
 namespace Flensrocker.ToDo.Abstractions.Tasks;
 
-[JsonDerivedType(typeof(Noted), TaskConstants.TaskEvent.Noted)]
+[JsonDerivedType(typeof(Opened), TaskConstants.TaskEvent.Opened)]
 public abstract partial record TaskEvent
 {
   [GenerateSerializer]
-  [Alias(TaskConstants.TaskEvent.Noted)]
-  public sealed record Noted : TaskEvent
+  [Alias(TaskConstants.TaskEvent.Opened)]
+  public sealed record Opened : TaskEvent
   {
     [Id(0)]
-    [JsonPropertyName("CreatedAt")]
-    public required DateTimeOffset CreatedAt { get; init; }
+    [JsonPropertyName("OpenedAt")]
+    public required DateTimeOffset OpenedAt { get; init; }
 
     [Id(1)]
     [JsonPropertyName("Title")]

@@ -20,12 +20,12 @@ internal class ListTasksViewQuery(IDbContextFactory<ToDoDbContext> dbContextFact
       .TaskListItem.AsNoTracking()
       .Where(e => e.TenantId == request.TenantId)
       .OrderBy(e => e.Status)
-      .ThenByDescending(e => e.CreatedAt)
+      .ThenByDescending(e => e.OpenedAt)
       .Select(e => new TaskQueryResponse.List.ListItem
       {
         TaskId = e.TaskId,
         Version = e.Version,
-        CreatedAt = e.CreatedAt,
+        CreatedAt = e.OpenedAt,
         Title = e.Title,
         Status = e.Status,
       })

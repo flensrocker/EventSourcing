@@ -14,7 +14,7 @@ internal class TaskViewDailyStatsEntityConfiguration : IEntityTypeConfiguration<
     builder.Property(e => e.Day);
     builder.Property(e => e.TenantId);
     builder.Property(e => e.UserId);
-    builder.Property(e => e.CountNoted);
+    builder.Property(e => e.CountOpened);
     builder.Property(e => e.CountCompleted);
     builder.Property(e => e.CountDismissed);
 

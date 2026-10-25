@@ -47,7 +47,7 @@ public abstract partial record TaskView
       StartedByUserId = null;
     }
 
-    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Opened payload)
     {
       Title = payload.Title;
       Status = TaskStatus.Opened;

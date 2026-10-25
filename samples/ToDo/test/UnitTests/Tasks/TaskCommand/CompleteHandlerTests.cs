@@ -20,7 +20,7 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
@@ -47,7 +47,7 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(
       CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId })
@@ -77,7 +77,7 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(
       CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId })
@@ -104,7 +104,7 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Completed { }));
 
@@ -143,7 +143,7 @@ public sealed class CompleteHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" }));
 

@@ -10,7 +10,7 @@ public static class TaskConstants
     public const string Base = $"{ToDoConstants.Module}_TaskCommand";
     public const string Complete = $"{Base}_Complete";
     public const string Dismiss = $"{Base}_Dismiss";
-    public const string Note = $"{Base}_Note";
+    public const string Open = $"{Base}_Open";
     public const string Pause = $"{Base}_Pause";
     public const string Reopen = $"{Base}_Reopen";
     public const string Start = $"{Base}_Start";
@@ -21,7 +21,7 @@ public static class TaskConstants
     public const string Base = $"{ToDoConstants.Module}_TaskEvent";
     public const string Completed = $"{Base}_Completed";
     public const string Dismissed = $"{Base}_Dismissed";
-    public const string Noted = $"{Base}_Noted";
+    public const string Opened = $"{Base}_Opened";
     public const string Paused = $"{Base}_Paused";
     public const string Reopened = $"{Base}_Reopened";
     public const string Started = $"{Base}_Started";

@@ -66,7 +66,7 @@ public abstract partial record TaskQueryResponse
       public required Guid? UserId { get; init; }
 
       [Id(2)]
-      public required int CountNoted { get; init; }
+      public required int CountOpened { get; init; }
 
       [Id(3)]
       public required int CountCompleted { get; init; }

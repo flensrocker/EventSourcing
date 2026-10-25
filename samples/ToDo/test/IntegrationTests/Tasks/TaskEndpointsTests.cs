@@ -77,24 +77,24 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   [TestMethod]
   public async Task GivenDismissedTaskWhenCompleteThenReturnBadRequest()
   {
-    var noteRequest = new NoteDto { Title = "Some Title" };
-    using var noteResponse = await _client
-      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", noteRequest, _cancellationToken)
+    var openRequest = new OpenDto { Title = "Some Title" };
+    using var openResponse = await _client
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/open", openRequest, _cancellationToken)
       .ConfigureAwait(false);
 
-    Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
-    Assert.IsNotNull(noteResult);
+    Assert.AreEqual(HttpStatusCode.Created, openResponse.StatusCode);
+    var openResult = await openResponse.Content.ReadFromJsonAsync<OpenedDto>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(openResult);
 
     var dismissRequest = new DismissDto { Reason = "Some Reason" };
     using var dismissResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/dismiss", dismissRequest, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/dismiss", dismissRequest, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, dismissResponse.StatusCode);
 
     using var testResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
@@ -176,24 +176,24 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   [TestMethod]
   public async Task GivenCompletedTaskWhenDismissThenReturnBadRequest()
   {
-    var noteRequest = new NoteDto { Title = "Some Title" };
-    using var noteResponse = await _client
-      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", noteRequest, _cancellationToken)
+    var openRequest = new OpenDto { Title = "Some Title" };
+    using var openResponse = await _client
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/open", openRequest, _cancellationToken)
       .ConfigureAwait(false);
 
-    Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
-    Assert.IsNotNull(noteResult);
+    Assert.AreEqual(HttpStatusCode.Created, openResponse.StatusCode);
+    var openResult = await openResponse.Content.ReadFromJsonAsync<OpenedDto>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(openResult);
 
     using var completeResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, completeResponse.StatusCode);
 
     var testRequest = new DismissDto { Reason = "Some Reason" };
     using var testResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/dismiss", testRequest, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/dismiss", testRequest, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
@@ -210,18 +210,18 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   [DataRow("123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1")]
   [DataRow("With\nLinebreak")]
   [DataRow("With\rCarriage Return")]
-  public async Task GivenInvalidNoteRequestWhenNoteThenReturnBadRequest(string? invalidTitle)
+  public async Task GivenInvalidOpenRequestWhenOpenThenReturnBadRequest(string? invalidTitle)
   {
-    var testRequest = new NoteDto { Title = invalidTitle };
+    var testRequest = new OpenDto { Title = invalidTitle };
 
     using var testResponse = await _client
-      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", testRequest, _cancellationToken)
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/open", testRequest, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
     var testResult = await testResponse.Content.ReadAsProblemDetailsWithErrorsAsync(_cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(testResult?.Errors);
-    Assert.IsTrue(testResult.Errors.ContainsKey(nameof(NoteDto.Title)));
+    Assert.IsTrue(testResult.Errors.ContainsKey(nameof(OpenDto.Title)));
   }
 
   [TestMethod]
@@ -243,27 +243,27 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   }
 
   [TestMethod]
-  public async Task GivenNoteDismissReopenCompleteWorkflowWhenGetDetailsThenReturnVersion4()
+  public async Task GivenOpenDismissReopenCompleteWorkflowWhenGetDetailsThenReturnVersion4()
   {
     var expectedVersion = 0;
 
-    var noteRequest = new NoteDto { Title = "Some Title" };
-    var noteStartTimestamp = DateTimeOffset.UtcNow;
-    using var noteResponse = await _client
-      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", noteRequest, _cancellationToken)
+    var openRequest = new OpenDto { Title = "Some Title" };
+    var openStartTimestamp = DateTimeOffset.UtcNow;
+    using var openResponse = await _client
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/open", openRequest, _cancellationToken)
       .ConfigureAwait(false);
-    var noteEndTimestamp = DateTimeOffset.UtcNow;
+    var openEndTimestamp = DateTimeOffset.UtcNow;
     expectedVersion++;
 
-    Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
-    Assert.IsNotNull(noteResult);
-    Assert.AreEqual(expectedVersion, noteResult.Version);
-    Assert.AreNotEqual(Guid.Empty, noteResult.TaskId);
+    Assert.AreEqual(HttpStatusCode.Created, openResponse.StatusCode);
+    var openResult = await openResponse.Content.ReadFromJsonAsync<OpenedDto>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(openResult);
+    Assert.AreEqual(expectedVersion, openResult.Version);
+    Assert.AreNotEqual(Guid.Empty, openResult.TaskId);
 
     var dismissRequest = new DismissDto { Reason = "Some Reason" };
     using var dismissResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/dismiss", dismissRequest, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/dismiss", dismissRequest, _cancellationToken)
       .ConfigureAwait(false);
     expectedVersion++;
 
@@ -274,7 +274,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
     var secondDismissRequest = new DismissDto { Reason = "Some Reason" };
     using var secondDismissResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/dismiss", secondDismissRequest, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/dismiss", secondDismissRequest, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, secondDismissResponse.StatusCode);
@@ -285,7 +285,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(expectedVersion, secondDismissResult.Version);
 
     using var reopenResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/reopen", (object?)null, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/reopen", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
     expectedVersion++;
 
@@ -295,7 +295,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(expectedVersion, reopenResult.Version);
 
     using var secondReopenResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/reopen", (object?)null, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/reopen", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, secondReopenResponse.StatusCode);
@@ -304,7 +304,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(expectedVersion, secondReopenResult.Version);
 
     using var completeResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
     expectedVersion++;
 
@@ -314,7 +314,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(expectedVersion, completeResult.Version);
 
     using var secondCompleteResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, secondCompleteResponse.StatusCode);
@@ -326,15 +326,15 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
     var detailsResult = await _client
       .GetFromJsonAsync<TaskView.Details>(
-        $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}",
+        $"{ToDoRoutes.TaskRoute}/{openResult.TaskId}",
         ToDoJsonSerializerContext.Default.Options,
         _cancellationToken
       )
       .ConfigureAwait(false);
     Assert.IsNotNull(detailsResult);
-    Assert.AreEqual(noteResult.TaskId, detailsResult.TaskId);
+    Assert.AreEqual(openResult.TaskId, detailsResult.TaskId);
     Assert.AreEqual(expectedVersion, detailsResult.Version);
-    Assert.AreEqual(noteRequest.Title, detailsResult.Title);
+    Assert.AreEqual(openRequest.Title, detailsResult.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Completed, detailsResult.Status);
     Assert.IsNull(detailsResult.DismissReason);
 
@@ -344,17 +344,17 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
       .ConfigureAwait(false);
     Assert.IsNotNull(listResult);
     Assert.IsNotEmpty(listResult.ItemList);
-    CollectionAssert.Contains(listResult.ItemList.Select(item => item.TaskId).ToArray(), noteResult.TaskId);
+    CollectionAssert.Contains(listResult.ItemList.Select(item => item.TaskId).ToArray(), openResult.TaskId);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
     var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
 
-    var taskEventList = await eventStore.ReadEventsFromStorage(noteResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
+    var taskEventList = await eventStore.ReadEventsFromStorage(openResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);
     Assert.HasCount(4, taskEventList);
-    var notedEvent = Assert.IsInstanceOfType<TaskEvent.Noted>(taskEventList[0].Payload);
-    Assert.AreEqual(noteRequest.Title, notedEvent.Title);
-    Assert.IsInRange(noteStartTimestamp, noteEndTimestamp, notedEvent.CreatedAt);
+    var openedEvent = Assert.IsInstanceOfType<TaskEvent.Opened>(taskEventList[0].Payload);
+    Assert.AreEqual(openRequest.Title, openedEvent.Title);
+    Assert.IsInRange(openStartTimestamp, openEndTimestamp, openedEvent.OpenedAt);
     var dismissedEvent = Assert.IsInstanceOfType<TaskEvent.Dismissed>(taskEventList[1].Payload);
     Assert.AreEqual(dismissRequest.Reason, dismissedEvent.Reason);
     Assert.IsInstanceOfType<TaskEvent.Reopened>(taskEventList[2].Payload);
@@ -366,19 +366,19 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   {
     var expectedVersion = 0;
 
-    var noteRequest = new NoteDto { Title = "Some Title" };
-    var noteStartTimestamp = DateTimeOffset.UtcNow;
-    using var noteResponse = await _client
-      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/note", noteRequest, _cancellationToken)
+    var openRequest = new OpenDto { Title = "Some Title" };
+    var openStartTimestamp = DateTimeOffset.UtcNow;
+    using var openResponse = await _client
+      .PostAsJsonAsync($"{ToDoRoutes.TaskRoute}/open", openRequest, _cancellationToken)
       .ConfigureAwait(false);
-    var noteEndTimestamp = DateTimeOffset.UtcNow;
+    var openEndTimestamp = DateTimeOffset.UtcNow;
     expectedVersion++;
 
-    Assert.AreEqual(HttpStatusCode.Created, noteResponse.StatusCode);
-    var noteResult = await noteResponse.Content.ReadFromJsonAsync<NotedDto>(_cancellationToken).ConfigureAwait(false);
-    Assert.IsNotNull(noteResult);
-    Assert.AreEqual(expectedVersion, noteResult.Version);
-    Assert.AreNotEqual(Guid.Empty, noteResult.TaskId);
+    Assert.AreEqual(HttpStatusCode.Created, openResponse.StatusCode);
+    var openResult = await openResponse.Content.ReadFromJsonAsync<OpenedDto>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(openResult);
+    Assert.AreEqual(expectedVersion, openResult.Version);
+    Assert.AreNotEqual(Guid.Empty, openResult.TaskId);
 
     _testContext.WriteLine("Setup SSE stream");
     var streamSetupTask = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -388,7 +388,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     var waitForCount = 2;
     var streamTask = Task.Run(async () =>
     {
-      using var streamRequest = new HttpRequestMessage(HttpMethod.Get, $"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/stream");
+      using var streamRequest = new HttpRequestMessage(HttpMethod.Get, $"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/stream");
       streamRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
       using var streamResponse = await _client
@@ -428,7 +428,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     await streamSetupTask.Task.ConfigureAwait(false);
 
     using var completeResponse = await _client
-      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{noteResult.TaskId}/complete", (object?)null, _cancellationToken)
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
 
     Assert.AreEqual(HttpStatusCode.OK, completeResponse.StatusCode);
@@ -438,9 +438,9 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     _testContext.WriteLine("SSE stream finished");
 
     Assert.HasCount(2, detailsList);
-    Assert.AreEqual(noteResult.TaskId, detailsList[0].TaskId);
+    Assert.AreEqual(openResult.TaskId, detailsList[0].TaskId);
     Assert.AreEqual(1, detailsList[0].Version);
-    Assert.AreEqual(noteResult.TaskId, detailsList[1].TaskId);
+    Assert.AreEqual(openResult.TaskId, detailsList[1].TaskId);
     Assert.AreEqual(2, detailsList[1].Version);
 
     // when multiple TaskView.Details got streamed, the async projection is hopefully processed
@@ -458,7 +458,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     if (dailyStatsResult.ItemList.Count > 0)
     {
       Assert.IsNotEmpty(dailyStatsResult.ItemList);
-      Assert.IsGreaterThan(0, dailyStatsResult.ItemList.First().CountNoted);
+      Assert.IsGreaterThan(0, dailyStatsResult.ItemList.First().CountOpened);
     }
   }
 }

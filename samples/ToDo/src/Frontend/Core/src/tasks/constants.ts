@@ -41,7 +41,7 @@ export type TaskCommandType_Base = typeof TaskCommandType_Base;
 export const TaskCommandType = {
   Complete: `${TaskCommandType_Base}_Complete`,
   Dismiss: `${TaskCommandType_Base}_Dismiss`,
-  Note: `${TaskCommandType_Base}_Note`,
+  Open: `${TaskCommandType_Base}_Open`,
   Pause: `${TaskCommandType_Base}_Pause`,
   Reopen: `${TaskCommandType_Base}_Reopen`,
   Start: `${TaskCommandType_Base}_Start`,
@@ -53,7 +53,7 @@ export type TaskEventType_Base = typeof TaskEventType_Base;
 export const TaskEventType = {
   Completed: `${TaskEventType_Base}_Completed`,
   Dismissed: `${TaskEventType_Base}_Dismissed`,
-  Noted: `${TaskEventType_Base}_Noted`,
+  Opened: `${TaskEventType_Base}_Opened`,
   Paused: `${TaskEventType_Base}_Paused`,
   Reopened: `${TaskEventType_Base}_Reopened`,
   Started: `${TaskEventType_Base}_Started`,

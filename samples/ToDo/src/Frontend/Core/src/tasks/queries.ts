@@ -12,7 +12,7 @@ export type TaskQueryRequest_DailyStats = Readonly<{
 export type TaskQueryResponse_DailyStats_DailyStatsItem = Readonly<{
   Day: string;
   UserId: string | null;
-  CountNoted: number;
+  CountOpened: number;
   CountCompleted: number;
   CountDismissed: number;
 }>;
@@ -27,7 +27,7 @@ export type TaskQueryRequest_List = Readonly<{
 export type TaskQueryResponse_List_ListItem = IDomainEventVersionable &
   Readonly<{
     TaskId: string;
-    CreatedAt: string;
+    OpenedAt: string;
     Title: string;
     Status: TaskStatus;
   }>;

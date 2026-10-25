@@ -49,10 +49,10 @@ public sealed class DailyStatsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new SuT.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
-    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+    var openedPayload = new SuT.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" };
+    var openedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, openedPayload);
 
-    var key = ToDoTestUtilities.TestGetKey<SuT.TaskView.DailyStats>(notedEvent);
+    var key = ToDoTestUtilities.TestGetKey<SuT.TaskView.DailyStats>(openedEvent);
     var stringKey = Assert.IsInstanceOfType<string>(key);
     Assert.AreEqual(72, stringKey.Length);
   }
@@ -72,12 +72,12 @@ public sealed class DailyStatsTests
     var testState = new SuT.TaskView.DailyStats();
     testState.Apply(completedEvent);
 
-    (var notedDay, _, _) = completedEvent.Metadata.CreatedAt;
+    (var completedDay, _, _) = completedEvent.Metadata.CreatedAt;
     Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, completedEvent));
-    Assert.AreEqual(notedDay, testState.Day);
+    Assert.AreEqual(completedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
-    Assert.AreEqual(0, testState.CountNoted);
+    Assert.AreEqual(0, testState.CountOpened);
     Assert.AreEqual(1, testState.CountCompleted);
     Assert.AreEqual(0, testState.CountDismissed);
   }
@@ -97,18 +97,18 @@ public sealed class DailyStatsTests
     var testState = new SuT.TaskView.DailyStats();
     testState.Apply(dismissedEvent);
 
-    (var notedDay, _, _) = dismissedEvent.Metadata.CreatedAt;
+    (var dismissedDay, _, _) = dismissedEvent.Metadata.CreatedAt;
     Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, dismissedEvent));
-    Assert.AreEqual(notedDay, testState.Day);
+    Assert.AreEqual(dismissedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
-    Assert.AreEqual(0, testState.CountNoted);
+    Assert.AreEqual(0, testState.CountOpened);
     Assert.AreEqual(0, testState.CountCompleted);
     Assert.AreEqual(1, testState.CountDismissed);
   }
 
   [TestMethod]
-  public void GivenNotedEventThenReturnViewWithCountNotedIncremented()
+  public void GivenOpenedEventThenReturnViewWithCountOpenedIncremented()
   {
     var tenantId = Guid.CreateVersion7();
     var userId = Guid.CreateVersion7();
@@ -117,24 +117,24 @@ public sealed class DailyStatsTests
     var taskVersion = 1;
     var taskCreatedAt = _timeProvider.GetUtcNow();
 
-    var notedPayload = new SuT.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" };
-    var notedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, notedPayload);
+    var openedPayload = new SuT.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" };
+    var openedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, openedPayload);
 
     var testState = new SuT.TaskView.DailyStats();
-    testState.Apply(notedEvent);
+    testState.Apply(openedEvent);
 
-    (var notedDay, _, _) = notedEvent.Metadata.CreatedAt;
-    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, notedEvent));
-    Assert.AreEqual(notedDay, testState.Day);
+    (var openedDay, _, _) = openedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, openedEvent));
+    Assert.AreEqual(openedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
-    Assert.AreEqual(1, testState.CountNoted);
+    Assert.AreEqual(1, testState.CountOpened);
     Assert.AreEqual(0, testState.CountCompleted);
     Assert.AreEqual(0, testState.CountDismissed);
   }
 
   [TestMethod]
-  public void GivenReopenedEventThenReturnViewWithCountNotedIncremented()
+  public void GivenReopenedEventThenReturnViewWithCountOpenedIncremented()
   {
     var tenantId = Guid.CreateVersion7();
     var userId = Guid.CreateVersion7();
@@ -148,12 +148,12 @@ public sealed class DailyStatsTests
     var testState = new SuT.TaskView.DailyStats();
     testState.Apply(reopenedEvent);
 
-    (var notedDay, _, _) = reopenedEvent.Metadata.CreatedAt;
+    (var reopenedDay, _, _) = reopenedEvent.Metadata.CreatedAt;
     Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, reopenedEvent));
-    Assert.AreEqual(notedDay, testState.Day);
+    Assert.AreEqual(reopenedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
-    Assert.AreEqual(1, testState.CountNoted);
+    Assert.AreEqual(1, testState.CountOpened);
     Assert.AreEqual(0, testState.CountCompleted);
     Assert.AreEqual(0, testState.CountDismissed);
   }
@@ -174,12 +174,12 @@ public sealed class DailyStatsTests
     var testState = new SuT.TaskView.DailyStats();
     testState.Apply(pausedEvent);
 
-    (var notedDay, _, _) = pausedEvent.Metadata.CreatedAt;
+    (var pausedDay, _, _) = pausedEvent.Metadata.CreatedAt;
     Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, pausedEvent));
-    Assert.AreEqual(notedDay, testState.Day);
+    Assert.AreEqual(pausedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
-    Assert.AreEqual(0, testState.CountNoted);
+    Assert.AreEqual(0, testState.CountOpened);
     Assert.AreEqual(0, testState.CountCompleted);
     Assert.AreEqual(0, testState.CountDismissed);
   }
@@ -200,12 +200,12 @@ public sealed class DailyStatsTests
     var testState = new SuT.TaskView.DailyStats();
     testState.Apply(startedEvent);
 
-    (var notedDay, _, _) = startedEvent.Metadata.CreatedAt;
+    (var startedDay, _, _) = startedEvent.Metadata.CreatedAt;
     Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, startedEvent));
-    Assert.AreEqual(notedDay, testState.Day);
+    Assert.AreEqual(startedDay, testState.Day);
     Assert.AreEqual(tenantId, testState.TenantId);
     Assert.AreEqual(userId, testState.UserId);
-    Assert.AreEqual(0, testState.CountNoted);
+    Assert.AreEqual(0, testState.CountOpened);
     Assert.AreEqual(0, testState.CountCompleted);
     Assert.AreEqual(0, testState.CountDismissed);
   }

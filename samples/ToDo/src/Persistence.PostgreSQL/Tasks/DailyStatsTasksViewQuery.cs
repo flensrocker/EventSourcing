@@ -31,7 +31,7 @@ internal class DailyStatsTasksViewQuery(IDbContextFactory<ToDoDbContext> dbConte
       {
         Day = e.Day,
         UserId = e.UserId,
-        CountNoted = e.CountNoted,
+        CountOpened = e.CountOpened,
         CountCompleted = e.CountCompleted,
         CountDismissed = e.CountDismissed,
       })

@@ -57,7 +57,7 @@ public abstract partial record TaskView
 
     [Id(4)]
     [JsonInclude]
-    public int CountNoted { get; internal set; }
+    public int CountOpened { get; internal set; }
 
     [Id(5)]
     [JsonInclude]
@@ -77,17 +77,17 @@ public abstract partial record TaskView
       CountDismissed++;
     }
 
-    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Opened payload)
     {
-      CountNoted++;
+      CountOpened++;
     }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Paused payload) { }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload)
     {
-      // for simplicity a reopening of a task is like noting a new task
-      CountNoted++;
+      // for simplicity a reopening of a task is like opening a new task
+      CountOpened++;
     }
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload) { }

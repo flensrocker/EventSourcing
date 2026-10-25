@@ -29,8 +29,8 @@ import { toDoTaskViewDetailsStream } from './views';
         @let errMsg = detailsError();
         @if (errMsg) {
           <div class="error">ERROR: {{ errMsg }}</div>
-        } @else if (isOpen()) {
-          open
+        } @else if (isOpened()) {
+          opened
         } @else if (isCompleted()) {
           completed
         } @else if (isDismissed()) {
@@ -76,7 +76,7 @@ export class ToDoTaskDetails {
   protected readonly status = computed(() => this.#details().Status);
   protected readonly dismissReason = computed(() => this.#details().DismissReason ?? '');
 
-  protected readonly isOpen = computed(() => this.status() === TaskStatus.Opened);
+  protected readonly isOpened = computed(() => this.status() === TaskStatus.Opened);
   protected readonly isCompleted = computed(() => this.status() === TaskStatus.Completed);
   protected readonly isDismissed = computed(() => this.status() === TaskStatus.Dismissed);
 

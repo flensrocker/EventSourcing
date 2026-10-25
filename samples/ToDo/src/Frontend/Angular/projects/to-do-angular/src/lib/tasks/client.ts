@@ -7,18 +7,18 @@ import { WithoutType } from '@flensrocker/event-sourcing-core';
 import {
   createTaskCommandComplete,
   createTaskCommandDismiss,
-  createTaskCommandNote,
+  createTaskCommandOpen,
   createTaskCommandReopen,
   getTaskCommandCompleteRoute,
   getTaskCommandDismissRoute,
-  getTaskCommandNoteRoute,
+  getTaskCommandOpenRoute,
   getTaskCommandReopenRoute,
   isToDoTaskIdValid,
   TaskCommand_Complete_Response,
   TaskCommand_Dismiss,
   TaskCommand_Dismiss_Response,
-  TaskCommand_Note,
-  TaskCommand_Note_Response,
+  TaskCommand_Open,
+  TaskCommand_Open_Response,
   TaskCommand_Reopen_Response,
 } from '@flensrocker/to-do-core';
 
@@ -48,8 +48,8 @@ export class ToDoTaskClient {
     );
   }
 
-  note(command: WithoutType<TaskCommand_Note>): Observable<TaskCommand_Note_Response> {
-    return this.#http.post<TaskCommand_Note_Response>(getTaskCommandNoteRoute(), createTaskCommandNote(command), {
+  open(command: WithoutType<TaskCommand_Open>): Observable<TaskCommand_Open_Response> {
+    return this.#http.post<TaskCommand_Open_Response>(getTaskCommandOpenRoute(), createTaskCommandOpen(command), {
       keepalive: true,
     });
   }

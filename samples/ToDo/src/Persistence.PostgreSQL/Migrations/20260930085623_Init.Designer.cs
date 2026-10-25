@@ -99,7 +99,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
                     b.Property<int>("CountDismissed")
                         .HasColumnType("integer");
 
-                    b.Property<int>("CountNoted")
+                    b.Property<int>("CountOpened")
                         .HasColumnType("integer");
 
                     b.Property<DateOnly>("Day")
@@ -122,7 +122,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTimeOffset>("OpenedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")

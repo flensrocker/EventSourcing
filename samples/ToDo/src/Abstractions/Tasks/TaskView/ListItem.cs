@@ -26,7 +26,7 @@ public abstract partial record TaskView
 
     [Id(3)]
     [JsonInclude]
-    public DateTimeOffset CreatedAt { get; internal set; }
+    public DateTimeOffset OpenedAt { get; internal set; }
 
     [Id(4)]
     [JsonInclude]
@@ -53,12 +53,12 @@ public abstract partial record TaskView
       Status = TaskStatus.Dismissed;
     }
 
-    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Opened payload)
     {
       TaskId = metadata.StreamId;
       Version = metadata.StreamVersion;
       TenantId = metadata.TenantId;
-      CreatedAt = payload.CreatedAt;
+      OpenedAt = payload.OpenedAt;
       Title = payload.Title;
       Status = TaskStatus.Opened;
     }

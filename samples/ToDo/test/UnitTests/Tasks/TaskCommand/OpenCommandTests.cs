@@ -6,16 +6,16 @@ using SuT = Flensrocker.ToDo.Abstractions.Tasks.TaskCommand;
 namespace Flensrocker.ToDo.UnitTests.Tasks.TaskCommand;
 
 [TestClass]
-public sealed class NoteCommandTests
+public sealed class OpenCommandTests
 {
   [TestMethod]
   [DataRow("Valid Title")]
   [DataRow("max length 23456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1234567890")]
   public void GivenValidInputsThenReturnSuccess(string validTitle)
   {
-    var testResult = SuT.Note.Create(title: validTitle);
+    var testResult = SuT.Open.Create(title: validTitle);
 
-    var result = Assert.IsInstanceOfType<DomainResult<SuT.Note>.Success>(testResult);
+    var result = Assert.IsInstanceOfType<DomainResult<SuT.Open>.Success>(testResult);
     Assert.AreEqual(validTitle, result.Value.Title);
   }
 
@@ -29,9 +29,9 @@ public sealed class NoteCommandTests
   )]
   public void GivenValidButDirtyInputsThenReturnSuccessWithSanitizedValues(string title, string expectedTitle)
   {
-    var testResult = SuT.Note.Create(title: title);
+    var testResult = SuT.Open.Create(title: title);
 
-    var result = Assert.IsInstanceOfType<DomainResult<SuT.Note>.Success>(testResult);
+    var result = Assert.IsInstanceOfType<DomainResult<SuT.Open>.Success>(testResult);
     Assert.AreEqual(expectedTitle, result.Value.Title);
   }
 
@@ -48,15 +48,15 @@ public sealed class NoteCommandTests
   [DataRow("With\rCarriage Return")]
   public void GivenInvalidInputsThenReturnValidationProblem(string? invalidTitle)
   {
-    var testResult = SuT.Note.Create(title: invalidTitle);
+    var testResult = SuT.Open.Create(title: invalidTitle);
 
-    var result = Assert.IsInstanceOfType<DomainResult<SuT.Note>.ValidationProblem>(testResult);
-    Assert.IsTrue(result.Errors.ContainsKey(nameof(SuT.Note.Title)));
+    var result = Assert.IsInstanceOfType<DomainResult<SuT.Open>.ValidationProblem>(testResult);
+    Assert.IsTrue(result.Errors.ContainsKey(nameof(SuT.Open.Title)));
   }
 
   [TestMethod]
   public void IsJsonSerializable()
   {
-    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Note>(SuT.Note.Create(title: "Some Title"));
+    ToDoTestUtilities.AssertJsonSerializable<SuT, SuT.Open>(SuT.Open.Create(title: "Some Title"));
   }
 }

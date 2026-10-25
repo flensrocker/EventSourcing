@@ -16,12 +16,12 @@ public static class TaskEndpoints
     public string? Reason { get; init; }
   }
 
-  public record NoteDto
+  public record OpenDto
   {
     public string? Title { get; init; }
   }
 
-  public record NotedDto : CommandResult
+  public record OpenedDto : CommandResult
   {
     public required Guid TaskId { get; init; }
   }
@@ -64,17 +64,17 @@ public static class TaskEndpoints
     );
 
     builder.MapPost(
-      "note",
-      async (HttpContext context, [FromBody] NoteDto dto) =>
+      "open",
+      async (HttpContext context, [FromBody] OpenDto dto) =>
       {
         // NOTE BEST PRACTICE
         // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
         var taskId = Guid.CreateVersion7();
 
         return await TaskCommand
-          .Note.Create(title: dto.Title)
+          .Open.Create(title: dto.Title)
           .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .Pipe(result => DomainResult.Success(new NotedDto { Version = result.Version, TaskId = taskId }))
+          .Pipe(result => DomainResult.Success(new OpenedDto { Version = result.Version, TaskId = taskId }))
           .ToTypedResult($"{taskRoute}/{taskId}");
       }
     );

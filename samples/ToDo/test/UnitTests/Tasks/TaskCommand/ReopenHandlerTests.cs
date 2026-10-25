@@ -20,7 +20,7 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Completed { }));
 
@@ -45,7 +45,7 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Dismissed { Reason = "Some Reason" }));
 
@@ -70,7 +70,7 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
 
     await using var testScope = _serviceProvider.CreateAsyncScope();
@@ -93,7 +93,7 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Completed { }));
     testState.Apply(CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Reopened { }));
@@ -136,7 +136,7 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(
       CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId })
@@ -164,7 +164,7 @@ public sealed class ReopenHandlerTests : BaseTaskHandlerTests
 
     var testState = new TaskCommandState();
     testState.Apply(
-      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Noted { CreatedAt = taskCreatedAt, Title = "Some Title" })
+      CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" })
     );
     testState.Apply(
       CreateTaskEvent(taskId, taskVersion++, new Abstractions.Tasks.TaskEvent.Started { StartedAt = taskStartedAt, ByUserId = userId })

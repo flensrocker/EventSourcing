@@ -33,7 +33,7 @@ public sealed class TaskCommandState : IDomainEventVersionable, ITaskEventProjec
     StartedByUserId = null;
   }
 
-  void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Noted payload)
+  void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Opened payload)
   {
     Status = Abstractions.Tasks.TaskStatus.Opened;
     DismissReason = null;

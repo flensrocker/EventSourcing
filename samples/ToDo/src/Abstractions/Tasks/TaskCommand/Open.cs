@@ -2,21 +2,21 @@
 
 namespace Flensrocker.ToDo.Abstractions.Tasks;
 
-[JsonDerivedType(typeof(Note), TaskConstants.TaskCommand.Note)]
+[JsonDerivedType(typeof(Open), TaskConstants.TaskCommand.Open)]
 public abstract partial record TaskCommand
 {
   [GenerateSerializer]
-  [Alias(TaskConstants.TaskCommand.Note)]
-  public sealed record Note : TaskCommand
+  [Alias(TaskConstants.TaskCommand.Open)]
+  public sealed record Open : TaskCommand
   {
     [Id(0)]
     public required string Title { get; init; }
 
     [JsonConstructor]
-    internal Note() { }
+    internal Open() { }
 
-    private const string _errorTitle = "Invalid 'Note' command";
-    private const string _errorDetail = "The task cannot be noted.";
+    private const string _errorTitle = "Invalid 'Open' command";
+    private const string _errorDetail = "The task cannot be opened.";
     private static readonly char[] _invalidCharacters = ['\r', '\n'];
 
     // NOTE BEST PRACTICE
@@ -28,7 +28,7 @@ public abstract partial record TaskCommand
     // Advantage: less code, but also less control about the validation
     // Other alternatives can include Fluent.Validation and similar libraries.
     // The concrete implementation is not important for Flensrocker.EventSourcing and should fit the needs of the domain.
-    public static DomainResult<Note> Create(string? title)
+    public static DomainResult<Open> Create(string? title)
     {
       title = title?.Trim();
 
@@ -44,7 +44,7 @@ public abstract partial record TaskCommand
       if (title.IndexOfAny(_invalidCharacters) >= 0)
         return new DomainResult.ValidationProblem(_errorTitle, _errorDetail, nameof(Title), "The title contains invalid characters.");
 
-      return new Note { Title = title };
+      return new Open { Title = title };
     }
   }
 }
