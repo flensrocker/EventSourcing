@@ -30,19 +30,24 @@ stateDiagram-v2
         Dismissed
 
         [*] --> Opened: note
+        Opened --> Opened: reopen
         Opened --> Started: start
-        Started --> Paused: pause
-        Paused --> Started: start
         Opened --> Completed: complete
-        Started --> Completed: complete
-        Paused --> Completed: complete
         Opened --> Dismissed: dismiss
+        Started --> Started: start
+        Started --> Paused: pause
+        Started --> Completed: complete
         Started --> Dismissed: dismiss
+        Paused --> Started: start
+        Paused --> Paused: pause
+        Paused --> Completed: complete
         Paused --> Dismissed: dismiss
         Completed --> Opened: reopen
+        Completed --> Completed: complete
         Dismissed --> Opened: reopen
-        Completed --> [*]
+        Dismissed --> Dismissed: dismiss with same reason
         Dismissed --> [*]
+        Completed --> [*]
     }
 ```
 
