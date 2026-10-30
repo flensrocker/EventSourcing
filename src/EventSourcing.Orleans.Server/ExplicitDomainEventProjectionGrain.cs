@@ -76,19 +76,21 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
     return new DomainResult.NotFound();
   }
 
-  public async IAsyncEnumerable<TProjection> StreamProjection([EnumeratorCancellation] CancellationToken cancellationToken)
+  public async IAsyncEnumerable<DomainResult<TProjection>> StreamProjection([EnumeratorCancellation] CancellationToken cancellationToken)
   {
     var projection = await GetOrCreateProjection(cancellationToken);
     if (projection is null)
     {
+      yield return new DomainResult.NotFound();
       DeactivateOnIdle();
-      yield break;
     }
+    else
+    {
+      yield return projection.Projection;
 
-    yield return projection.Projection;
-
-    await foreach (var value in projection.AsObservable().ToAsyncEnumerable().WithCancellation(cancellationToken))
-      yield return value;
+      await foreach (var value in projection.AsObservable().ToAsyncEnumerable().WithCancellation(cancellationToken))
+        yield return value;
+    }
   }
 
   public void Dispose()

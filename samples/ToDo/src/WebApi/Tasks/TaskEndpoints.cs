@@ -153,13 +153,10 @@ public static class TaskEndpoints
       "{taskId}/stream",
       static async (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
       {
-        // TODO is this the way to handle a NotFound etc.?
-        var result = await context.RequestServices.GetProjection<TaskView.Details>(taskId, cancellationToken);
-        if (!result.IsSuccess())
-          return result.ToTypedResult();
-
-        var toDoStream = context.RequestServices.StreamProjection<TaskView.Details>(taskId, cancellationToken);
-        return TypedResults.ServerSentEvents(toDoStream, eventType: TaskConstants.TaskView.Details);
+        var toDoStream = context
+          .RequestServices.StreamProjection<TaskView.Details>(taskId, cancellationToken)
+          .WithSseErrorEvents(eventType: TaskConstants.TaskView.Details);
+        return TypedResults.ServerSentEvents(toDoStream);
       }
     );
 

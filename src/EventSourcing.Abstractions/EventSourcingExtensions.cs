@@ -88,7 +88,7 @@ public static class EventSourcingExtensions
       return await handler.GetProjection(cancellationToken).ConfigureAwait(false);
     }
 
-    public IAsyncEnumerable<TProjection> StreamProjection<TProjection>(Guid id, CancellationToken cancellationToken)
+    public IAsyncEnumerable<DomainResult<TProjection>> StreamProjection<TProjection>(Guid id, CancellationToken cancellationToken)
     {
       var handler = serviceProvider.GetRequiredKeyedService<IDomainEventProjection<TProjection>>(id);
       return handler.StreamProjection(cancellationToken);

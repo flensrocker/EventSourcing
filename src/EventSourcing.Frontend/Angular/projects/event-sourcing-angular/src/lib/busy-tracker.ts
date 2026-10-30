@@ -1,15 +1,19 @@
 import { computed, Signal, signal } from '@angular/core';
 
-export type BusyTracker = Readonly<{
-  /**
-   * Use the returned callback to "stop" the busy-tracker.
-   */
-  start: () => () => void;
+export type IsBusy = Readonly<{
   /**
    * Signals `true` if there are more `start` called than stopped.
    */
   isBusy: Signal<boolean>;
 }>;
+
+export type BusyTracker = IsBusy &
+  Readonly<{
+    /**
+     * Use the returned callback to "stop" the busy-tracker.
+     */
+    start: () => () => void;
+  }>;
 
 export const busyTracker = (): BusyTracker => {
   let nextId = 1;
@@ -27,5 +31,18 @@ export const busyTracker = (): BusyTracker => {
   return {
     start,
     isBusy,
+  };
+};
+
+export const combinedIsBusy = (...busy: IsBusy[]): IsBusy => {
+  return {
+    isBusy: computed(() => {
+      let someIsBusy = false;
+      for (const b of busy) {
+        // explicitly call every signal to track them all
+        someIsBusy = b.isBusy() || someIsBusy;
+      }
+      return someIsBusy;
+    }),
   };
 };

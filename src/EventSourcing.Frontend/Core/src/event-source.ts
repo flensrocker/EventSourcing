@@ -1,6 +1,20 @@
-import { NEVER, Observable, defer, filter, finalize, fromEvent, map, merge, of, scan, shareReplay, switchMap } from 'rxjs';
+import { NEVER, Observable, defer, filter, finalize, fromEvent, map, merge, of, scan, shareReplay, switchMap, throwError } from 'rxjs';
 
 type EventSourceMessageParseFn<TData> = (eventType: string, message: string) => TData;
+
+const SseErrorEventType = 'SseError';
+
+type SseError = Readonly<{
+  StatusCode: number;
+  Message: string | null;
+}>;
+
+const sseErrorMessage: Record<number, string> = {
+  400: 'Bad Request',
+  401: 'Unauthorized',
+  403: 'Forbidden',
+  404: 'Not Found',
+};
 
 export type EventSourceOptions<TData> = Readonly<{
   eventTypes?: readonly string[];
@@ -29,10 +43,12 @@ export const eventSourceInitialConnectingStatus: EventSourceStatus<undefined> = 
   error: undefined,
 };
 
-export const isEventSourceStatus = <TData>(data: EventSourceData<TData>): data is EventSourceStatus<TData> => 'status' in data;
-export const isEventSourceValue = <TData>(data: EventSourceData<TData>): data is EventSourceValue<TData> => 'value' in data;
-export const getEventSourceValue = <TData>(data: EventSourceData<TData>): TData | undefined =>
-  isEventSourceStatus(data) ? data.lastValue : data.value;
+export const isEventSourceStatus = <TData>(data: EventSourceData<TData> | null | undefined): data is EventSourceStatus<TData> =>
+  data != null && 'status' in data;
+export const isEventSourceValue = <TData>(data: EventSourceData<TData> | null | undefined): data is EventSourceValue<TData> =>
+  data != null && 'value' in data;
+export const getEventSourceValue = <TData>(data: EventSourceData<TData> | null | undefined): TData | undefined =>
+  isEventSourceStatus(data) ? data.lastValue : data?.value;
 
 export const fromEventSource = <TData = string>(
   sse: EventSource,
@@ -61,6 +77,14 @@ export const fromEventSource = <TData = string>(
     ),
   );
 
+  const sseError$ = fromEvent<MessageEvent<string>>(sse, SseErrorEventType).pipe(
+    filter((event) => allowedOrigins == null || allowedOrigins.includes(event.origin)),
+    switchMap((event) => {
+      const sseError: SseError = JSON.parse(event.data);
+      return throwError(() => new Error(`${sseError.StatusCode}: ${sseError.Message ?? sseErrorMessage[sseError.StatusCode] ?? ''}`));
+    }),
+  );
+
   const error$: Observable<EventSourceStatus<TData>> = fromEvent<Event>(sse, 'error').pipe(
     switchMap((): Observable<EventSourceStatus<TData>> => {
       if (sse.readyState === EventSource.CLOSED) {
@@ -75,7 +99,7 @@ export const fromEventSource = <TData = string>(
     }),
   );
 
-  return merge(...events$, error$).pipe(
+  return merge(...events$, sseError$, error$).pipe(
     scan<EventSourceData<TData>, EventSourceData<TData>>(
       (last, data) => (isEventSourceStatus(data) ? { ...data, lastValue: getEventSourceValue(last) } : data),
       eventSourceInitialConnectingStatus,

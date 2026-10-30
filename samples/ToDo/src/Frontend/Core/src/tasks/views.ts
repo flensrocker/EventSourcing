@@ -11,14 +11,6 @@ export type TaskView_Details = IDomainEventVersionable &
     DismissReason: string | null;
     StartedByUserId: string | null;
   }>;
-export const emptyTaskViewDetails: TaskView_Details = {
-  TaskId: '',
-  Version: 0,
-  Title: '',
-  Status: TaskStatus.Opened,
-  DismissReason: null,
-  StartedByUserId: null,
-};
 
 export const getTaskViewDetailsId = (details: TaskView_Details) => details.TaskId;
 export const getTaskViewDetailsRoute = (taskId: string) => getToDoTaskRoute('', taskId);

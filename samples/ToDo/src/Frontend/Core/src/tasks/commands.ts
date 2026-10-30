@@ -42,7 +42,7 @@ export type TaskCommand_Start = WithType<typeof TaskCommandType.Start> & {
 };
 export type TaskCommand_Start_Response = CommandResult;
 export const createTaskCommandStart = (cmd: WithoutType<TaskCommand_Start>) => withType(cmd, TaskCommandType.Start);
-export const getTaskCommandStartRoute = (taskId: string) => getToDoTaskRoute('Start', taskId);
+export const getTaskCommandStartRoute = (taskId: string) => getToDoTaskRoute('start', taskId);
 
 export type TaskCommand =
   TaskCommand_Complete | TaskCommand_Dismiss | TaskCommand_Open | TaskCommand_Pause | TaskCommand_Reopen | TaskCommand_Start;

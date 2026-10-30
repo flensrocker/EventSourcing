@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Extensions.AspNetCore;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
@@ -13,7 +14,7 @@ using Flensrocker.ToDo.WebApi;
 var builder = WebApplication.CreateBuilder(args);
 
 // Build JsonSerializerOptions for all relevant parts of the application
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddToDoJsonOptions();
 
 // Register the migration service as early as possible so it runs before all other hosted services
 builder.Services.AddHostedService<MigrationService>();

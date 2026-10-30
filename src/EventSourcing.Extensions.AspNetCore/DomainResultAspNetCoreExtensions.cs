@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.ServerSentEvents;
 using Microsoft.AspNetCore.Http;
 
 namespace Flensrocker.EventSourcing.Extensions.AspNetCore;
@@ -31,6 +33,31 @@ public static class DomainResultAspNetCoreExtensions
     {
       var result = await asyncResult.ConfigureAwait(false);
       return result.ToTypedResult(createdUri);
+    }
+  }
+
+  extension<T>(IAsyncEnumerable<DomainResult<T>> asyncResults)
+  {
+    public async IAsyncEnumerable<SseItem<object?>> WithSseErrorEvents(string eventType)
+    {
+      await foreach (var result in asyncResults)
+      {
+        yield return result switch
+        {
+          DomainResult<T>.BadRequest r => new SseError { StatusCode = HttpStatusCode.BadRequest, Message = r.Message }.ToSseItem(),
+          DomainResult<T>.Forbid r => new SseError { StatusCode = HttpStatusCode.Forbidden, Message = null }.ToSseItem(),
+          DomainResult<T>.InternalError r => new SseError
+          {
+            StatusCode = HttpStatusCode.InternalServerError,
+            Message = r.Message,
+          }.ToSseItem(),
+          DomainResult<T>.NotFound r => new SseError { StatusCode = HttpStatusCode.NotFound, Message = r.Message }.ToSseItem(),
+          DomainResult<T>.Success r => new SseItem<object?>(r.Value, eventType),
+          DomainResult<T>.Unauthorized r => new SseError { StatusCode = HttpStatusCode.Unauthorized, Message = null }.ToSseItem(),
+          DomainResult<T>.ValidationProblem r => new SseError { StatusCode = HttpStatusCode.BadRequest, Message = r.Title }.ToSseItem(),
+          _ => new SseError { StatusCode = HttpStatusCode.InternalServerError, Message = null }.ToSseItem(),
+        };
+      }
     }
   }
 }
