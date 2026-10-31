@@ -74,6 +74,11 @@ public abstract partial record TaskView
       StartedByUserId = payload.ByUserId;
     }
 
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.TitleChanged payload)
+    {
+      Title = payload.Title;
+    }
+
     public void Apply(DomainEvent @event)
     {
       TaskId = @event.Metadata.StreamId;

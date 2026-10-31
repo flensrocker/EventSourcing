@@ -3,6 +3,11 @@ import { isObjectOfType, WithoutType, WithType, withType } from '@flensrocker/ev
 import { TaskEventType } from './constants';
 
 // TODO create validation schema for event types
+export type TaskEvent_TitleChanged = WithType<typeof TaskEventType.TitleChanged> & {
+  readonly Title: string;
+};
+export const createTaskEventTitleChanged = (cmd: WithoutType<TaskEvent_TitleChanged>) => withType(cmd, TaskEventType.TitleChanged);
+
 export type TaskEvent_Completed = WithType<typeof TaskEventType.Completed>;
 const completed = withType<TaskEvent_Completed>({}, TaskEventType.Completed);
 export const createTaskEventCompleted = () => completed;
@@ -42,3 +47,4 @@ export const isTaskEventOpened = (event: TaskEvent) => isObjectOfType<TaskEvent_
 export const isTaskEventPaused = (event: TaskEvent) => isObjectOfType<TaskEvent_Paused>(event, TaskEventType.Paused);
 export const isTaskEventReopened = (event: TaskEvent) => isObjectOfType<TaskEvent_Reopened>(event, TaskEventType.Reopened);
 export const isTaskEventStarted = (event: TaskEvent) => isObjectOfType<TaskEvent_Started>(event, TaskEventType.Started);
+export const isTaskEventTitleChanged = (event: TaskEvent) => isObjectOfType<TaskEvent_TitleChanged>(event, TaskEventType.TitleChanged);

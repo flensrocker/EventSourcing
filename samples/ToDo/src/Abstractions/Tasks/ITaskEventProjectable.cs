@@ -14,6 +14,7 @@ public interface ITaskEventProjectable : IDomainEventProjectable
   void Apply(DomainEventMetadata metadata, TaskEvent.Paused payload);
   void Apply(DomainEventMetadata metadata, TaskEvent.Reopened payload);
   void Apply(DomainEventMetadata metadata, TaskEvent.Started payload);
+  void Apply(DomainEventMetadata metadata, TaskEvent.TitleChanged payload);
 
   void ApplyTaskEvent(DomainEvent @event)
   {
@@ -35,6 +36,9 @@ public interface ITaskEventProjectable : IDomainEventProjectable
         Apply(@event.Metadata, payload);
         break;
       case TaskEvent.Started payload:
+        Apply(@event.Metadata, payload);
+        break;
+      case TaskEvent.TitleChanged payload:
         Apply(@event.Metadata, payload);
         break;
     }

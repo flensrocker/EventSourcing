@@ -11,6 +11,11 @@ namespace Flensrocker.ToDo.WebApi.Tasks;
 
 public static class TaskEndpoints
 {
+  public record ChangeTitleDto
+  {
+    public string? Title { get; init; }
+  }
+
   public record DismissDto
   {
     public string? Reason { get; init; }
@@ -41,6 +46,17 @@ public static class TaskEndpoints
     where TBuilder : IEndpointRouteBuilder
   {
     // endpoints for commands
+    builder.MapPut(
+      "{taskId}/changeTitle",
+      static async (HttpContext context, Guid taskId, [FromBody] ChangeTitleDto dto) =>
+      {
+        return await TaskCommand
+          .ChangeTitle.Create(title: dto.Title)
+          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+          .ToTypedResult();
+      }
+    );
+
     builder.MapPut(
       "{taskId}/complete",
       static async (HttpContext context, Guid taskId) =>

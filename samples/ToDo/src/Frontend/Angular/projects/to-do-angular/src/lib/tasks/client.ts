@@ -5,12 +5,14 @@ import { Observable, throwError } from 'rxjs';
 
 import { WithoutType } from '@flensrocker/event-sourcing-core';
 import {
+  createTaskCommandChangeTitle,
   createTaskCommandComplete,
   createTaskCommandDismiss,
   createTaskCommandOpen,
   createTaskCommandPause,
   createTaskCommandReopen,
   createTaskCommandStart,
+  getTaskCommandChangeTitleRoute,
   getTaskCommandCompleteRoute,
   getTaskCommandDismissRoute,
   getTaskCommandOpenRoute,
@@ -18,6 +20,8 @@ import {
   getTaskCommandReopenRoute,
   getTaskCommandStartRoute,
   isToDoTaskIdValid,
+  TaskCommand_ChangeTitle,
+  TaskCommand_ChangeTitle_Response,
   TaskCommand_Complete_Response,
   TaskCommand_Dismiss,
   TaskCommand_Dismiss_Response,
@@ -36,6 +40,15 @@ export class ToDoTaskClient {
 
   #validate(taskId: string): Observable<never> | null {
     return isToDoTaskIdValid(taskId) ? null : throwError(() => new Error('taskId is required'));
+  }
+
+  changeTitle(taskId: string, command: WithoutType<TaskCommand_ChangeTitle>): Observable<TaskCommand_ChangeTitle_Response> {
+    return (
+      this.#validate(taskId) ??
+      this.#http.put<TaskCommand_ChangeTitle_Response>(getTaskCommandChangeTitleRoute(taskId), createTaskCommandChangeTitle(command), {
+        keepalive: true,
+      })
+    );
   }
 
   complete(taskId: string): Observable<TaskCommand_Complete_Response> {

@@ -209,4 +209,29 @@ public sealed class DailyStatsTests
     Assert.AreEqual(0, testState.CountCompleted);
     Assert.AreEqual(0, testState.CountDismissed);
   }
+
+  [TestMethod]
+  public void GivenTitleChangedEventThenReturnViewWithCountZero()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+
+    var titleChangedPayload = new SuT.TaskEvent.TitleChanged { Title = "Some Title" };
+    var titleChangedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, titleChangedPayload);
+
+    var testState = new SuT.TaskView.DailyStats();
+    testState.Apply(titleChangedEvent);
+
+    (var startedDay, _, _) = titleChangedEvent.Metadata.CreatedAt;
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, titleChangedEvent));
+    Assert.AreEqual(startedDay, testState.Day);
+    Assert.AreEqual(tenantId, testState.TenantId);
+    Assert.AreEqual(userId, testState.UserId);
+    Assert.AreEqual(0, testState.CountOpened);
+    Assert.AreEqual(0, testState.CountCompleted);
+    Assert.AreEqual(0, testState.CountDismissed);
+  }
 }

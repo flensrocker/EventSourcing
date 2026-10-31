@@ -13,14 +13,30 @@ internal sealed class TaskCommandHandler(TimeProvider timeProvider) : ICommandHa
     TaskCommand command
   )
   {
-    return state.Status switch
+    return command switch
     {
-      Abstractions.Tasks.TaskStatus.Completed => FromCompletedTo(state, command),
-      Abstractions.Tasks.TaskStatus.Dismissed => FromDismissedTo(state, command),
-      Abstractions.Tasks.TaskStatus.Opened => FromOpenedTo(state, command),
-      Abstractions.Tasks.TaskStatus.Paused => FromPausedTo(state, command),
-      Abstractions.Tasks.TaskStatus.Started => FromStartedTo(state, command),
-      _ => new DomainResult.InternalError($"Unhandled state {state.Status}"),
+      // Commands independent of the status of a task can run outside the state-machine
+      TaskCommand.ChangeTitle cmd => ChangeTitle(state, cmd),
+      // Commands that change the status of a task run inside the state-machine
+      _ => state.Status switch
+      {
+        Abstractions.Tasks.TaskStatus.Completed => FromCompletedTo(state, command),
+        Abstractions.Tasks.TaskStatus.Dismissed => FromDismissedTo(state, command),
+        Abstractions.Tasks.TaskStatus.Opened => FromOpenedTo(state, command),
+        Abstractions.Tasks.TaskStatus.Paused => FromPausedTo(state, command),
+        Abstractions.Tasks.TaskStatus.Started => FromStartedTo(state, command),
+        _ => new DomainResult.InternalError($"Unhandled state {state.Status}"),
+      },
+    };
+  }
+
+  private static DomainResult<TaskEvent[]> ChangeTitle(TaskCommandState state, TaskCommand.ChangeTitle command)
+  {
+    return command switch
+    {
+      _ when state.Version == 0 => new DomainResult.NotFound("The task does not exist."),
+      _ when state.Title == command.Title => (TaskEvent[])[],
+      _ => (TaskEvent[])[new TaskEvent.TitleChanged { Title = command.Title }],
     };
   }
 

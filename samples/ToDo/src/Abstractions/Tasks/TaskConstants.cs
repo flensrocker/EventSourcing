@@ -8,6 +8,7 @@ public static class TaskConstants
   public static class TaskCommand
   {
     public const string Base = $"{ToDoConstants.Module}_TaskCommand";
+    public const string ChangeTitle = $"{Base}_ChangeTitle";
     public const string Complete = $"{Base}_Complete";
     public const string Dismiss = $"{Base}_Dismiss";
     public const string Open = $"{Base}_Open";
@@ -25,6 +26,7 @@ public static class TaskConstants
     public const string Paused = $"{Base}_Paused";
     public const string Reopened = $"{Base}_Reopened";
     public const string Started = $"{Base}_Started";
+    public const string TitleChanged = $"{Base}_TitleChanged";
   }
 
   public static class TaskQueryRequest

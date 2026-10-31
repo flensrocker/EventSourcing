@@ -33,6 +33,33 @@ public sealed class DetailsTests
   }
 
   [TestMethod]
+  public void GivenOpenedAndTitleChangedEventThenReturnViewWithOpenedStatusAndChangedTitle()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+
+    var openedPayload = new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" };
+    var openedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, openedPayload);
+    var titleChangedPayload = new Abstractions.Tasks.TaskEvent.TitleChanged { Title = "Cahnged Title" };
+    var titleChangedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, titleChangedPayload);
+
+    var testState = new SuT.Details();
+    testState.Apply(openedEvent);
+    testState.Apply(titleChangedEvent);
+
+    Assert.AreEqual(taskId, testState.TaskId);
+    Assert.AreEqual(taskVersion - 1, testState.Version);
+    Assert.AreEqual(titleChangedPayload.Title, testState.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
+    Assert.IsNull(testState.DismissReason);
+    Assert.IsNull(testState.StartedByUserId);
+  }
+
+  [TestMethod]
   public void GivenOpenedAndStartedEventThenReturnViewWithStartedStatus()
   {
     var tenantId = Guid.CreateVersion7();

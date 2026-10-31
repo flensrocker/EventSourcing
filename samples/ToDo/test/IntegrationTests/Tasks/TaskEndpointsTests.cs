@@ -57,6 +57,25 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   }
 
   [TestMethod]
+  public async Task GivenNotExistingTaskIdWhenChangeTitleThenReturnNotFound()
+  {
+    var taskId = Guid.CreateVersion7();
+    var changeTitleRequest = new ChangeTitleDto { Title = "Changed Title" };
+
+    using var testResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{taskId}/changeTitle", changeTitleRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
+
+    await using var assertScope = _factory.Services.CreateAsyncScope();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+
+    var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
+    Assert.IsNull(taskEventList);
+  }
+
+  [TestMethod]
   public async Task GivenNotExistingTaskIdWhenCompleteThenReturnNotFound()
   {
     var taskId = Guid.CreateVersion7();
@@ -225,6 +244,33 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   }
 
   [TestMethod]
+  [DataRow((string?)null)]
+  [DataRow("")]
+  [DataRow(" ")]
+  [DataRow("\t")]
+  [DataRow(" \t")]
+  [DataRow("\t ")]
+  [DataRow(" \t ")]
+  [DataRow("123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 1")]
+  [DataRow("With\nLinebreak")]
+  [DataRow("With\rCarriage Return")]
+  public async Task GivenInvalidChangeTitleRequestWhenChangeTitleThenReturnBadRequest(string? invalidTitle)
+  {
+    var taskId = Guid.CreateVersion7();
+
+    var testRequest = new ChangeTitleDto { Title = invalidTitle };
+
+    using var testResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{taskId}/changeTitle", testRequest, _cancellationToken)
+      .ConfigureAwait(false);
+
+    Assert.AreEqual(HttpStatusCode.BadRequest, testResponse.StatusCode);
+    var testResult = await testResponse.Content.ReadAsProblemDetailsWithErrorsAsync(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(testResult?.Errors);
+    Assert.IsTrue(testResult.Errors.ContainsKey(nameof(ChangeTitleDto.Title)));
+  }
+
+  [TestMethod]
   public async Task GivenNotExistingTaskIdWhenReopenThenReturnNotFound()
   {
     var taskId = Guid.CreateVersion7();
@@ -243,7 +289,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   }
 
   [TestMethod]
-  public async Task GivenOpenDismissReopenCompleteWorkflowWhenGetDetailsThenReturnVersion4()
+  public async Task GivenOpenDismissReopenChangeTitleCompleteWorkflowWhenGetDetailsThenReturnVersion5()
   {
     var expectedVersion = 0;
 
@@ -303,6 +349,17 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.IsNotNull(secondReopenResult);
     Assert.AreEqual(expectedVersion, secondReopenResult.Version);
 
+    var changeTitleRequest = new ChangeTitleDto { Title = "Changed Title" };
+    using var changeTitleResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/changeTitle", changeTitleRequest, _cancellationToken)
+      .ConfigureAwait(false);
+    expectedVersion++;
+
+    Assert.AreEqual(HttpStatusCode.OK, changeTitleResponse.StatusCode);
+    var changeTitleResult = await changeTitleResponse.Content.ReadFromJsonAsync<CommandResult>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(changeTitleResult);
+    Assert.AreEqual(expectedVersion, changeTitleResult.Version);
+
     using var completeResponse = await _client
       .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/complete", (object?)null, _cancellationToken)
       .ConfigureAwait(false);
@@ -334,7 +391,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.IsNotNull(detailsResult);
     Assert.AreEqual(openResult.TaskId, detailsResult.TaskId);
     Assert.AreEqual(expectedVersion, detailsResult.Version);
-    Assert.AreEqual(openRequest.Title, detailsResult.Title);
+    Assert.AreEqual(changeTitleRequest.Title, detailsResult.Title);
     Assert.AreEqual(Abstractions.Tasks.TaskStatus.Completed, detailsResult.Status);
     Assert.IsNull(detailsResult.DismissReason);
 
@@ -351,14 +408,16 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
     var taskEventList = await eventStore.ReadEventsFromStorage(openResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);
-    Assert.HasCount(4, taskEventList);
+    Assert.HasCount(5, taskEventList);
     var openedEvent = Assert.IsInstanceOfType<TaskEvent.Opened>(taskEventList[0].Payload);
     Assert.AreEqual(openRequest.Title, openedEvent.Title);
     Assert.IsInRange(openStartTimestamp, openEndTimestamp, openedEvent.OpenedAt);
     var dismissedEvent = Assert.IsInstanceOfType<TaskEvent.Dismissed>(taskEventList[1].Payload);
     Assert.AreEqual(dismissRequest.Reason, dismissedEvent.Reason);
     Assert.IsInstanceOfType<TaskEvent.Reopened>(taskEventList[2].Payload);
-    Assert.IsInstanceOfType<TaskEvent.Completed>(taskEventList[3].Payload);
+    var titleChangedEvent = Assert.IsInstanceOfType<TaskEvent.TitleChanged>(taskEventList[3].Payload);
+    Assert.AreEqual(changeTitleRequest.Title, titleChangedEvent.Title);
+    Assert.IsInstanceOfType<TaskEvent.Completed>(taskEventList[4].Payload);
   }
 
   [TestMethod]

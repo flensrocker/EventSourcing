@@ -92,6 +92,8 @@ public abstract partial record TaskView
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload) { }
 
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.TitleChanged payload) { }
+
     public void Apply(DomainEvent @event)
     {
       DailyStatsId = GetKey(@event);

@@ -65,6 +65,7 @@ public abstract partial record TaskView
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Paused payload)
     {
+      Version = metadata.StreamVersion;
       Status = TaskStatus.Paused;
     }
 
@@ -76,7 +77,14 @@ public abstract partial record TaskView
 
     void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Started payload)
     {
+      Version = metadata.StreamVersion;
       Status = TaskStatus.Started;
+    }
+
+    void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.TitleChanged payload)
+    {
+      Version = metadata.StreamVersion;
+      Title = payload.Title;
     }
 
     public void Apply(DomainEvent @event)

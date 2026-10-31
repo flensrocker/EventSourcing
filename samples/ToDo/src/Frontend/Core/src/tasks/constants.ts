@@ -39,6 +39,7 @@ export const TaskCommandType_Base = `${ToDoConstants.Module}_TaskCommand`;
 export type TaskCommandType_Base = typeof TaskCommandType_Base;
 
 export const TaskCommandType = {
+  ChangeTitle: `${TaskCommandType_Base}_ChangeTitle`,
   Complete: `${TaskCommandType_Base}_Complete`,
   Dismiss: `${TaskCommandType_Base}_Dismiss`,
   Open: `${TaskCommandType_Base}_Open`,
@@ -57,6 +58,7 @@ export const TaskEventType = {
   Paused: `${TaskEventType_Base}_Paused`,
   Reopened: `${TaskEventType_Base}_Reopened`,
   Started: `${TaskEventType_Base}_Started`,
+  TitleChanged: `${TaskEventType_Base}_TitleChanged`,
 } as const;
 
 export const TaskViewType_Base = `${ToDoConstants.Module}_TaskView`;

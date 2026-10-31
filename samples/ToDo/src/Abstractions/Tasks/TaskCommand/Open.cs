@@ -17,7 +17,6 @@ public abstract partial record TaskCommand
 
     private const string _errorTitle = "Invalid 'Open' command";
     private const string _errorDetail = "The task cannot be opened.";
-    private static readonly char[] _invalidCharacters = ['\r', '\n'];
 
     // NOTE BEST PRACTICE
     // The static "Create" method in combination with the internal constructor is the anti corruption layer of the command.
@@ -30,21 +29,9 @@ public abstract partial record TaskCommand
     // The concrete implementation is not important for Flensrocker.EventSourcing and should fit the needs of the domain.
     public static DomainResult<Open> Create(string? title)
     {
-      title = title?.Trim();
-
-      if (string.IsNullOrWhiteSpace(title))
-        return new DomainResult.ValidationProblem(_errorTitle, _errorDetail, nameof(Title), "The title is required.");
-      if (title.Length > TaskConstants.TaskTitleMaxLength)
-        return new DomainResult.ValidationProblem(
-          _errorTitle,
-          _errorDetail,
-          nameof(Title),
-          $"The title is too long, max. {TaskConstants.TaskTitleMaxLength} allowed."
-        );
-      if (title.IndexOfAny(_invalidCharacters) >= 0)
-        return new DomainResult.ValidationProblem(_errorTitle, _errorDetail, nameof(Title), "The title contains invalid characters.");
-
-      return new Open { Title = title };
+      return TaskExtensions
+        .ValidateTitle(title, _errorTitle, _errorDetail, nameof(Title))
+        .Pipe(validTitle => DomainResult.Success(new Open { Title = validTitle }));
     }
   }
 }

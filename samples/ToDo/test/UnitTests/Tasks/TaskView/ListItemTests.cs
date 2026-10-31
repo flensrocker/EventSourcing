@@ -52,6 +52,34 @@ public sealed class ListItemTests
   }
 
   [TestMethod]
+  public void GivenOpenedAndTitleChangedEventThenReturnViewWithOpenedStatusAndChangedTitle()
+  {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
+
+    var taskId = Guid.CreateVersion7();
+    var taskVersion = 1;
+    var taskCreatedAt = _timeProvider.GetUtcNow();
+
+    var openedPayload = new Abstractions.Tasks.TaskEvent.Opened { OpenedAt = taskCreatedAt, Title = "Some Title" };
+    var openedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, openedPayload);
+    var titleChangedPayload = new Abstractions.Tasks.TaskEvent.TitleChanged { Title = "Cahnged Title" };
+    var titleChangedEvent = TaskTestUtilities.CreateTaskEvent(_timeProvider, tenantId, userId, taskId, taskVersion++, titleChangedPayload);
+
+    var testState = new SuT.ListItem();
+    testState.Apply(openedEvent);
+    testState.Apply(titleChangedEvent);
+
+    Assert.IsTrue(ToDoTestUtilities.TestWhereKey(testState, openedEvent));
+    Assert.AreEqual(taskId, testState.TaskId);
+    Assert.AreEqual(taskVersion - 1, testState.Version);
+    Assert.AreEqual(tenantId, testState.TenantId);
+    Assert.AreEqual(openedPayload.OpenedAt, testState.OpenedAt);
+    Assert.AreEqual(titleChangedPayload.Title, testState.Title);
+    Assert.AreEqual(Abstractions.Tasks.TaskStatus.Opened, testState.Status);
+  }
+
+  [TestMethod]
   public void GivenOpenedAndStartedEventThenReturnViewWithStartedStatus()
   {
     var tenantId = Guid.CreateVersion7();

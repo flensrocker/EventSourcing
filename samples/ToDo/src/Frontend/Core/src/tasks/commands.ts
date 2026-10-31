@@ -3,6 +3,13 @@ import { CommandResult, isObjectOfType, WithoutType, withType, WithType } from '
 import { getToDoTaskRoute, TaskCommandType } from './constants';
 
 // TODO create validation schema for command types
+export type TaskCommand_ChangeTitle = WithType<typeof TaskCommandType.ChangeTitle> & {
+  readonly Title: string;
+};
+export type TaskCommand_ChangeTitle_Response = CommandResult;
+export const createTaskCommandChangeTitle = (cmd: WithoutType<TaskCommand_ChangeTitle>) => withType(cmd, TaskCommandType.ChangeTitle);
+export const getTaskCommandChangeTitleRoute = (taskId: string) => getToDoTaskRoute('changeTitle', taskId);
+
 export type TaskCommand_Complete = WithType<typeof TaskCommandType.Complete>;
 export type TaskCommand_Complete_Response = CommandResult;
 const complete = withType<TaskCommand_Complete>({}, TaskCommandType.Complete);

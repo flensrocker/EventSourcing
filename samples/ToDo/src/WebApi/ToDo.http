@@ -2,6 +2,14 @@
 @port=5188
 
 ### Commands
+PUT http://{{host}}:{{port}}/api/todo/task/{{open.response.body.$.TaskId}}/changeTitle
+Content-Type: application/json
+
+{
+  "Title": "Changed Title"
+}
+
+###
 PUT http://{{host}}:{{port}}/api/todo/task/{{open.response.body.$.TaskId}}/complete
 Content-Type: application/json
 

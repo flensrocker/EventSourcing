@@ -11,12 +11,15 @@ public sealed class TaskCommandState : IDomainEventVersionable, ITaskEventProjec
   public int Version { get; private set; }
 
   [Id(1)]
-  public Abstractions.Tasks.TaskStatus Status { get; private set; }
+  public string Title { get; private set; } = "";
 
   [Id(2)]
-  public string? DismissReason { get; private set; }
+  public Abstractions.Tasks.TaskStatus Status { get; private set; }
 
   [Id(3)]
+  public string? DismissReason { get; private set; }
+
+  [Id(4)]
   public Guid? StartedByUserId { get; private set; }
 
   void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Completed payload)
@@ -35,6 +38,7 @@ public sealed class TaskCommandState : IDomainEventVersionable, ITaskEventProjec
 
   void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.Opened payload)
   {
+    Title = payload.Title;
     Status = Abstractions.Tasks.TaskStatus.Opened;
     DismissReason = null;
     StartedByUserId = null;
@@ -57,6 +61,11 @@ public sealed class TaskCommandState : IDomainEventVersionable, ITaskEventProjec
   {
     Status = Abstractions.Tasks.TaskStatus.Started;
     StartedByUserId = payload.ByUserId;
+  }
+
+  void ITaskEventProjectable.Apply(DomainEventMetadata metadata, TaskEvent.TitleChanged payload)
+  {
+    Title = payload.Title;
   }
 
   public void Apply(DomainEvent @event)
