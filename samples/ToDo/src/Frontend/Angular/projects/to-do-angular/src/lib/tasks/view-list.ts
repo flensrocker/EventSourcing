@@ -10,11 +10,11 @@ import { map, of, switchMap } from 'rxjs';
 import { TaskQueryRequest_List } from '@flensrocker/to-do-core';
 
 import { toDoTaskQueryList } from './queries';
-import { ToDoTaskListItem } from './to-do-task-list-item';
+import { ToDoTaskViewListItem } from './view-list-item';
 
 @Component({
-  selector: 'to-do-task-list',
-  imports: [MatButtonModule, MatListModule, MatProgressBarModule, ToDoTaskListItem],
+  selector: 'to-do-task-view-list',
+  imports: [MatButtonModule, MatListModule, MatProgressBarModule, ToDoTaskViewListItem],
   styles: `
     .error {
       color: var(--mat-sys-error);
@@ -30,7 +30,7 @@ import { ToDoTaskListItem } from './to-do-task-list-item';
       <mat-selection-list #tasks [multiple]="false">
         @for (item of itemList(); track item.TaskId) {
           <mat-list-option [value]="item" togglePosition="before">
-            <to-do-task-list-item [item]="item" />
+            <to-do-task-view-list-item [item]="item" />
           </mat-list-option>
         }
       </mat-selection-list>
@@ -39,7 +39,7 @@ import { ToDoTaskListItem } from './to-do-task-list-item';
       <button type="button" matButton [disabled]="isLoading()" (click)="reload()">Reload</button>
     </div>`,
 })
-export class ToDoTaskList {
+export class ToDoTaskViewList {
   readonly #listRequest = computed((): TaskQueryRequest_List => ({ TenantId: null }));
   readonly #listQuery = toDoTaskQueryList(this.#listRequest);
 

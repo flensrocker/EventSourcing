@@ -15,7 +15,7 @@ import { ToDoTaskClient } from './client';
 import { toDoTaskViewDetailsStream } from './views';
 
 @Component({
-  selector: 'to-do-task-details',
+  selector: 'to-do-task-view-details',
   imports: [MatButtonModule, MatCardModule, MatProgressBarModule, ToDoCommandButton, ToDoCommandError],
   styles: `
     .error {
@@ -70,7 +70,7 @@ import { toDoTaskViewDetailsStream } from './views';
     </mat-card-footer>
   </mat-card>`,
 })
-export class ToDoTaskDetails {
+export class ToDoTaskViewDetails {
   readonly #client = inject(ToDoTaskClient);
 
   readonly taskId = input.required<string>();
