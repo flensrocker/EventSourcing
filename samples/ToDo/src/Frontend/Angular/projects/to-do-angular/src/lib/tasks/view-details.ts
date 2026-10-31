@@ -2,16 +2,20 @@ import { Component, computed, inject, input } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+
+import { EMPTY, Observable, switchMap } from 'rxjs';
 
 import { IsBusy, combinedIsBusy, commandHandler, errorToString, versionTracker } from '@flensrocker/event-sourcing-angular';
 import { getEventSourceValue } from '@flensrocker/event-sourcing-core';
-import { TaskStatus, getTaskViewDetailsId } from '@flensrocker/to-do-core';
+import { TaskCommand_Dismiss_Response, TaskStatus, getTaskViewDetailsId } from '@flensrocker/to-do-core';
 
 import { ToDoCommandButton } from '../to-do-command-button';
 import { ToDoCommandError } from '../to-do-command-error';
 
 import { ToDoTaskClient } from './client';
+import { ToDoTaskDismissReasonDialog, ToDoTaskDismissReasonDialogResult } from './dismiss-reason-dialog';
 import { toDoTaskViewDetailsStream } from './views';
 
 @Component({
@@ -71,6 +75,7 @@ import { toDoTaskViewDetailsStream } from './views';
   </mat-card>`,
 })
 export class ToDoTaskViewDetails {
+  readonly #dialog = inject(MatDialog);
   readonly #client = inject(ToDoTaskClient);
 
   readonly taskId = input.required<string>();
@@ -133,8 +138,7 @@ export class ToDoTaskViewDetails {
     versionTracker: this.#versionTracker,
   });
   protected readonly dismiss = commandHandler({
-    // TODO show dialog to enter reason
-    createCommand: () => [this.taskId(), this.#client.dismiss(this.taskId(), { Reason: "I don't want to!" })],
+    createCommand: () => [this.taskId(), this.#dismiss(this.taskId())],
     disabledWhen: () =>
       this.#someCommand.isBusy() ||
       !this.#detailsStream.hasValue() ||
@@ -152,5 +156,14 @@ export class ToDoTaskViewDetails {
 
   constructor() {
     this.#someCommand = combinedIsBusy(this.start, this.pause, this.complete, this.dismiss, this.reopen);
+  }
+
+  #dismiss(taskId: string): Observable<TaskCommand_Dismiss_Response> {
+    return this.#dialog
+      .open<ToDoTaskDismissReasonDialog, unknown, ToDoTaskDismissReasonDialogResult>(ToDoTaskDismissReasonDialog, {
+        closeOnNavigation: true,
+      })
+      .afterClosed()
+      .pipe(switchMap((result) => (result == null ? EMPTY : this.#client.dismiss(taskId, result))));
   }
 }

@@ -24,7 +24,7 @@ export type CommandHandler = Readonly<{
 /**
  * When calling `submit` the `createCommand` function is executed to get the next command.
  * The provided observable will be subscribed to and therefore executed.
- * @param createCommand A function that returns the observable to execute the command, optional with the associated id for the version-tracker.
+ * @param createCommand A function that returns the observable to execute the command, optional with the associated id for the version-tracker. Return `EMPTY` for a no-op.
  * @param disabledWhen An optional function that returns true, if the command can NOT be executed. Will be wrapped in a `computed` and observes the returned `isBusy`.
  * @param versionTracker An optional version-tracker, if the command is associated with an id.
  * @returns An easy to use object for a button in a component.
