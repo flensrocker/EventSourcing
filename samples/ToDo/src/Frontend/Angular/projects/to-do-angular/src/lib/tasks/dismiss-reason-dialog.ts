@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { WithoutType } from '@flensrocker/event-sourcing-core';
 import { TaskCommand_Dismiss, TaskDismissReasonMaxLength } from '@flensrocker/to-do-core';
 
-export type ToDoTaskDismissReasonDialogResult = WithoutType<TaskCommand_Dismiss>;
+export type ToDoTaskDismissReasonDialogResult = WithoutType<TaskCommand_Dismiss> | null;
 
 @Component({
   selector: 'to-do-task-dismiss-reason-dialog',
@@ -31,7 +31,7 @@ export type ToDoTaskDismissReasonDialogResult = WithoutType<TaskCommand_Dismiss>
 export class ToDoTaskDismissReasonDialog {
   readonly #dialogRef = inject<MatDialogRef<ToDoTaskDismissReasonDialog, ToDoTaskDismissReasonDialogResult>>(MatDialogRef);
 
-  readonly #dismissModel = signal<ToDoTaskDismissReasonDialogResult>({
+  readonly #dismissModel = signal<NonNullable<ToDoTaskDismissReasonDialogResult>>({
     Reason: '',
   });
 

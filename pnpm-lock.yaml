@@ -204,6 +204,9 @@ importers:
       '@flensrocker/to-do-core':
         specifier: workspace:*
         version: link:../../../ToDo/src/Frontend/Core
+      '@material-design-icons/font':
+        specifier: 0.14.15
+        version: 0.14.15
       rxjs:
         specifier: 7.8.2
         version: 7.8.2
@@ -1236,6 +1239,9 @@ packages:
     resolution: {integrity: sha512-1g7G0knRX2iV/voDu54yxrGqw5Dk0w2oIYb7dgJq8IkOi+m7wbD8Q3QpPFjh0C01G58S88dqGn03len6UPCXsg==}
     cpu: [x64]
     os: [win32]
+
+  '@material-design-icons/font@0.14.15':
+    resolution: {integrity: sha512-h4YFZnYxNuciEKR0jAOekaQmIg2UGUSxbnoyzo4OdE42gy9QB3UnrjLcASiDy9ra8fqrcHy+NqxTHx7F86BH0A==}
 
   '@modelcontextprotocol/core@2.3.1':
     resolution: {integrity: sha512-laVmIhPGpWi7rG9q+0UigblRN0Hws/Yjlb6qLFtVqryXVLkc4h+yN8z731POD2LnAGQlFe7/tXhUm7Bi0YB91g==}
@@ -4152,6 +4158,8 @@ snapshots:
 
   '@lmdb/lmdb-win32-x64@3.5.6':
     optional: true
+
+  '@material-design-icons/font@0.14.15': {}
 
   '@modelcontextprotocol/core@2.3.1':
     dependencies:

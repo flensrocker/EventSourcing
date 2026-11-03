@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 import { CommandHandler } from '@flensrocker/event-sourcing-angular';
 
@@ -19,4 +20,20 @@ import { ToDoButtonSpinner } from './to-do-button-spinner';
 })
 export class ToDoCommandButton {
   readonly command = input.required<CommandHandler>();
+}
+
+@Component({
+  selector: 'to-do-command-icon-button',
+  imports: [MatButtonModule, MatIconModule, ToDoButtonSpinner],
+  template: `
+    @let cmd = command();
+    <button type="button" mat-icon-button [disabled]="cmd.disabled()" [showProgress]="cmd.isBusy()" (click)="cmd.submit()">
+      <mat-icon>{{ icon() }}</mat-icon>
+      <to-do-button-spinner progressIndicator />
+    </button>
+  `,
+})
+export class ToDoCommandIconButton {
+  readonly command = input.required<CommandHandler>();
+  readonly icon = input.required<string>();
 }

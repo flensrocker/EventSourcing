@@ -1,26 +1,27 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, untracked } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
-import { EMPTY, Observable, switchMap } from 'rxjs';
+import { filter, Observable, switchMap } from 'rxjs';
 
-import { IsBusy, combinedIsBusy, commandHandler, errorToString, versionTracker } from '@flensrocker/event-sourcing-angular';
+import { combinedIsBusy, commandHandler, errorToString, versionTracker } from '@flensrocker/event-sourcing-angular';
 import { getEventSourceValue } from '@flensrocker/event-sourcing-core';
-import { TaskCommand_Dismiss_Response, TaskStatus, getTaskViewDetailsId } from '@flensrocker/to-do-core';
+import { TaskCommand_ChangeTitle_Response, TaskCommand_Dismiss_Response, TaskStatus, getTaskViewDetailsId } from '@flensrocker/to-do-core';
 
-import { ToDoCommandButton } from '../to-do-command-button';
+import { ToDoCommandButton, ToDoCommandIconButton } from '../to-do-command-button';
 import { ToDoCommandError } from '../to-do-command-error';
 
+import { ToDoTaskChangeTitleDialog, ToDoTaskChangeTitleDialogData, ToDoTaskChangeTitleDialogResult } from './change-title-dialog';
 import { ToDoTaskClient } from './client';
 import { ToDoTaskDismissReasonDialog, ToDoTaskDismissReasonDialogResult } from './dismiss-reason-dialog';
 import { toDoTaskViewDetailsStream } from './views';
 
 @Component({
   selector: 'to-do-task-view-details',
-  imports: [MatButtonModule, MatCardModule, MatProgressBarModule, ToDoCommandButton, ToDoCommandError],
+  imports: [MatButtonModule, MatCardModule, MatProgressBarModule, ToDoCommandButton, ToDoCommandIconButton, ToDoCommandError],
   styles: `
     .error {
       color: var(--mat-sys-error);
@@ -45,7 +46,10 @@ import { toDoTaskViewDetailsStream } from './views';
   `,
   template: `<mat-card>
     <mat-card-header>
-      <mat-card-title>{{ title() }}</mat-card-title>
+      <mat-card-title>
+        {{ title() }}
+        <to-do-command-icon-button [command]="changeTitle" icon="edit" />
+      </mat-card-title>
     </mat-card-header>
     <mat-card-content class="container">
       @if (isLoading()) {
@@ -118,6 +122,11 @@ export class ToDoTaskViewDetails {
     }
   });
 
+  protected readonly changeTitle = commandHandler({
+    createCommand: () => [this.taskId(), this.#changeTitle(this.taskId())],
+    disabledWhen: () => this.#someCommand.isBusy() || !this.#detailsStream.hasValue(),
+    versionTracker: this.#versionTracker,
+  });
   protected readonly start = commandHandler({
     // TODO show dialog to select user
     createCommand: () => [this.taskId(), this.#client.start(this.taskId(), { StartedAt: null, ByUserId: null })],
@@ -152,10 +161,21 @@ export class ToDoTaskViewDetails {
     versionTracker: this.#versionTracker,
   });
 
-  readonly #someCommand: IsBusy;
+  readonly #someCommand = combinedIsBusy(this.changeTitle, this.start, this.pause, this.complete, this.dismiss, this.reopen);
 
-  constructor() {
-    this.#someCommand = combinedIsBusy(this.start, this.pause, this.complete, this.dismiss, this.reopen);
+  #changeTitle(taskId: string): Observable<TaskCommand_ChangeTitle_Response> {
+    return this.#dialog
+      .open<ToDoTaskChangeTitleDialog, ToDoTaskChangeTitleDialogData, ToDoTaskChangeTitleDialogResult>(ToDoTaskChangeTitleDialog, {
+        closeOnNavigation: true,
+        data: {
+          Title: untracked(this.title),
+        },
+      })
+      .afterClosed()
+      .pipe(
+        filter((result) => result != null),
+        switchMap((result) => this.#client.changeTitle(taskId, result)),
+      );
   }
 
   #dismiss(taskId: string): Observable<TaskCommand_Dismiss_Response> {
@@ -164,6 +184,9 @@ export class ToDoTaskViewDetails {
         closeOnNavigation: true,
       })
       .afterClosed()
-      .pipe(switchMap((result) => (result == null ? EMPTY : this.#client.dismiss(taskId, result))));
+      .pipe(
+        filter((result) => result != null),
+        switchMap((result) => this.#client.dismiss(taskId, result)),
+      );
   }
 }

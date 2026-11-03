@@ -28,6 +28,7 @@
     "@flensrocker/event-sourcing-core": "workspace:*",
     "@flensrocker/to-do-angular": "workspace:*",
     "@flensrocker/to-do-core": "workspace:*",
+    "@material-design-icons/font": "0.14.15",
     "rxjs": "7.8.2",
     "tslib": "2.9.1"
   },
