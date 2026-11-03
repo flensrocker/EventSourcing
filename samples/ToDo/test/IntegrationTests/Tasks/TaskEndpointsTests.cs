@@ -289,7 +289,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
   }
 
   [TestMethod]
-  public async Task GivenOpenDismissReopenChangeTitleCompleteWorkflowWhenGetDetailsThenReturnVersion5()
+  public async Task GivenOpenStartedPausedDismissReopenChangeTitleCompleteWorkflowWhenGetDetailsThenReturnVersion7()
   {
     var expectedVersion = 0;
 
@@ -306,6 +306,28 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.IsNotNull(openResult);
     Assert.AreEqual(expectedVersion, openResult.Version);
     Assert.AreNotEqual(Guid.Empty, openResult.TaskId);
+
+    var startRequest = new StartDto { StartedAt = null, ByUserId = null };
+    using var startResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/start", startRequest, _cancellationToken)
+      .ConfigureAwait(false);
+    expectedVersion++;
+
+    Assert.AreEqual(HttpStatusCode.OK, startResponse.StatusCode);
+    var startResult = await startResponse.Content.ReadFromJsonAsync<CommandResult>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(startResult);
+    Assert.AreEqual(expectedVersion, startResult.Version);
+
+    var pauseRequest = new PauseDto { PausedAt = null };
+    using var pauseResponse = await _client
+      .PutAsJsonAsync($"{ToDoRoutes.TaskRoute}/{openResult.TaskId}/pause", pauseRequest, _cancellationToken)
+      .ConfigureAwait(false);
+    expectedVersion++;
+
+    Assert.AreEqual(HttpStatusCode.OK, pauseResponse.StatusCode);
+    var pauseResult = await pauseResponse.Content.ReadFromJsonAsync<CommandResult>(_cancellationToken).ConfigureAwait(false);
+    Assert.IsNotNull(pauseResult);
+    Assert.AreEqual(expectedVersion, pauseResult.Version);
 
     var dismissRequest = new DismissDto { Reason = "Some Reason" };
     using var dismissResponse = await _client
@@ -408,16 +430,19 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
 
     var taskEventList = await eventStore.ReadEventsFromStorage(openResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);
-    Assert.HasCount(5, taskEventList);
+    Assert.HasCount(7, taskEventList);
     var openedEvent = Assert.IsInstanceOfType<TaskEvent.Opened>(taskEventList[0].Payload);
     Assert.AreEqual(openRequest.Title, openedEvent.Title);
     Assert.IsInRange(openStartTimestamp, openEndTimestamp, openedEvent.OpenedAt);
-    var dismissedEvent = Assert.IsInstanceOfType<TaskEvent.Dismissed>(taskEventList[1].Payload);
+    var startedEvent = Assert.IsInstanceOfType<TaskEvent.Started>(taskEventList[1].Payload);
+    Assert.AreEqual(startRequest.ByUserId, startedEvent.ByUserId);
+    var pausedEvent = Assert.IsInstanceOfType<TaskEvent.Paused>(taskEventList[2].Payload);
+    var dismissedEvent = Assert.IsInstanceOfType<TaskEvent.Dismissed>(taskEventList[3].Payload);
     Assert.AreEqual(dismissRequest.Reason, dismissedEvent.Reason);
-    Assert.IsInstanceOfType<TaskEvent.Reopened>(taskEventList[2].Payload);
-    var titleChangedEvent = Assert.IsInstanceOfType<TaskEvent.TitleChanged>(taskEventList[3].Payload);
+    Assert.IsInstanceOfType<TaskEvent.Reopened>(taskEventList[4].Payload);
+    var titleChangedEvent = Assert.IsInstanceOfType<TaskEvent.TitleChanged>(taskEventList[5].Payload);
     Assert.AreEqual(changeTitleRequest.Title, titleChangedEvent.Title);
-    Assert.IsInstanceOfType<TaskEvent.Completed>(taskEventList[4].Payload);
+    Assert.IsInstanceOfType<TaskEvent.Completed>(taskEventList[6].Payload);
   }
 
   [TestMethod]
