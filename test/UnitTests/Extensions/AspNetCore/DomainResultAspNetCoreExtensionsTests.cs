@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Net;
 using Flensrocker.EventSourcing.Extensions.AspNetCore;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -111,5 +112,89 @@ public class DomainResultAspNetCoreExtensionsTests
     Assert.AreEqual(result.Title, httpResult.ProblemDetails.Title);
     Assert.AreEqual(result.Detail, httpResult.ProblemDetails.Detail);
     Assert.AreSequenceEqual(result.Errors.ToArray(), httpResult.ProblemDetails.Errors.ToArray());
+  }
+
+  [TestMethod]
+  public async Task GivenAnAsyncSequenceOfDomainResultsWhenWrappingWithSseErrorThenReturnSequenceOfSseItems()
+  {
+    static async IAsyncEnumerable<DomainResult<string>> EnumerateResults()
+    {
+      yield return new DomainResult<string>.Success { Value = "Success" };
+      yield return new DomainResult<string>.BadRequest { Message = "Bad Request" };
+      yield return new DomainResult<string>.Forbid();
+      yield return new DomainResult<string>.InternalError { Message = "Internal Error" };
+      yield return new DomainResult<string>.NotFound { Message = "Not Found" };
+      yield return new DomainResult<string>.Unauthorized();
+      yield return new DomainResult<string>.ValidationProblem
+      {
+        Title = "Title",
+        Detail = "Detail",
+        Errors = ImmutableDictionary<string, string[]>.Empty.Add("Key 1", ["Error 1a", "Error 1b"]).Add("Key 2", ["Error 2a"]),
+      };
+    }
+
+    var index = 0;
+
+    await foreach (var sseItem in EnumerateResults().WithSseErrorEvents("EventType"))
+    {
+      switch (index)
+      {
+        case 0:
+        {
+          Assert.AreEqual("EventType", sseItem.EventType);
+          var value = Assert.IsInstanceOfType<string>(sseItem.Data);
+          Assert.AreEqual("Success", value);
+          break;
+        }
+        case 1:
+        {
+          Assert.AreEqual(AspNetCoreConstants.SseErrorEventType, sseItem.EventType);
+          var value = Assert.IsInstanceOfType<SseError>(sseItem.Data);
+          Assert.AreEqual(HttpStatusCode.BadRequest, value.StatusCode);
+          Assert.AreEqual("Bad Request", value.Message);
+          break;
+        }
+        case 2:
+        {
+          Assert.AreEqual(AspNetCoreConstants.SseErrorEventType, sseItem.EventType);
+          var value = Assert.IsInstanceOfType<SseError>(sseItem.Data);
+          Assert.AreEqual(HttpStatusCode.Forbidden, value.StatusCode);
+          break;
+        }
+        case 3:
+        {
+          Assert.AreEqual(AspNetCoreConstants.SseErrorEventType, sseItem.EventType);
+          var value = Assert.IsInstanceOfType<SseError>(sseItem.Data);
+          Assert.AreEqual(HttpStatusCode.InternalServerError, value.StatusCode);
+          Assert.AreEqual("Internal Error", value.Message);
+          break;
+        }
+        case 4:
+        {
+          Assert.AreEqual(AspNetCoreConstants.SseErrorEventType, sseItem.EventType);
+          var value = Assert.IsInstanceOfType<SseError>(sseItem.Data);
+          Assert.AreEqual(HttpStatusCode.NotFound, value.StatusCode);
+          Assert.AreEqual("Not Found", value.Message);
+          break;
+        }
+        case 5:
+        {
+          Assert.AreEqual(AspNetCoreConstants.SseErrorEventType, sseItem.EventType);
+          var value = Assert.IsInstanceOfType<SseError>(sseItem.Data);
+          Assert.AreEqual(HttpStatusCode.Unauthorized, value.StatusCode);
+          break;
+        }
+        case 6:
+        {
+          Assert.AreEqual(AspNetCoreConstants.SseErrorEventType, sseItem.EventType);
+          var value = Assert.IsInstanceOfType<SseError>(sseItem.Data);
+          Assert.AreEqual(HttpStatusCode.BadRequest, value.StatusCode);
+          Assert.AreEqual("Title", value.Message);
+          break;
+        }
+      }
+
+      index++;
+    }
   }
 }
