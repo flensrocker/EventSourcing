@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 
-public static class PersistentProjectionExtensions
+public static partial class PersistentProjectionExtensions
 {
   public static IServiceCollection AddPersistentProjection<TProjection>(
     this IServiceCollection services,
@@ -39,29 +39,19 @@ public static class PersistentProjectionExtensions
     foreach (var projectionOptions in projectionOptionsList)
     {
       var expectedVersion = projectionOptions.CurrentVersion;
-      logger.LogInformation("Projection {ProjectionTypeName}: version {ExpectedVersion}", projectionOptions.TypeName, expectedVersion);
+      LogInfoVersion(logger, projectionOptions.TypeName, expectedVersion);
 
       if (projectionState.TryGetProjectionVersion(projectionOptions.TypeName, out var actualVersion))
       {
         if (expectedVersion < actualVersion)
         {
-          logger.LogError(
-            "Projection {ProjectionTypeName}: actual version {ActualVersion} is higher than expected version {ExpectedVersion}",
-            projectionOptions.TypeName,
-            actualVersion,
-            expectedVersion
-          );
+          LogErrorActualVersionIsGreaterThanExpected(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
           continue;
         }
 
         if (expectedVersion == actualVersion)
         {
-          logger.LogInformation(
-            "Projection {ProjectionTypeName}: actual version {ActualVersion} equals expected version {ExpectedVersion}",
-            projectionOptions.TypeName,
-            actualVersion,
-            expectedVersion
-          );
+          LogInfoActualVersionEqualsExpected(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
           continue;
         }
       }
@@ -69,7 +59,7 @@ public static class PersistentProjectionExtensions
       {
         actualVersion = 0;
 
-        logger.LogInformation("Projection {ProjectionTypeName}: no version yet, registering", projectionOptions.TypeName);
+        LogInfoProjectionRegistering(logger, projectionOptions.TypeName);
 
         var projectionRegistered = DomainEvent.Create<PersistentProjectionEvent>(
           PersistentProjectionConstants.PersistentProjectionEvent.Base,
@@ -90,21 +80,16 @@ public static class PersistentProjectionExtensions
             )
             .ConfigureAwait(false)
         )
+        {
           stateVersionIndex++;
+        }
         else
-          logger.LogError(
-            "Projection {ProjectionTypeName}: error on storing event {EventName}",
-            projectionOptions.TypeName,
-            nameof(PersistentProjectionEvent.ProjectionRegistered)
-          );
+        {
+          LogErrorProjectionEvent(logger, projectionOptions.TypeName, nameof(PersistentProjectionEvent.ProjectionRegistered));
+        }
       }
 
-      logger.LogInformation(
-        "Projection {ProjectionTypeName}: rebuilding, because actual version {ActualVersion} is less than expected version {ExpectedVersion}",
-        projectionOptions.TypeName,
-        actualVersion,
-        expectedVersion
-      );
+      LogInfoActualVersionIsLessThanExpected(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
 
       try
       {
@@ -137,20 +122,68 @@ public static class PersistentProjectionExtensions
             )
             .ConfigureAwait(false)
         )
+        {
           stateVersionIndex++;
+        }
         else
-          logger.LogError(
-            "Projection {ProjectionTypeName}: error on storing event {EventName}",
-            projectionOptions.TypeName,
-            nameof(PersistentProjectionEvent.ProjectionRebuilt)
-          );
+        {
+          LogErrorProjectionEvent(logger, projectionOptions.TypeName, nameof(PersistentProjectionEvent.ProjectionRebuilt));
+        }
       }
       catch (Exception ex)
       {
-        logger.LogError(ex, "Projection {ProjectionTypeName}: rebuild failed", projectionOptions.TypeName);
+        LogErrorRebuildFailed(logger, ex, projectionOptions.TypeName);
       }
     }
 
-    logger.LogInformation("Finished persistent projections rebuild");
+    LogInfoRebuildFinished(logger);
   }
+
+  [LoggerMessage(LogLevel.Information, Message = "Projection {ProjectionTypeName}: version {ExpectedVersion}")]
+  internal static partial void LogInfoVersion(ILogger logger, string projectionTypeName, int expectedVersion);
+
+  [LoggerMessage(
+    LogLevel.Error,
+    Message = "Projection {ProjectionTypeName}: actual version {ActualVersion} is higher than expected version {ExpectedVersion}"
+  )]
+  internal static partial void LogErrorActualVersionIsGreaterThanExpected(
+    ILogger logger,
+    string projectionTypeName,
+    int actualVersion,
+    int expectedVersion
+  );
+
+  [LoggerMessage(
+    LogLevel.Information,
+    Message = "Projection {ProjectionTypeName}: actual version {ActualVersion} equals expected version {ExpectedVersion}"
+  )]
+  internal static partial void LogInfoActualVersionEqualsExpected(
+    ILogger logger,
+    string projectionTypeName,
+    int actualVersion,
+    int expectedVersion
+  );
+
+  [LoggerMessage(LogLevel.Information, Message = "Projection {ProjectionTypeName}: no version yet, registering")]
+  internal static partial void LogInfoProjectionRegistering(ILogger logger, string projectionTypeName);
+
+  [LoggerMessage(LogLevel.Information, Message = "Projection {ProjectionTypeName}: error on storing event {EventName}")]
+  internal static partial void LogErrorProjectionEvent(ILogger logger, string projectionTypeName, string eventName);
+
+  [LoggerMessage(
+    LogLevel.Information,
+    Message = "Projection {ProjectionTypeName}: rebuilding, because actual version {ActualVersion} is less than expected version {ExpectedVersion}"
+  )]
+  internal static partial void LogInfoActualVersionIsLessThanExpected(
+    ILogger logger,
+    string projectionTypeName,
+    int actualVersion,
+    int expectedVersion
+  );
+
+  [LoggerMessage(LogLevel.Error, Message = "Projection {ProjectionTypeName}: rebuild failed")]
+  internal static partial void LogErrorRebuildFailed(ILogger logger, Exception ex, string projectionTypeName);
+
+  [LoggerMessage(LogLevel.Information, Message = "Finished persistent projections rebuild")]
+  internal static partial void LogInfoRebuildFinished(ILogger logger);
 }
