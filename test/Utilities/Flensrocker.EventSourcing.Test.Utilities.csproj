@@ -1,6 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="MSTest.Sdk">
   <ItemGroup>
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Testcontainers.PostgreSql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EventSourcing.Abstractions\Flensrocker.EventSourcing.Abstractions.csproj" />
   </ItemGroup>
 </Project>
