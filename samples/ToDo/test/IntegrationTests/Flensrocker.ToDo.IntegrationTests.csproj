@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\test\Utilities\Flensrocker.EventSourcing.Test.Utilities.csproj" />
     <ProjectReference Include="..\TestApp\Flensrocker.ToDo.TestApp.csproj" />
   </ItemGroup>
 </Project>

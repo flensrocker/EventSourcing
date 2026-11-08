@@ -54,4 +54,7 @@
   <Folder Name="/test/UnitTests/">
     <Project Path="test/UnitTests/Flensrocker.EventSourcing.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/test/Utilities/">
+    <Project Path="test/Utilities/Flensrocker.EventSourcing.Test.Utilities.csproj" />
+  </Folder>
 </Solution>
