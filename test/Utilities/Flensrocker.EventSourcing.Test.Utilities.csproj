@@ -1,9 +1,14 @@
 <Project Sdk="MSTest.Sdk">
+  <PropertyGroup>
+    <IsTestApplication>false</IsTestApplication>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\EventSourcing.Abstractions\Flensrocker.EventSourcing.Abstractions.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Npgsql" />
     <PackageReference Include="Testcontainers.PostgreSql" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\EventSourcing.Abstractions\Flensrocker.EventSourcing.Abstractions.csproj" />
   </ItemGroup>
 </Project>
