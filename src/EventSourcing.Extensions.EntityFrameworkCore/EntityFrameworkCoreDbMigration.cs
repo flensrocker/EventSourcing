@@ -4,19 +4,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 
-internal class EntityFrameworkCoreDbMigration<TDbContext>(TDbContext dbContext, ILogger<EntityFrameworkCoreDbMigration<TDbContext>> logger)
-  : IDbMigration
+public partial class EntityFrameworkCoreDbMigration<TDbContext>(
+  IDbContextFactory<TDbContext> dbContextFactory,
+  ILogger<EntityFrameworkCoreDbMigration<TDbContext>> logger
+) : IDbMigration
   where TDbContext : DbContext
 {
-  private readonly TDbContext _dbContext = dbContext;
-  private readonly ILogger _logger = logger;
+  protected readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;
+  protected readonly ILogger _logger = logger;
 
-  public async Task MigrateAsync()
+  public virtual async Task MigrateAsync()
   {
-    _logger.LogInformation("Migration starting on DbContext {DbContext}", _dbContext.GetType());
+    LogMigrationStarting(_logger, typeof(TDbContext));
 
-    await _dbContext.Database.MigrateAsync().ConfigureAwait(false);
+    using (var migrationDbContext = _dbContextFactory.CreateDbContext())
+      await migrationDbContext.Database.MigrateAsync().ConfigureAwait(false);
 
-    _logger.LogInformation("Migration finished on DbContext {DbContext}", _dbContext.GetType());
+    LogMigrationFinished(_logger, typeof(TDbContext));
   }
+
+  [LoggerMessage(Level = LogLevel.Information, Message = "Migration starting on DbContext {DbContext}")]
+  internal static partial void LogMigrationStarting(ILogger logger, Type dbContext);
+
+  [LoggerMessage(Level = LogLevel.Information, Message = "Migration finished on DbContext {DbContext}")]
+  internal static partial void LogMigrationFinished(ILogger logger, Type dbContext);
 }
