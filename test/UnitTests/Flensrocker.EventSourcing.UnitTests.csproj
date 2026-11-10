@@ -1,7 +1,8 @@
 <Project Sdk="MSTest.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\Utilities\Flensrocker.EventSourcing.Test.Utilities.csproj" />
     <ProjectReference Include="..\..\src\EventSourcing.Extensions.AspNetCore\Flensrocker.EventSourcing.Extensions.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\src\EventSourcing.Extensions.EntityFrameworkCore\Flensrocker.EventSourcing.Extensions.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\EventSourcing.Persistence.PostgreSQL\Flensrocker.EventSourcing.Persistence.PostgreSQL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
