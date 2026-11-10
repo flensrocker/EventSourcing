@@ -86,7 +86,7 @@ public static class EntityFrameworkCoreExtensions
           withVersion.Version
         );
 
-        var fromVersion = Math.Max(1, withVersion.Version);
+        var fromVersion = Math.Max(1, withVersion.Version + 1);
         var missingEvents = await eventStore
           .ReadEventsFromStorage(entityId, fromVersion, firstExpectedVersion + 1, default)
           .ConfigureAwait(false);

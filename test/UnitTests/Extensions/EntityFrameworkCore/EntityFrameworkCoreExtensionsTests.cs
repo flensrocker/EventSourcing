@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using System.Text.Json.Serialization;
 using Flensrocker.EventSourcing.Abstractions;
-using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Extensions.AspNetCore;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
@@ -58,12 +57,6 @@ public class EntityFrameworkCoreExtensionsTests
       options.UseNpgsql(connectionString);
     });
 
-    // _services.AddEntityFrameworkCorePersistentProjection<
-    //   FooViewVersionTrackerPersistentProjection,
-    //   FooDbContext,
-    //   FooView.VersionTracker,
-    //   FooEvent
-    // >(FooConstants.VersionTrackerView, FooView.VersionTracker.ProjectionVersion);
     _services.AddEntityFrameworkCoreStrongConsistentProjection<FooEvent, FooDbContext, FooViewVersionTrackerStrongConsistentProjection>();
 
     _serviceProvider = _services.BuildServiceProvider();
@@ -83,35 +76,24 @@ public class EntityFrameworkCoreExtensionsTests
     await _serviceProvider.DisposeAsync();
   }
 
-  private AsyncServiceScope _testScope = default!;
-
-  [TestInitialize]
-  public void TestInitialize()
-  {
-    _testScope = _serviceProvider.CreateAsyncScope();
-  }
-
-  [TestCleanup]
-  public async Task TestCleanup()
-  {
-    await _testScope.DisposeAsync();
-  }
-
   [TestMethod]
   public async Task GivenNewIdThenEventStoreAndProjectionAreEmpty()
   {
     var fooId = Guid.CreateVersion7();
 
-    var eventStore = _testScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
-    var fooDbContext = _testScope.ServiceProvider.GetRequiredService<FooDbContext>();
+    await using (var testScope = _serviceProvider.CreateAsyncScope())
+    {
+      var eventStore = testScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var fooDbContext = testScope.ServiceProvider.GetRequiredService<FooDbContext>();
 
-    var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken);
-    Assert.IsNull(fooEvents);
+      var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken);
+      Assert.IsNull(fooEvents);
 
-    var fooVersionTracker = await fooDbContext
-      .VersionTracker.Where(foo => foo.FooId == fooId)
-      .SingleOrDefaultAsync(TestContext.CancellationToken);
-    Assert.IsNull(fooVersionTracker);
+      var fooVersionTracker = await fooDbContext
+        .VersionTracker.Where(foo => foo.FooId == fooId)
+        .SingleOrDefaultAsync(TestContext.CancellationToken);
+      Assert.IsNull(fooVersionTracker);
+    }
   }
 
   [TestMethod]
@@ -119,30 +101,98 @@ public class EntityFrameworkCoreExtensionsTests
   {
     var fooId = Guid.CreateVersion7();
 
-    var eventStore = _testScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
-    var fooDbContext = _testScope.ServiceProvider.GetRequiredService<FooDbContext>();
+    await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
+    {
+      var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
 
-    var createdAt = _timeProvider.GetUtcNow();
-    var createdEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, 1, new FooEvent.Created(), null, null, createdAt);
+      var createdAt = _timeProvider.GetUtcNow();
+      var createdEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, 1, new FooEvent.Created(), null, null, createdAt);
 
-    _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
-    var updatedAt = _timeProvider.GetUtcNow();
-    var updatedEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, 2, new FooEvent.Updated(), null, null, updatedAt);
+      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var updatedAt = _timeProvider.GetUtcNow();
+      var updatedEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, 2, new FooEvent.Updated(), null, null, updatedAt);
 
-    var updateOk = await eventStore.ApplyUpdatesToStorage(fooId, [createdEvent, updatedEvent], 0);
-    Assert.IsTrue(updateOk);
+      var updateOk = await eventStore.ApplyUpdatesToStorage(fooId, [createdEvent, updatedEvent], 0);
+      Assert.IsTrue(updateOk);
+    }
 
-    var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken);
-    Assert.IsNotNull(fooEvents);
-    Assert.HasCount(2, fooEvents);
+    await using (var assertScope = _serviceProvider.CreateAsyncScope())
+    {
+      var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var fooDbContext = assertScope.ServiceProvider.GetRequiredService<FooDbContext>();
 
-    var fooVersionTracker = await fooDbContext
-      .VersionTracker.Where(foo => foo.FooId == fooId)
-      .SingleOrDefaultAsync(TestContext.CancellationToken);
-    Assert.IsNotNull(fooVersionTracker);
-    Assert.AreEqual(fooId, fooVersionTracker.FooId);
-    Assert.AreEqual(2, fooVersionTracker.Version);
-    Assert.AreEqual("1,2", fooVersionTracker.AppliedVersions);
+      var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken);
+      Assert.IsNotNull(fooEvents);
+      Assert.HasCount(2, fooEvents);
+
+      var fooVersionTracker = await fooDbContext
+        .VersionTracker.Where(foo => foo.FooId == fooId)
+        .SingleOrDefaultAsync(TestContext.CancellationToken);
+      Assert.IsNotNull(fooVersionTracker);
+      Assert.AreEqual(fooId, fooVersionTracker.FooId);
+      Assert.AreEqual(2, fooVersionTracker.Version);
+      Assert.AreEqual("1,2", fooVersionTracker.AppliedVersions);
+    }
+  }
+
+  [TestMethod]
+  public async Task GivenNewIdAndOutOfDateProjectionThenMissingEventsAreAppliedToProjection()
+  {
+    var fooId = Guid.CreateVersion7();
+
+    await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
+    {
+      var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
+
+      var createdAt = _timeProvider.GetUtcNow();
+      var createdEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, 1, new FooEvent.Created(), null, null, createdAt);
+
+      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var updatedAt = _timeProvider.GetUtcNow();
+      var updatedEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, 2, new FooEvent.Updated(), null, null, updatedAt);
+
+      var firstUpdateOk = await eventStore.ApplyUpdatesToStorage(fooId, [createdEvent, updatedEvent], 0);
+      Assert.IsTrue(firstUpdateOk);
+
+      var fooVersionTracker = await fooDbContext
+        .VersionTracker.Where(foo => foo.FooId == fooId)
+        .SingleOrDefaultAsync(TestContext.CancellationToken);
+      Assert.IsNotNull(fooVersionTracker);
+      Assert.AreEqual(fooId, fooVersionTracker.FooId);
+      Assert.AreEqual(2, fooVersionTracker.Version);
+      Assert.AreEqual("1,2", fooVersionTracker.AppliedVersions);
+
+      fooVersionTracker.Version = 1;
+      fooVersionTracker.AppliedVersions = "1";
+      await fooDbContext.SaveChangesAsync(TestContext.CancellationToken);
+    }
+
+    await using (var assertScope = _serviceProvider.CreateAsyncScope())
+    {
+      var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var fooDbContext = assertScope.ServiceProvider.GetRequiredService<FooDbContext>();
+
+      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var deletedAt = _timeProvider.GetUtcNow();
+      var deletedEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, 3, new FooEvent.Deleted(), null, null, deletedAt);
+
+      var secondUpdateOk = await eventStore.ApplyUpdatesToStorage(fooId, [deletedEvent], 2);
+      Assert.IsTrue(secondUpdateOk);
+
+      var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken);
+      Assert.IsNotNull(fooEvents);
+      Assert.HasCount(3, fooEvents);
+
+      var fooVersionTracker = await fooDbContext
+        .VersionTracker.Where(foo => foo.FooId == fooId)
+        .SingleOrDefaultAsync(TestContext.CancellationToken);
+      Assert.IsNotNull(fooVersionTracker);
+      Assert.AreEqual(fooId, fooVersionTracker.FooId);
+      Assert.AreEqual(3, fooVersionTracker.Version);
+      Assert.AreEqual("1,2,3", fooVersionTracker.AppliedVersions);
+    }
   }
 }
 
@@ -254,19 +304,6 @@ public class FooDbContext : DbContext
     modelBuilder.ApplyConfiguration(new FooViewVersionTrackerEntityConfiguration());
   }
 }
-
-// public class FooViewVersionTrackerPersistentProjection(
-//   IDbContextFactory<FooDbContext> dbContextFactory,
-//   IDomainEventStorage<FooEvent> eventStore,
-//   ILogger<FooViewVersionTrackerPersistentProjection> logger,
-//   [FromKeyedServices(FooConstants.VersionTrackerView)] PersistentProjectionOptions projectionOptions
-// )
-//   : EntityFrameworkCorePersistentProjection<FooDbContext, FooView.VersionTracker, FooEvent>(
-//     dbContextFactory,
-//     eventStore,
-//     logger,
-//     projectionOptions
-//   ) { }
 
 public class FooViewVersionTrackerStrongConsistentProjection(ILogger<FooViewVersionTrackerStrongConsistentProjection> logger)
   : IDbStrongConsistentProjection<FooEvent, FooDbContext>
