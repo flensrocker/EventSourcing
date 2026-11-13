@@ -11,10 +11,8 @@ internal class MessageEntiyConfiguration(ModelBuilder modelBuilder, bool exclude
 
   public void Configure(EntityTypeBuilder<MessageEntity> builder)
   {
-    builder.ToTable(
-      EntityFrameworkCoreConstants.MessageTableName,
-      EntityFrameworkCoreConstants.SchemaName,
-      tableBuilder => tableBuilder.ExcludeFromMigrations(_excludeFromMigrations)
+    builder.ToTable(EntityFrameworkCoreConstants.MessageTableName, EntityFrameworkCoreConstants.SchemaName, tableBuilder =>
+      tableBuilder.ExcludeFromMigrations(_excludeFromMigrations)
     );
 
     builder.HasKey(e => e.Id);

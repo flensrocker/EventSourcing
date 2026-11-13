@@ -28,15 +28,12 @@ public static class PostgreSQLPersistenceExtensions
           },
         configureDbContext: (connectionString, dbOptions) =>
         {
-          dbOptions.UseNpgsql(
-            connectionString,
-            npgsqlOptions =>
-            {
-              npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, EntityFrameworkCoreConstants.SchemaName);
-              npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
-            }
-          );
+          dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+          {
+            npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+            npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, EntityFrameworkCoreConstants.SchemaName);
+            npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
+          });
         }
       );
 

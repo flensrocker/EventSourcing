@@ -35,22 +35,17 @@ builder
 
 builder.Host.UseOrleansClient(clientBuilder =>
 {
-  var npgsqlConnectionString =
-    builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb)
+  var npgsqlConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.PostgresDb)
     ?? throw new InvalidOperationException("Npgsql connection string not configured.");
 
-  var natsConnectionString =
-    builder.Configuration.GetConnectionString(ServiceKeys.OrleansStreaming)
+  var natsConnectionString = builder.Configuration.GetConnectionString(ServiceKeys.OrleansStreaming)
     ?? throw new InvalidOperationException("NATS connection string not configured.");
-  clientBuilder.AddNatsStreams(
-    OrleansConstants.DomainEventStreamProviderName,
-    options =>
-    {
-      options.StreamName = OrleansConstants.DomainEventStreamProviderName;
-      options.JsonSerializerOptions = globalJsonOptions.Options;
-      options.NatsClientOptions = NatsOpts.Default with { Url = natsConnectionString };
-    }
-  );
+  clientBuilder.AddNatsStreams(OrleansConstants.DomainEventStreamProviderName, options =>
+  {
+    options.StreamName = OrleansConstants.DomainEventStreamProviderName;
+    options.JsonSerializerOptions = globalJsonOptions.Options;
+    options.NatsClientOptions = NatsOpts.Default with { Url = natsConnectionString };
+  });
 });
 
 builder.Services.ConfigureHttpJsonOptions(jsonOptions =>

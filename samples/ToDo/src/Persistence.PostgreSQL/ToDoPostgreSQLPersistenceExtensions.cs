@@ -26,15 +26,12 @@ public static class ToDoPostgreSQLPersistenceExtensions
           var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
           var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
 
-          dbOptions.UseNpgsql(
-            connectionString,
-            npgsqlOptions =>
-            {
-              npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
-              npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, ToDoPostgreSQLPersistenceConstants.SchemaName);
-              npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
-            }
-          );
+          dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+          {
+            npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+            npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, ToDoPostgreSQLPersistenceConstants.SchemaName);
+            npgsqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorCodesToAdd: null);
+          });
         }
       );
 

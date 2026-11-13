@@ -19,25 +19,19 @@ public static class MeasureEndpoints
 
   public static IEndpointRouteBuilder MapMeasure(this IEndpointRouteBuilder builder)
   {
-    builder.MapPost(
-      "/api/measure/webapi-only",
-      static async ([FromBody] DummyDto dto) =>
-      {
-        return Results.Ok();
-      }
-    );
+    builder.MapPost("/api/measure/webapi-only", static async ([FromBody] DummyDto dto) =>
+    {
+      return Results.Ok();
+    });
 
-    builder.MapPost(
-      "/api/measure/webapi-grain",
-      static async ([FromBody] DummyDto dto, [FromServices] IClusterClient client) =>
-      {
-        var command = new DummyCommand { Content = dto.Content ?? "" };
-        var grainId = GetRandomGrainId();
-        var dummy = client.GetGrain<IDummyGrain>(grainId);
-        await dummy.ExecuteNoop(command);
-        return Results.Ok();
-      }
-    );
+    builder.MapPost("/api/measure/webapi-grain", static async ([FromBody] DummyDto dto, [FromServices] IClusterClient client) =>
+    {
+      var command = new DummyCommand { Content = dto.Content ?? "" };
+      var grainId = GetRandomGrainId();
+      var dummy = client.GetGrain<IDummyGrain>(grainId);
+      await dummy.ExecuteNoop(command);
+      return Results.Ok();
+    });
 
     return builder;
   }

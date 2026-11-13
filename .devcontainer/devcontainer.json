@@ -8,7 +8,10 @@
       "version": "lts"
     },
     "ghcr.io/devcontainers/features/dotnet:2": {
-      "version": "10.0"
+      "version": "11.0",
+      "dotnetRuntimeVersions": "10.0",
+      "aspNetCoreRuntimeVersions": "10.0",
+      "tabCompletions": true
     }
   },
   "hostRequirements": {

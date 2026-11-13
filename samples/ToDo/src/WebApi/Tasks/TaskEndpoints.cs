@@ -46,87 +46,66 @@ public static class TaskEndpoints
     where TBuilder : IEndpointRouteBuilder
   {
     // endpoints for commands
-    builder.MapPut(
-      "{taskId}/changeTitle",
-      static async (HttpContext context, Guid taskId, [FromBody] ChangeTitleDto dto) =>
-      {
-        return await TaskCommand
-          .ChangeTitle.Create(title: dto.Title)
-          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .ToTypedResult();
-      }
-    );
+    builder.MapPut("{taskId}/changeTitle", static async (HttpContext context, Guid taskId, [FromBody] ChangeTitleDto dto) =>
+    {
+      return await TaskCommand
+        .ChangeTitle.Create(title: dto.Title)
+        .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+        .ToTypedResult();
+    });
 
-    builder.MapPut(
-      "{taskId}/complete",
-      static async (HttpContext context, Guid taskId) =>
-      {
-        return await TaskCommand
-          .Complete.Create()
-          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .ToTypedResult();
-      }
-    );
+    builder.MapPut("{taskId}/complete", static async (HttpContext context, Guid taskId) =>
+    {
+      return await TaskCommand
+        .Complete.Create()
+        .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+        .ToTypedResult();
+    });
 
-    builder.MapPut(
-      "{taskId}/dismiss",
-      static async (HttpContext context, Guid taskId, [FromBody] DismissDto dto) =>
-      {
-        return await TaskCommand
-          .Dismiss.Create(reason: dto.Reason)
-          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .ToTypedResult();
-      }
-    );
+    builder.MapPut("{taskId}/dismiss", static async (HttpContext context, Guid taskId, [FromBody] DismissDto dto) =>
+    {
+      return await TaskCommand
+        .Dismiss.Create(reason: dto.Reason)
+        .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+        .ToTypedResult();
+    });
 
-    builder.MapPost(
-      "open",
-      async (HttpContext context, [FromBody] OpenDto dto) =>
-      {
-        // NOTE BEST PRACTICE
-        // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
-        var taskId = Guid.CreateVersion7();
+    builder.MapPost("open", async (HttpContext context, [FromBody] OpenDto dto) =>
+    {
+      // NOTE BEST PRACTICE
+      // Use always a Guid v7 for new event streams, because they are sorted by time of creation, which is nicer for database indices.
+      var taskId = Guid.CreateVersion7();
 
-        return await TaskCommand
-          .Open.Create(title: dto.Title)
-          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .Pipe(result => DomainResult.Success(new OpenedDto { Version = result.Version, TaskId = taskId }))
-          .ToTypedResult($"{taskRoute}/{taskId}");
-      }
-    );
+      return await TaskCommand
+        .Open.Create(title: dto.Title)
+        .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+        .Pipe(result => DomainResult.Success(new OpenedDto { Version = result.Version, TaskId = taskId }))
+        .ToTypedResult($"{taskRoute}/{taskId}");
+    });
 
-    builder.MapPut(
-      "{taskId}/pause",
-      static async (HttpContext context, Guid taskId, [FromBody] PauseDto dto) =>
-      {
-        return await TaskCommand
-          .Pause.Create(pausedAt: dto.PausedAt)
-          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .ToTypedResult();
-      }
-    );
+    builder.MapPut("{taskId}/pause", static async (HttpContext context, Guid taskId, [FromBody] PauseDto dto) =>
+    {
+      return await TaskCommand
+        .Pause.Create(pausedAt: dto.PausedAt)
+        .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+        .ToTypedResult();
+    });
 
-    builder.MapPut(
-      "{taskId}/reopen",
-      static async (HttpContext context, Guid taskId) =>
-      {
-        return await TaskCommand
-          .Reopen.Create()
-          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .ToTypedResult();
-      }
-    );
+    builder.MapPut("{taskId}/reopen", static async (HttpContext context, Guid taskId) =>
+    {
+      return await TaskCommand
+        .Reopen.Create()
+        .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+        .ToTypedResult();
+    });
 
-    builder.MapPut(
-      "{taskId}/start",
-      static async (HttpContext context, Guid taskId, [FromBody] StartDto dto) =>
-      {
-        return await TaskCommand
-          .Start.Create(startedAt: dto.StartedAt, byUserId: dto.ByUserId)
-          .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
-          .ToTypedResult();
-      }
-    );
+    builder.MapPut("{taskId}/start", static async (HttpContext context, Guid taskId, [FromBody] StartDto dto) =>
+    {
+      return await TaskCommand
+        .Start.Create(startedAt: dto.StartedAt, byUserId: dto.ByUserId)
+        .Pipe(async command => await context.RequestServices.ExecuteCommandAsync<TaskCommand>(taskId, command))
+        .ToTypedResult();
+    });
 
     // endpoints for queries
     builder.MapGet(
@@ -157,34 +136,25 @@ public static class TaskEndpoints
     );
 
     // endpoints for views
-    builder.MapGet(
-      "{taskId}",
-      static async (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
-      {
-        return await context.RequestServices.GetProjection<TaskView.Details>(taskId, cancellationToken).ToTypedResult();
-      }
-    );
+    builder.MapGet("{taskId}", static async (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
+    {
+      return await context.RequestServices.GetProjection<TaskView.Details>(taskId, cancellationToken).ToTypedResult();
+    });
 
-    builder.MapGet(
-      "{taskId}/stream",
-      static async (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
-      {
-        var toDoStream = context
-          .RequestServices.StreamProjection<TaskView.Details>(taskId, cancellationToken)
-          .WithSseErrorEvents(eventType: TaskConstants.TaskView.Details);
-        return TypedResults.ServerSentEvents(toDoStream);
-      }
-    );
+    builder.MapGet("{taskId}/stream", static async (HttpContext context, Guid taskId, CancellationToken cancellationToken) =>
+    {
+      var toDoStream = context
+        .RequestServices.StreamProjection<TaskView.Details>(taskId, cancellationToken)
+        .WithSseErrorEvents(eventType: TaskConstants.TaskView.Details);
+      return TypedResults.ServerSentEvents(toDoStream);
+    });
 
     // endpoints for debugging, ignore
-    builder.MapGet(
-      "events",
-      static ([FromServices] IDomainEventStorage<TaskEvent> eventStore, CancellationToken cancellationToken) =>
-      {
-        var taskEvents = eventStore.ReadAllEventsFromStorage(cancellationToken);
-        return TypedResults.ServerSentEvents(taskEvents, eventType: TaskConstants.TaskEvent.Base);
-      }
-    );
+    builder.MapGet("events", static ([FromServices] IDomainEventStorage<TaskEvent> eventStore, CancellationToken cancellationToken) =>
+    {
+      var taskEvents = eventStore.ReadAllEventsFromStorage(cancellationToken);
+      return TypedResults.ServerSentEvents(taskEvents, eventType: TaskConstants.TaskEvent.Base);
+    });
 
     builder.MapGet(
       "{taskId}/events",
