@@ -1,0 +1,137 @@
+using System.Linq.Expressions;
+using System.Text.Json.Serialization;
+using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
+using Flensrocker.EventSourcing.Persistence.PostgreSQL;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
+
+namespace Flensrocker.EventSourcing.UnitTests.Extensions.EntityFrameworkCore;
+
+public static class FooConstants
+{
+  public const string EventBase = "FooEvent";
+  public const string CreatedEvent = $"{EventBase}_Created";
+  public const string UpdatedEvent = $"{EventBase}_Updated";
+  public const string DeletedEvent = $"{EventBase}_Deleted";
+
+  public const string ViewBase = "FooView";
+  public const string VersionTrackerView = $"{ViewBase}_VersionTracker";
+
+  public const string DbSchema = "Foo";
+  public const string VersionTrackerTable = "VersionTracker";
+}
+
+[GenerateSerializer]
+[Alias(FooConstants.EventBase)]
+[JsonDerivedType(typeof(Created), FooConstants.CreatedEvent)]
+[JsonDerivedType(typeof(Updated), FooConstants.UpdatedEvent)]
+[JsonDerivedType(typeof(Deleted), FooConstants.DeletedEvent)]
+public abstract record FooEvent
+{
+  private FooEvent() { }
+
+  [GenerateSerializer]
+  [Alias(FooConstants.CreatedEvent)]
+  public sealed record Created() : FooEvent { }
+
+  [GenerateSerializer]
+  [Alias(FooConstants.UpdatedEvent)]
+  public sealed record Updated() : FooEvent { }
+
+  [GenerateSerializer]
+  [Alias(FooConstants.DeletedEvent)]
+  public sealed record Deleted() : FooEvent { }
+}
+
+public abstract record FooView
+{
+  private FooView() { }
+
+  [GenerateSerializer]
+  [Alias(FooConstants.VersionTrackerView)]
+  public sealed record VersionTracker : FooView, IDomainEventProjectable, IDomainEventVersionable, IWhereKey<VersionTracker>
+  {
+    public const int ProjectionVersion = 1;
+
+    [Id(0)]
+    [JsonInclude]
+    public Guid FooId { get; internal set; }
+
+    [Id(1)]
+    [JsonInclude]
+    public int Version { get; internal set; }
+
+    [Id(2)]
+    [JsonInclude]
+    public string AppliedVersions { get; internal set; } = "";
+
+    static object IWhereKey<VersionTracker>.GetKey(DomainEvent domainEvent) => domainEvent.Metadata.StreamId;
+
+    static Expression<Func<VersionTracker, bool>> IWhereKey<VersionTracker>.GetWhereKey(DomainEvent domainEvent) =>
+      item => item.FooId == domainEvent.Metadata.StreamId;
+
+    void IDomainEventProjectable.Apply(DomainEvent @event)
+    {
+      FooId = @event.Metadata.StreamId;
+      Version = @event.Metadata.StreamVersion;
+      AppliedVersions = string.IsNullOrWhiteSpace(AppliedVersions) ? $"{Version}" : string.Join(",", AppliedVersions, $"{Version}");
+    }
+  }
+}
+
+[JsonSerializable(typeof(FooEvent))]
+[JsonSerializable(typeof(FooView.VersionTracker))]
+[JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
+public partial class FooJsonSerializerContext : JsonSerializerContext { }
+
+public class FooViewVersionTrackerEntityConfiguration : IEntityTypeConfiguration<FooView.VersionTracker>
+{
+  public void Configure(EntityTypeBuilder<FooView.VersionTracker> builder)
+  {
+    builder.ToTable(FooConstants.VersionTrackerTable, FooConstants.DbSchema);
+
+    builder.HasKey(e => e.FooId);
+
+    builder.Property(e => e.Version);
+    builder.Property(e => e.AppliedVersions);
+  }
+}
+
+public class FooDbContext : DbContext
+{
+  public DbSet<FooView.VersionTracker> VersionTracker
+  {
+    get => Set<FooView.VersionTracker>();
+  }
+
+  public FooDbContext(DbContextOptions<FooDbContext> options)
+    : base(options) { }
+
+  protected override void OnModelCreating(ModelBuilder modelBuilder)
+  {
+    modelBuilder.ApplyPostgreSQLEventSourcingConfiguration(excludeFromMigrations: true);
+
+    modelBuilder.HasDefaultSchema(FooConstants.DbSchema);
+    modelBuilder.ApplyConfiguration(new FooViewVersionTrackerEntityConfiguration());
+  }
+}
+
+public class FooViewVersionTrackerStrongConsistentProjection(ILogger<FooViewVersionTrackerStrongConsistentProjection> logger)
+  : IDbStrongConsistentProjection<FooEvent, FooDbContext>
+{
+  private readonly ILogger<FooViewVersionTrackerStrongConsistentProjection> _logger = logger;
+  private FooView.VersionTracker? _item = null;
+
+  async Task IDbStrongConsistentProjection<FooEvent, FooDbContext>.ApplyEvents(
+    IDomainEventStorage<FooEvent> eventStore,
+    FooDbContext dbContext,
+    IReadOnlyList<DomainEvent> domainEvents
+  )
+  {
+    _item = await dbContext
+      .UpdateProjectionAsync(eventStore, domainEvents, _item, FooConstants.VersionTrackerView, _logger)
+      .ConfigureAwait(false);
+  }
+}
