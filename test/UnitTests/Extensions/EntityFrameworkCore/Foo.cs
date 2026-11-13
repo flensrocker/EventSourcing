@@ -1,10 +1,12 @@
 using System.Linq.Expressions;
 using System.Text.Json.Serialization;
 using Flensrocker.EventSourcing.Abstractions;
+using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.UnitTests.Extensions.EntityFrameworkCore;
@@ -123,6 +125,19 @@ public class FooDbContext : DbContext
     modelBuilder.ApplyConfiguration(new FooViewVersionTrackerEntityConfiguration());
   }
 }
+
+public class FooViewVersionTrackerPersistentProjection(
+  IDbContextFactory<FooDbContext> dbContextFactory,
+  IDomainEventStorage<FooEvent> eventStore,
+  ILogger<FooViewVersionTrackerPersistentProjection> logger,
+  [FromKeyedServices(FooConstants.VersionTrackerView)] PersistentProjectionOptions projectionOptions
+)
+  : EntityFrameworkCorePersistentProjection<FooDbContext, FooView.VersionTracker, FooEvent>(
+    dbContextFactory,
+    eventStore,
+    logger,
+    projectionOptions
+  ) { }
 
 public class FooViewVersionTrackerStrongConsistentProjection(ILogger<FooViewVersionTrackerStrongConsistentProjection> logger)
   : IDbStrongConsistentProjection<FooEvent, FooDbContext>
