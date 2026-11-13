@@ -65,6 +65,10 @@ public abstract record FooView
 
     [Id(2)]
     [JsonInclude]
+    public Guid? TenantId { get; internal set; }
+
+    [Id(3)]
+    [JsonInclude]
     public string AppliedVersions { get; internal set; } = "";
 
     static object IWhereKey<VersionTracker>.GetKey(DomainEvent domainEvent) => domainEvent.Metadata.StreamId;
@@ -76,6 +80,7 @@ public abstract record FooView
     {
       FooId = @event.Metadata.StreamId;
       Version = @event.Metadata.StreamVersion;
+      TenantId = @event.Metadata.TenantId;
       AppliedVersions = string.IsNullOrWhiteSpace(AppliedVersions) ? $"{Version}" : string.Join(",", AppliedVersions, $"{Version}");
     }
   }
@@ -95,6 +100,7 @@ public class FooViewVersionTrackerEntityConfiguration : IEntityTypeConfiguration
     builder.HasKey(e => e.FooId);
 
     builder.Property(e => e.Version);
+    builder.Property(e => e.TenantId);
     builder.Property(e => e.AppliedVersions);
   }
 }

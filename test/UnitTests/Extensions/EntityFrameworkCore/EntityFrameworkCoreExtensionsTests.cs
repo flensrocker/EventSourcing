@@ -95,6 +95,8 @@ public class EntityFrameworkCoreExtensionsTests
   [TestMethod]
   public async Task GivenNewIdAndStoredEventsThenEventStoreAndProjectionAreNotEmpty()
   {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
     var fooId = Guid.CreateVersion7();
     var fooVersion = 0;
 
@@ -105,11 +107,11 @@ public class EntityFrameworkCoreExtensionsTests
       var expectedFooVersion = fooVersion;
 
       var createdAt = _timeProvider.GetUtcNow();
-      var createdEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Created(), null, null, createdAt);
+      var createdEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Created(), tenantId, userId, createdAt);
 
       _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
       var updatedAt = _timeProvider.GetUtcNow();
-      var updatedEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Updated(), null, null, updatedAt);
+      var updatedEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Updated(), tenantId, userId, updatedAt);
 
       var updateOk = await eventStore.ApplyUpdatesToStorage(fooId, [createdEvent, updatedEvent], expectedFooVersion);
       Assert.IsTrue(updateOk);
@@ -130,6 +132,7 @@ public class EntityFrameworkCoreExtensionsTests
       Assert.IsNotNull(fooVersionTracker);
       Assert.AreEqual(fooId, fooVersionTracker.FooId);
       Assert.AreEqual(fooVersion, fooVersionTracker.Version);
+      Assert.AreEqual(tenantId, fooVersionTracker.TenantId);
       Assert.AreEqual("1,2", fooVersionTracker.AppliedVersions);
     }
   }
@@ -137,6 +140,8 @@ public class EntityFrameworkCoreExtensionsTests
   [TestMethod]
   public async Task GivenNewIdAndOutOfDateProjectionThenMissingEventsAreAppliedToProjection()
   {
+    var tenantId = Guid.CreateVersion7();
+    var userId = Guid.CreateVersion7();
     var fooId = Guid.CreateVersion7();
     var fooVersion = 0;
 
@@ -147,11 +152,11 @@ public class EntityFrameworkCoreExtensionsTests
       var expectedFooVersion = fooVersion;
 
       var createdAt = _timeProvider.GetUtcNow();
-      var createdEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Created(), null, null, createdAt);
+      var createdEvent = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Created(), tenantId, userId, createdAt);
 
       _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
       var updated1At = _timeProvider.GetUtcNow();
-      var updated1Event = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Updated(), null, null, updated1At);
+      var updated1Event = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Updated(), tenantId, userId, updated1At);
 
       var firstUpdateOk = await eventStore.ApplyUpdatesToStorage(fooId, [createdEvent, updated1Event], expectedFooVersion);
       Assert.IsTrue(firstUpdateOk);
@@ -162,6 +167,7 @@ public class EntityFrameworkCoreExtensionsTests
       Assert.IsNotNull(fooVersionTracker);
       Assert.AreEqual(fooId, fooVersionTracker.FooId);
       Assert.AreEqual(fooVersion, fooVersionTracker.Version);
+      Assert.AreEqual(tenantId, fooVersionTracker.TenantId);
       Assert.AreEqual("1,2", fooVersionTracker.AppliedVersions);
 
       fooVersionTracker.Version = 1;
@@ -177,7 +183,7 @@ public class EntityFrameworkCoreExtensionsTests
 
       _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
       var updated2At = _timeProvider.GetUtcNow();
-      var updated2Event = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Updated(), null, null, updated2At);
+      var updated2Event = DomainEvent.Create<FooEvent>(FooConstants.EventBase, fooId, ++fooVersion, new FooEvent.Updated(), tenantId, userId, updated2At);
 
       var secondUpdateOk = await eventStore.ApplyUpdatesToStorage(fooId, [updated2Event], expectedFooVersion);
       Assert.IsTrue(secondUpdateOk);
@@ -192,6 +198,7 @@ public class EntityFrameworkCoreExtensionsTests
       Assert.IsNotNull(fooVersionTracker);
       Assert.AreEqual(fooId, fooVersionTracker.FooId);
       Assert.AreEqual(fooVersion, fooVersionTracker.Version);
+      Assert.AreEqual(tenantId, fooVersionTracker.TenantId);
       Assert.AreEqual("1,2,3", fooVersionTracker.AppliedVersions);
     }
   }
