@@ -1,13 +1,13 @@
 ﻿namespace Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 
-internal static class PersistentProjectionConstants
+public static class PersistentProjectionConstants
 {
-  internal static readonly Guid RegistryId = Guid.Empty;
+  public static readonly Guid RegistryId = Guid.Empty;
 
-  internal static class PersistentProjectionEvent
+  public static class PersistentProjectionEvent
   {
-    internal const string Base = $"{EventSourcingConstants.AliasBase}_PersistentProjectionEvent";
-    internal const string ProjectionRegistered = $"{Base}_ProjectionRegistered";
-    internal const string ProjectionRebuilt = $"{Base}_ProjectionRebuilt";
+    public const string Base = $"{EventSourcingConstants.AliasBase}_PersistentProjectionEvent";
+    public const string ProjectionRegistered = $"{Base}_ProjectionRegistered";
+    public const string ProjectionRebuilt = $"{Base}_ProjectionRebuilt";
   }
 }

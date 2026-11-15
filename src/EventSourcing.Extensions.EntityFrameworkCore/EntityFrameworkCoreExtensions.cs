@@ -146,6 +146,7 @@ public static class EntityFrameworkCoreExtensions
         {
           TEntity? projection;
 
+          // TODO if "creation event"
           if (domainEvent.Metadata.StreamVersion == 1)
           {
             projection = new();
@@ -154,11 +155,11 @@ public static class EntityFrameworkCoreExtensions
 
             batchCount++;
           }
-          // TODO else if "deletion event"
+          // TODO else if "deletion event" => remove projection, end batch to SaveChanges and clear ChangeTracker?
           else
           {
-            var entity = dbContext.Set<TEntity>().Local.FindEntry(domainEvent.Metadata.StreamId);
-            if (entity is null)
+            projection = dbContext.Set<TEntity>().Local.Where(TEntity.GetWhereKey(domainEvent).Compile().Invoke).FirstOrDefault();
+            if (projection is null)
             {
               projection = await dbContext
                 .Set<TEntity>()
@@ -167,6 +168,7 @@ public static class EntityFrameworkCoreExtensions
                 .ConfigureAwait(false);
               if (projection is null)
               {
+                // TODO review: should this really create a new projection? This cannot be in the right state for this event => LogError?
                 logger.LogWarning(
                   "Missing projection {ProjectionType}, entity-id {EntityId}, version {EntityVersion}",
                   projectionOptions.TypeName,
@@ -175,14 +177,12 @@ public static class EntityFrameworkCoreExtensions
                 );
 
                 projection = new();
-                entity = dbContext.Attach(projection);
+                var entity = dbContext.Attach(projection);
                 entity.State = EntityState.Added;
 
                 batchCount++;
               }
             }
-            else
-              projection = entity.Entity;
           }
 
           projection?.Apply(domainEvent);

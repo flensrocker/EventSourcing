@@ -59,7 +59,7 @@ public abstract record FooView
   [Alias(FooConstants.VersionTrackerView)]
   public sealed record VersionTracker : FooView, IDomainEventProjectable, IDomainEventVersionable, IWhereKey<VersionTracker>
   {
-    public const int ProjectionVersion = 1;
+    public const int ProjectionVersion = 2;
 
     [Id(0)]
     [JsonInclude]
