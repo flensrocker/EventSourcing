@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Text.Json;
 using Flensrocker.EventSourcing.Abstractions;
 
@@ -39,6 +40,12 @@ public static class TestUtilities
     where T : IWhereKey<T>
   {
     return T.GetKey(domainEvent);
+  }
+
+  public static Expression<Func<T, bool>> TestWhereKey<T>(DomainEvent domainEvent)
+    where T : IWhereKey<T>
+  {
+    return T.GetWhereKey(domainEvent);
   }
 
   public static bool TestWhereKey<T>(T item, DomainEvent domainEvent)

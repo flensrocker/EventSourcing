@@ -70,10 +70,10 @@ public class EntityFrameworkCoreExtensionsTests
   {
     var fooId = Guid.CreateVersion7();
 
-    await using (var testScope = _serviceProvider.CreateAsyncScope())
+    await using (var assertScope = _serviceProvider.CreateAsyncScope())
     {
-      var eventStore = testScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
-      var fooDbContext = testScope.ServiceProvider.GetRequiredService<FooDbContext>();
+      var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var fooDbContext = assertScope.ServiceProvider.GetRequiredService<FooDbContext>();
 
       var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken);
       Assert.IsNull(fooEvents);
