@@ -25,6 +25,7 @@ public class EntityFrameworkCoreExtensionsTests
     await TestPostgreSQLContainer.InitializeAsync(TestContext.CancellationToken);
 
     var connectionString = TestPostgreSQLContainer.GetConnectionString();
+    // TODO think about making this injectable
     var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddFooJsonOptions();
 
     var configuration = new ConfigurationBuilder()
