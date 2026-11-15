@@ -26,7 +26,7 @@ public class EntityFrameworkCoreExtensionsTests
 
     var connectionString = TestPostgreSQLContainer.GetConnectionString();
     // TODO think about making this injectable
-    var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddFooJsonOptions();
+    var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddFooJsonOptions().MakeReadOnly();
 
     var configuration = new ConfigurationBuilder()
       .AddInMemoryCollection([new("ConnectionStrings:DefaultConnection", connectionString)])
