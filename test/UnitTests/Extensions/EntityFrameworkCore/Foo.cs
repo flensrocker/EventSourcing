@@ -1,11 +1,15 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
+using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -88,6 +92,11 @@ public abstract record FooView
   }
 }
 
+public class FooPostgreSQLPersistenceOptions
+{
+  public required string ConnectionName { get; init; }
+}
+
 [JsonSerializable(typeof(FooEvent))]
 [JsonSerializable(typeof(FooView.VersionTracker))]
 [JsonSourceGenerationOptions(AllowOutOfOrderMetadataProperties = true)]
@@ -154,5 +163,57 @@ public class FooViewVersionTrackerStrongConsistentProjection(ILogger<FooViewVers
     _item = await dbContext
       .UpdateProjectionAsync(eventStore, domainEvents, _item, FooConstants.VersionTrackerView, _logger)
       .ConfigureAwait(false);
+  }
+}
+
+public static class FooExtensions
+{
+  extension(EventSourcingJsonSerializerOptions jsonOptions)
+  {
+    public EventSourcingJsonSerializerOptions AddFooJsonOptions() =>
+      jsonOptions.Add(FooJsonSerializerContext.Default).Add<FooEvent>(FooConstants.EventBase);
+  }
+
+  extension(IServiceCollection services)
+  {
+    public IServiceCollection AddFooPostgreSQLPersistence(Func<FooPostgreSQLPersistenceOptions> configureOptions)
+    {
+      var storageOptions = configureOptions();
+      services.AddSingleton(storageOptions);
+
+      services.AddPooledDbContextFactory<FooDbContext>(
+        (serviceProvider, dbOptions) =>
+        {
+          var rootConfiguration = serviceProvider.GetRequiredService<IConfiguration>();
+          var connectionString = rootConfiguration.GetConnectionString(storageOptions.ConnectionName);
+
+          dbOptions.UseNpgsql(connectionString, npgsqlOptions =>
+          {
+            npgsqlOptions.MigrationsAssembly(Assembly.GetExecutingAssembly());
+            npgsqlOptions.MigrationsHistoryTable(HistoryRepository.DefaultTableName, FooConstants.DbSchema);
+            npgsqlOptions.EnableRetryOnFailure();
+          });
+        }
+      );
+
+      services.AddEntityFrameworkCoreDbMigration<FooDbContext>();
+      services.AddEntityFrameworkCorePersistentProjection<
+        FooViewVersionTrackerPersistentProjection,
+        FooDbContext,
+        FooView.VersionTracker,
+        FooEvent
+      >(FooConstants.VersionTrackerView, FooView.VersionTracker.ProjectionVersion);
+      services.AddEntityFrameworkCoreStrongConsistentProjection<FooEvent, FooDbContext, FooViewVersionTrackerStrongConsistentProjection>();
+
+      return services;
+    }
+  }
+
+  extension(EntityFrameworkCoreDomainEventStorageBuilder builder)
+  {
+    public EntityFrameworkCoreDomainEventStorageBuilder ForFooEvents()
+    {
+      return builder.ForDomainEvents<FooEvent, FooDbContext>();
+    }
   }
 }

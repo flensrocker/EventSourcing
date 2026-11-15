@@ -1,7 +1,6 @@
 using Flensrocker.EventSourcing.Abstractions;
 using Flensrocker.EventSourcing.Abstractions.PersistentProjection;
 using Flensrocker.EventSourcing.Extensions.AspNetCore;
-using Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
 using Flensrocker.EventSourcing.Test.Utilities;
@@ -17,7 +16,6 @@ public class EntityFrameworkCoreExtensionsTests
 {
   private ServiceCollection _services = default!;
   private ServiceProvider _serviceProvider = default!;
-  private readonly FakeTimeProvider _timeProvider = new();
 
   public TestContext TestContext { get; set; }
 
@@ -27,10 +25,7 @@ public class EntityFrameworkCoreExtensionsTests
     await TestPostgreSQLContainer.InitializeAsync(TestContext.CancellationToken);
 
     var connectionString = TestPostgreSQLContainer.GetConnectionString();
-    var globalJsonOptions = new EventSourcingJsonSerializerOptions()
-      .AddAspNetCoreJsonOptions()
-      .Add(FooJsonSerializerContext.Default)
-      .Add<FooEvent>(FooConstants.EventBase);
+    var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddFooJsonOptions();
 
     var configuration = new ConfigurationBuilder()
       .AddInMemoryCollection([new("ConnectionStrings:DefaultConnection", connectionString)])
@@ -40,27 +35,17 @@ public class EntityFrameworkCoreExtensionsTests
 
     _services.AddSingleton<IConfiguration>(configuration);
     _services.AddLogging();
-    _services.AddSingleton<TimeProvider>(_timeProvider);
+    _services.AddSingleton<FakeTimeProvider>();
+    _services.AddSingleton<TimeProvider>(sp => sp.GetRequiredService<FakeTimeProvider>());
 
     _services
       .AddFlensrockerEventSourcingCore()
       .AddPostgreSQLDomainEventStorage(() =>
         new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = "DefaultConnection", JsonOptions = globalJsonOptions }
       )
-      .ForDomainEvents<FooEvent, FooDbContext>();
+      .ForFooEvents();
 
-    _services.AddPooledDbContextFactory<FooDbContext>(options =>
-    {
-      options.UseNpgsql(connectionString);
-    });
-
-    _services.AddEntityFrameworkCorePersistentProjection<
-      FooViewVersionTrackerPersistentProjection,
-      FooDbContext,
-      FooView.VersionTracker,
-      FooEvent
-    >(FooConstants.VersionTrackerView, FooView.VersionTracker.ProjectionVersion);
-    _services.AddEntityFrameworkCoreStrongConsistentProjection<FooEvent, FooDbContext, FooViewVersionTrackerStrongConsistentProjection>();
+    _services.AddFooPostgreSQLPersistence(() => new FooPostgreSQLPersistenceOptions { ConnectionName = "DefaultConnection" });
 
     _serviceProvider = _services.BuildServiceProvider();
 
@@ -109,11 +94,12 @@ public class EntityFrameworkCoreExtensionsTests
 
     await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
     {
+      var timeProvider = arrangeScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
       var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
       var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 
-      var createdAt = _timeProvider.GetUtcNow();
+      var createdAt = timeProvider.GetUtcNow();
       var createdEvent = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
@@ -124,8 +110,8 @@ public class EntityFrameworkCoreExtensionsTests
         createdAt
       );
 
-      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
-      var updatedAt = _timeProvider.GetUtcNow();
+      timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var updatedAt = timeProvider.GetUtcNow();
       var updatedEvent = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
@@ -170,11 +156,12 @@ public class EntityFrameworkCoreExtensionsTests
 
     await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
     {
+      var timeProvider = arrangeScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
       var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
       var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 
-      var createdAt = _timeProvider.GetUtcNow();
+      var createdAt = timeProvider.GetUtcNow();
       var createdEvent = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
@@ -185,8 +172,8 @@ public class EntityFrameworkCoreExtensionsTests
         createdAt
       );
 
-      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
-      var updated1At = _timeProvider.GetUtcNow();
+      timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var updated1At = timeProvider.GetUtcNow();
       var updated1Event = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
@@ -216,12 +203,13 @@ public class EntityFrameworkCoreExtensionsTests
 
     await using (var assertScope = _serviceProvider.CreateAsyncScope())
     {
+      var timeProvider = assertScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
       var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
       var fooDbContext = assertScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 
-      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
-      var updated2At = _timeProvider.GetUtcNow();
+      timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var updated2At = timeProvider.GetUtcNow();
       var updated2Event = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
@@ -260,11 +248,12 @@ public class EntityFrameworkCoreExtensionsTests
 
     await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
     {
+      var timeProvider = arrangeScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
       var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
       var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 
-      var createdAt = _timeProvider.GetUtcNow();
+      var createdAt = timeProvider.GetUtcNow();
       var createdEvent = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
@@ -275,8 +264,8 @@ public class EntityFrameworkCoreExtensionsTests
         createdAt
       );
 
-      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
-      var updated1At = _timeProvider.GetUtcNow();
+      timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var updated1At = timeProvider.GetUtcNow();
       var updated1Event = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
@@ -287,8 +276,8 @@ public class EntityFrameworkCoreExtensionsTests
         updated1At
       );
 
-      _timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
-      var updated2At = _timeProvider.GetUtcNow();
+      timeProvider.Advance(TimeSpan.FromMilliseconds(1L));
+      var updated2At = timeProvider.GetUtcNow();
       var updated2Event = DomainEvent.Create<FooEvent>(
         FooConstants.EventBase,
         fooId,
