@@ -18,14 +18,14 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddMeasureJsonOptions().AddToDoJsonOptions();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddMeasureJsonOptions().AddToDoJsonOptions().MakeReadOnly();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 
-builder.Services.AddFlensrockerEventSourcingCore();
+builder.Services.AddFlensrockerEventSourcingCore(globalJsonOptions);
 builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
-    new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions }
+    new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb }
   )
   .ForToDoEvents();
 

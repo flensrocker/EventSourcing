@@ -12,14 +12,14 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions().MakeReadOnly();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 
-builder.Services.AddFlensrockerEventSourcingCore();
+builder.Services.AddFlensrockerEventSourcingCore(globalJsonOptions);
 builder.Services.AddPostgreSQLDomainMessageSubscriber(() =>
 {
-  return new PostgreSQLMessageSubscriberOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions };
+  return new PostgreSQLMessageSubscriberOptions { ConnectionName = ServiceKeys.PostgresDb };
 });
 
 builder.UseOrleansClient(clientBuilder =>

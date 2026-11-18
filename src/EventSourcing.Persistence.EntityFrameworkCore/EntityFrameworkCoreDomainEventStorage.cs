@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 
 internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>(
-  EntityFrameworkCoreDomainEventStorageOptions options,
+  EventSourcingJsonSerializerOptions jsonOptions,
   IDomainEventStorageDbProvider dbProvider,
   IDbContextFactory<TDbContext> dbContextFactory,
   IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> strongConsistentProjections,
@@ -15,14 +15,14 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
   where TEventBase : class
   where TDbContext : DbContext
 {
-  private readonly EntityFrameworkCoreDomainEventStorageOptions _options = options;
+  private readonly EventSourcingJsonSerializerOptions _jsonOptions = jsonOptions;
   private readonly IDomainEventStorageDbProvider _dbProvider = dbProvider;
   private readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;
   private readonly IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> _strongConsistentProjections =
     strongConsistentProjections;
   private readonly ILogger<EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>> _logger = logger;
 
-  public string StreamType { get; } = options.JsonOptions.GetTypeName(typeof(TEventBase));
+  public string StreamType { get; } = jsonOptions.GetTypeName(typeof(TEventBase));
 
   async Task<KeyValuePair<int, TState>> IDomainEventStorage<TEventBase>.ReadStateFromStorage<TState>(
     Guid streamId,
@@ -38,7 +38,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
       .AsNoTracking()
       .Where(e => e.StreamType == StreamType && e.StreamId == streamId && e.StreamVersion > 0)
       .OrderBy(e => e.StreamVersion)
-      .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions.Options))
+      .Select(e => e.ToDomainEvent<TEventBase>(_jsonOptions.Options))
       .ToArrayAsync(cancellationToken)
       .ConfigureAwait(false);
 
@@ -63,7 +63,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
 
     try
     {
-      var insertSql = _dbProvider.GenerateInsertSql(updates, _options.JsonOptions.Options);
+      var insertSql = _dbProvider.GenerateInsertSql(updates, _jsonOptions.Options);
 
       await using var strategyDbContext = await _dbContextFactory.CreateDbContextAsync().ConfigureAwait(false);
 
@@ -125,7 +125,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
           && (toVersionExcl <= 0 || e.StreamVersion < toVersionExcl)
         )
         .OrderBy(e => e.StreamVersion)
-        .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions.Options))
+        .Select(e => e.ToDomainEvent<TEventBase>(_jsonOptions.Options))
         .ToArrayAsync(cancellationToken)
         .ConfigureAwait(false);
 
@@ -153,7 +153,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
       .AsNoTracking()
       .Where(e => e.StreamType == StreamType)
       .OrderBy(e => e.GlobalIndex)
-      .Select(e => e.ToDomainEvent<TEventBase>(_options.JsonOptions.Options))
+      .Select(e => e.ToDomainEvent<TEventBase>(_jsonOptions.Options))
       .AsAsyncEnumerable();
 
     await foreach (var domainEvent in domainEventList.WithCancellation(cancellationToken).ConfigureAwait(false))

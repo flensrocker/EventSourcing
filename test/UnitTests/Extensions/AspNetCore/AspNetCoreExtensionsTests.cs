@@ -12,6 +12,7 @@ public class AspNetCoreExtensionsTests
     var jsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions();
 
     var hasTypeInfo = jsonOptions.Options.TryGetTypeInfo(typeof(SseError), out var sseErrorTypeInfo);
+    Assert.IsTrue(hasTypeInfo);
     Assert.IsNotNull(sseErrorTypeInfo);
   }
 }

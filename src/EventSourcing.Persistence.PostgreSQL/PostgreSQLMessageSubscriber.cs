@@ -14,6 +14,7 @@ namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 internal partial class PostgreSQLMessageSubscriber(
   IConfiguration configuration,
   PostgreSQLMessageSubscriberOptions options,
+  EventSourcingJsonSerializerOptions jsonOptions,
   EventSourcingActivitySource activitySource,
   IDomainEventPublisher publisher,
   PostgreSQLMessageSubscriberMetrics metrics,
@@ -22,6 +23,7 @@ internal partial class PostgreSQLMessageSubscriber(
 {
   private readonly IConfiguration _configuration = configuration;
   private readonly PostgreSQLMessageSubscriberOptions _options = options;
+  private readonly EventSourcingJsonSerializerOptions _jsonOptions = jsonOptions;
   private readonly EventSourcingActivitySource _activitySource = activitySource;
   private readonly IDomainEventPublisher _publisher = publisher;
   private readonly PostgreSQLMessageSubscriberMetrics _metrics = metrics;
@@ -127,7 +129,7 @@ internal partial class PostgreSQLMessageSubscriber(
             (
               ActivitySource: _activitySource.Source,
               ConnectionString: connectionString,
-              _options.JsonOptions,
+              JsonOptions: _jsonOptions,
               Publisher: _publisher,
               Metrics: _metrics,
               Logger: _logger

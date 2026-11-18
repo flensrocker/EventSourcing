@@ -24,12 +24,12 @@ public class EntityFrameworkCoreExtensionsTests
   {
     await TestPostgreSQLContainer.InitializeAsync(TestContext.CancellationToken).ConfigureAwait(false);
 
+    var connectionName = "DefaultConnection";
     var connectionString = TestPostgreSQLContainer.GetConnectionString();
-    // TODO think about making this injectable
     var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddFooJsonOptions().MakeReadOnly();
 
     var configuration = new ConfigurationBuilder()
-      .AddInMemoryCollection([new("ConnectionStrings:DefaultConnection", connectionString)])
+      .AddInMemoryCollection([new($"ConnectionStrings:{connectionName}", connectionString)])
       .Build();
 
     _services = new ServiceCollection();
@@ -40,13 +40,11 @@ public class EntityFrameworkCoreExtensionsTests
     _services.AddSingleton<TimeProvider>(sp => sp.GetRequiredService<FakeTimeProvider>());
 
     _services
-      .AddFlensrockerEventSourcingCore()
-      .AddPostgreSQLDomainEventStorage(() =>
-        new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = "DefaultConnection", JsonOptions = globalJsonOptions }
-      )
+      .AddFlensrockerEventSourcingCore(globalJsonOptions)
+      .AddPostgreSQLDomainEventStorage(() => new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = connectionName })
       .ForFooEvents();
 
-    _services.AddFooPostgreSQLPersistence(() => new FooPostgreSQLPersistenceOptions { ConnectionName = "DefaultConnection" });
+    _services.AddFooPostgreSQLPersistence(() => new FooPostgreSQLPersistenceOptions { ConnectionName = connectionName });
 
     _serviceProvider = _services.BuildServiceProvider();
 

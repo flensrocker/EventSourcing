@@ -11,13 +11,13 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions().MakeReadOnly();
 
-builder.Services.AddFlensrockerEventSourcingCore();
+builder.Services.AddFlensrockerEventSourcingCore(globalJsonOptions);
 builder
   .Services.AddPostgreSQLDomainEventStorage(() =>
   {
-    return new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb, JsonOptions = globalJsonOptions };
+    return new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb };
   })
   .ForToDoEvents();
 

@@ -14,24 +14,22 @@ using Flensrocker.ToDo.WebApi;
 var builder = WebApplication.CreateBuilder(args);
 
 // Build JsonSerializerOptions for all relevant parts of the application
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddToDoJsonOptions();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddToDoJsonOptions().MakeReadOnly();
 
 // Register the migration service as early as possible so it runs before all other hosted services
 builder.Services.AddHostedService<MigrationService>();
 
 // Activate core event sourcing services and PostgreSQL storage for "ToDo" events
 builder
-  .Services.AddFlensrockerEventSourcingCore()
-  .AddPostgreSQLDomainEventStorage(() =>
-    new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = "DefaultConnection", JsonOptions = globalJsonOptions }
-  )
+  .Services.AddFlensrockerEventSourcingCore(globalJsonOptions)
+  .AddPostgreSQLDomainEventStorage(() => new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = "DefaultConnection" })
   .ForToDoEvents();
 
 // Activate in-process outbox on PostgreSQL with Orleans Streaming publisher
 builder
   .Services.AddPostgreSQLDomainMessageSubscriber(() =>
   {
-    return new PostgreSQLMessageSubscriberOptions { ConnectionName = "DefaultConnection", JsonOptions = globalJsonOptions };
+    return new PostgreSQLMessageSubscriberOptions { ConnectionName = "DefaultConnection" };
   })
   .AddOrleansDomainEventStreamPublisher();
 
