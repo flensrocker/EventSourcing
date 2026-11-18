@@ -10,11 +10,23 @@ using Flensrocker.ToDo.Orleans.Client;
 using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
+using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Build JsonSerializerOptions for all relevant parts of the application
 var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddToDoJsonOptions().MakeReadOnly();
+
+builder.Logging.AddOpenTelemetry(logging =>
+{
+  logging.IncludeFormattedMessage = true;
+  logging.IncludeScopes = true;
+  logging.AddConsoleExporter();
+});
+builder
+  .Services.AddOpenTelemetry()
+  .WithMetrics(metrics => metrics.AddMeter("Flensrocker.EventSourcing"))
+  .WithTracing(tracing => tracing.AddSource("Flensrocker.EventSourcing"));
 
 // Register the migration service as early as possible so it runs before all other hosted services
 builder.Services.AddHostedService<MigrationService>();
