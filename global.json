@@ -1,6 +1,5 @@
 {
   "msbuild-sdks": {
-    "Aspire.AppHost.Sdk": "13.6.5",
     "Cake.Sdk": "7.0.0",
     "MSTest.Sdk": "4.5.3"
   },

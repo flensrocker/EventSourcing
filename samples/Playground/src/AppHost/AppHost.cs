@@ -23,7 +23,7 @@ var postgres = builder
 var db = postgres.AddDatabase(ServiceKeys.PostgresDb, databaseName: "playground");
 
 var dbMigration = builder
-  .AddProject<Projects.Playground_Migration>("playground-db-migration")
+  .AddDotnetProject("playground-db-migration", "../Migration")
   .WithReference(db)
   .WithParentRelationship(db)
   .WaitFor(db);
@@ -42,7 +42,7 @@ var hostAllServicesInOneProcess = false;
 if (hostAllServicesInOneProcess)
 {
   webApi = builder
-    .AddProject<Projects.Playground_AllInOne>("playground-webapi")
+    .AddDotnetProject("playground-webapi", "../AllInOne")
     .WithReference(nats)
     .WithReference(db)
     .WithReference(orleans)
@@ -54,7 +54,7 @@ if (hostAllServicesInOneProcess)
 else
 {
   var silo = builder
-    .AddProject<Projects.Playground_Orleans_Server>("playground-orleans-server")
+    .AddDotnetProject("playground-orleans-server", "../Orleans.Server")
     .WithReference(nats)
     .WithReference(db)
     .WithReference(orleans)
@@ -63,7 +63,7 @@ else
     .WaitForCompletion(dbMigration);
 
   var outbox = builder
-    .AddProject<Projects.Playground_Outbox>("playground-outbox")
+    .AddDotnetProject("playground-outbox", "../Outbox")
     .WithReference(nats)
     .WithReference(db)
     .WithReference(orleans.AsClient())
@@ -73,7 +73,7 @@ else
     .WaitFor(silo);
 
   webApi = builder
-    .AddProject<Projects.Playground_WebApi>("playground-webapi")
+    .AddDotnetProject("playground-webapi", "../WebApi")
     .WithReference(nats)
     .WithReference(db)
     .WithReference(orleans.AsClient())
