@@ -152,6 +152,8 @@ public class EntityFrameworkCoreExtensionsTests
       var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken).ConfigureAwait(false);
       Assert.IsNotNull(fooEvents);
       Assert.HasCount(fooVersion, fooEvents);
+      var vtKey = Assert.IsInstanceOfType<Guid>(TestUtilities.TestGetKey<FooView.VersionTracker>(fooEvents[0]));
+      Assert.AreEqual(fooId, vtKey);
 
       var fooVersionTracker = await fooDbContext
         .VersionTracker.Where(foo => foo.FooId == fooId)
