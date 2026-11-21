@@ -17,7 +17,7 @@ using OpenTelemetry.Trace;
 var builder = WebApplication.CreateBuilder(args);
 
 // Build JsonSerializerOptions for all relevant parts of the application
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddToDoJsonOptions().MakeReadOnly();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddToDoJsonOptions();
 
 var connectionName = "DefaultConnection";
 

@@ -56,14 +56,4 @@ public class EventSourcingJsonSerializerOptions
   {
     return type is not null && _typeToName.TryGetValue(type, out var typeName) ? typeName : "";
   }
-
-  public EventSourcingJsonSerializerOptions MakeReadOnly()
-  {
-    if (!Options.IsReadOnly)
-    {
-      Options.MakeReadOnly();
-    }
-
-    return this;
-  }
 }

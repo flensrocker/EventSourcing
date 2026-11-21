@@ -13,7 +13,7 @@ var forceRebuild = args.Any(arg => "--force".Equals(arg, StringComparison.Ordina
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions().MakeReadOnly();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions();
 
 builder.Services.AddFlensrockerEventSourcingCore(globalJsonOptions);
 builder
