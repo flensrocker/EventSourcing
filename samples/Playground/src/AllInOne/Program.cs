@@ -25,9 +25,7 @@ builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 
 builder.Services.AddFlensrockerEventSourcingCore(globalJsonOptions);
 builder
-  .Services.AddPostgreSQLDomainEventStorage(() =>
-    new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb }
-  )
+  .Services.AddPostgreSQLDomainEventStore(() => new EntityFrameworkCoreDomainEventStoreOptions { ConnectionName = ServiceKeys.PostgresDb })
   .ForToDoEvents();
 
 builder

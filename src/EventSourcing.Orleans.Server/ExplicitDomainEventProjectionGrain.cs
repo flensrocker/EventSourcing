@@ -14,7 +14,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable, new()
 {
-  private readonly IDomainEventStorage<TEventBase> _eventStore;
+  private readonly IDomainEventStore<TEventBase> _eventStore;
   private readonly ILogger _logger;
 
   private DomainEventProjectionObserver<TEventBase, TProjection>? _projection;
@@ -22,7 +22,7 @@ public abstract class ExplicitDomainEventProjectionGrain<TEventBase, TProjection
 
   protected ExplicitDomainEventProjectionGrain()
   {
-    _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+    _eventStore = ServiceProvider.GetRequiredService<IDomainEventStore<TEventBase>>();
     _logger = ServiceProvider.GetRequiredService<ILogger<ExplicitDomainEventProjectionGrain<TEventBase, TProjection>>>();
   }
 

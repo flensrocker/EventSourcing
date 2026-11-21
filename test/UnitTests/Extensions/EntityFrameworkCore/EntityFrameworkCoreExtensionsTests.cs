@@ -41,7 +41,7 @@ public class EntityFrameworkCoreExtensionsTests
 
     _services
       .AddFlensrockerEventSourcingCore(globalJsonOptions)
-      .AddPostgreSQLDomainEventStorage(() => new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = connectionName })
+      .AddPostgreSQLDomainEventStore(() => new EntityFrameworkCoreDomainEventStoreOptions { ConnectionName = connectionName })
       .ForFooEvents();
 
     _services.AddFooPostgreSQLPersistence(() => new FooPostgreSQLPersistenceOptions { ConnectionName = connectionName });
@@ -72,8 +72,8 @@ public class EntityFrameworkCoreExtensionsTests
 
     await using (var assertScope = _serviceProvider.CreateAsyncScope())
     {
-      var projectionEventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<PersistentProjectionEvent>>();
-      var fooEventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var projectionEventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<PersistentProjectionEvent>>();
+      var fooEventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<FooEvent>>();
       var fooDbContext = assertScope.ServiceProvider.GetRequiredService<FooDbContext>();
 
       var projectionEvents = new List<DomainEvent>();
@@ -113,7 +113,7 @@ public class EntityFrameworkCoreExtensionsTests
     await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
     {
       var timeProvider = arrangeScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
-      var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStore<FooEvent>>();
       var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 
@@ -146,7 +146,7 @@ public class EntityFrameworkCoreExtensionsTests
 
     await using (var assertScope = _serviceProvider.CreateAsyncScope())
     {
-      var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<FooEvent>>();
       var fooDbContext = assertScope.ServiceProvider.GetRequiredService<FooDbContext>();
 
       var fooEvents = await eventStore.ReadEventsFromStorage(fooId, 1, -1, TestContext.CancellationToken).ConfigureAwait(false);
@@ -178,7 +178,7 @@ public class EntityFrameworkCoreExtensionsTests
     await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
     {
       var timeProvider = arrangeScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
-      var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var eventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStore<FooEvent>>();
       var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 
@@ -228,7 +228,7 @@ public class EntityFrameworkCoreExtensionsTests
     await using (var assertScope = _serviceProvider.CreateAsyncScope())
     {
       var timeProvider = assertScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
-      var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<FooEvent>>();
       var fooDbContext = assertScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 
@@ -274,8 +274,8 @@ public class EntityFrameworkCoreExtensionsTests
     await using (var arrangeScope = _serviceProvider.CreateAsyncScope())
     {
       var timeProvider = arrangeScope.ServiceProvider.GetRequiredService<FakeTimeProvider>();
-      var projectionEventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<PersistentProjectionEvent>>();
-      var fooEventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStorage<FooEvent>>();
+      var projectionEventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStore<PersistentProjectionEvent>>();
+      var fooEventStore = arrangeScope.ServiceProvider.GetRequiredService<IDomainEventStore<FooEvent>>();
       var fooDbContext = arrangeScope.ServiceProvider.GetRequiredService<FooDbContext>();
       var expectedFooVersion = fooVersion;
 

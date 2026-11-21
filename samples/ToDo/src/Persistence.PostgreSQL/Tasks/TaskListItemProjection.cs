@@ -19,7 +19,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 
 internal class TaskListItemPersistentProjection(
   IDbContextFactory<ToDoDbContext> dbContextFactory,
-  IDomainEventStorage<TaskEvent> eventStore,
+  IDomainEventStore<TaskEvent> eventStore,
   ILogger<TaskListItemPersistentProjection> logger,
   [FromKeyedServices(TaskConstants.TaskView.ListItem)] PersistentProjectionOptions projectionOptions
 )
@@ -37,7 +37,7 @@ internal class TaskListItemStrongConsistentProjection(ILogger<TaskListItemStrong
   private TaskView.ListItem? _listItem = null;
 
   async Task IDbStrongConsistentProjection<TaskEvent, ToDoDbContext>.ApplyEvents(
-    IDomainEventStorage<TaskEvent> eventStore,
+    IDomainEventStore<TaskEvent> eventStore,
     ToDoDbContext dbContext,
     IReadOnlyList<DomainEvent> domainEvents
   )

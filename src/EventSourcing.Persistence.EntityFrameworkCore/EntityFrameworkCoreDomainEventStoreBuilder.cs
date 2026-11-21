@@ -4,11 +4,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 
-public class EntityFrameworkCoreDomainEventStorageBuilder
+public class EntityFrameworkCoreDomainEventStoreBuilder
 {
   private readonly IServiceCollection _services;
 
-  public EntityFrameworkCoreDomainEventStorageBuilder(IServiceCollection services)
+  public EntityFrameworkCoreDomainEventStoreBuilder(IServiceCollection services)
   {
     _services = services;
   }
@@ -17,19 +17,19 @@ public class EntityFrameworkCoreDomainEventStorageBuilder
   /// Use this overload if you want to implement strong consistent projections on your DbContext.
   /// The DbContext has to call <c>modelBuilder.ApplyDBPROVIDEREventSourcingConfiguration(excludeFromMigrations: true)</c> in its configuration.
   /// </summary>
-  public EntityFrameworkCoreDomainEventStorageBuilder ForDomainEvents<TEventBase, TDbContext>()
+  public EntityFrameworkCoreDomainEventStoreBuilder ForDomainEvents<TEventBase, TDbContext>()
     where TEventBase : class
     where TDbContext : DbContext
   {
-    _services.AddScoped<EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>>();
-    _services.AddScoped<IDomainEventStorage<TEventBase>>(sp =>
-      sp.GetRequiredService<EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>>()
+    _services.AddScoped<EntityFrameworkCoreDomainEventStore<TEventBase, TDbContext>>();
+    _services.AddScoped<IDomainEventStore<TEventBase>>(sp =>
+      sp.GetRequiredService<EntityFrameworkCoreDomainEventStore<TEventBase, TDbContext>>()
     );
 
     return this;
   }
 
-  public EntityFrameworkCoreDomainEventStorageBuilder ForDomainEvents<TEventBase>()
+  public EntityFrameworkCoreDomainEventStoreBuilder ForDomainEvents<TEventBase>()
     where TEventBase : class
   {
     return ForDomainEvents<TEventBase, EventSourcingDbContext>();

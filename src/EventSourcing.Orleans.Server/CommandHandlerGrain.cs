@@ -14,13 +14,13 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
   where TCommandBase : class
   where TCommandState : class, IDomainEventProjectable, new()
 {
-  private readonly IDomainEventStorage<TEventBase> _eventStore;
+  private readonly IDomainEventStore<TEventBase> _eventStore;
 
   private int _nextVersion;
 
   protected CommandHandlerGrain()
   {
-    _eventStore = ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+    _eventStore = ServiceProvider.GetRequiredService<IDomainEventStore<TEventBase>>();
   }
 
   public override async Task OnActivateAsync(CancellationToken cancellationToken)

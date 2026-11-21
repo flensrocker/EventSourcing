@@ -42,7 +42,7 @@ builder.Services.AddHostedService<MigrationService>();
 // Activate core event sourcing services and PostgreSQL storage for "ToDo" events
 builder
   .Services.AddFlensrockerEventSourcingCore(globalJsonOptions)
-  .AddPostgreSQLDomainEventStorage(() => new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = connectionName })
+  .AddPostgreSQLDomainEventStore(() => new EntityFrameworkCoreDomainEventStoreOptions { ConnectionName = connectionName })
   .ForToDoEvents();
 
 // Activate in-process outbox on PostgreSQL with Orleans Streaming publisher

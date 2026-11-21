@@ -10,7 +10,7 @@ public partial class DomainEventProjectionObserver<TEventBase, TProjection> : IA
   where TEventBase : class
   where TProjection : class, IDomainEventProjectable, new()
 {
-  private readonly IDomainEventStorage<TEventBase> _eventStore;
+  private readonly IDomainEventStore<TEventBase> _eventStore;
   private readonly Guid _projectionId;
   private readonly ILogger _logger;
 
@@ -18,7 +18,7 @@ public partial class DomainEventProjectionObserver<TEventBase, TProjection> : IA
 
   public TProjection Projection { get; private set; } = default!;
 
-  private DomainEventProjectionObserver(IDomainEventStorage<TEventBase> eventStore, Guid projectionId, ILogger logger)
+  private DomainEventProjectionObserver(IDomainEventStore<TEventBase> eventStore, Guid projectionId, ILogger logger)
   {
     _eventStore = eventStore;
     _projectionId = projectionId;
@@ -26,7 +26,7 @@ public partial class DomainEventProjectionObserver<TEventBase, TProjection> : IA
   }
 
   public static async Task<DomainEventProjectionObserver<TEventBase, TProjection>?> Create(
-    IDomainEventStorage<TEventBase> eventStore,
+    IDomainEventStore<TEventBase> eventStore,
     Guid projectionId,
     ILogger logger,
     CancellationToken cancellationToken

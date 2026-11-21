@@ -150,7 +150,7 @@ public static class TaskEndpoints
     });
 
     // endpoints for debugging, ignore
-    builder.MapGet("events", static ([FromServices] IDomainEventStorage<TaskEvent> eventStore, CancellationToken cancellationToken) =>
+    builder.MapGet("events", static ([FromServices] IDomainEventStore<TaskEvent> eventStore, CancellationToken cancellationToken) =>
     {
       var taskEvents = eventStore.ReadAllEventsFromStorage(cancellationToken);
       return TypedResults.ServerSentEvents(taskEvents, eventType: TaskConstants.TaskEvent.Base);
@@ -163,7 +163,7 @@ public static class TaskEndpoints
         [FromQuery] string? mode,
         [FromQuery] int? from,
         [FromQuery] int? to,
-        [FromServices] IDomainEventStorage<TaskEvent> eventStore,
+        [FromServices] IDomainEventStore<TaskEvent> eventStore,
         CancellationToken cancellationToken
       ) =>
       {

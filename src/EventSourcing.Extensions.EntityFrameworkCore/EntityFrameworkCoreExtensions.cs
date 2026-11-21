@@ -38,7 +38,7 @@ public static class EntityFrameworkCoreExtensions
     where TDbContext : DbContext
   {
     public async Task<TEntity?> UpdateProjectionAsync<TEntity, TEventBase>(
-      IDomainEventStorage<TEventBase> eventStore,
+      IDomainEventStore<TEventBase> eventStore,
       IReadOnlyList<DomainEvent> domainEvents,
       TEntity? projection,
       string projectionTypeName,
@@ -118,7 +118,7 @@ public static class EntityFrameworkCoreExtensions
     where TDbContext : DbContext
   {
     public async Task RebuildProjectionAsync<TEntity, TEventBase>(
-      IDomainEventStorage<TEventBase> eventStore,
+      IDomainEventStore<TEventBase> eventStore,
       ILogger logger,
       PersistentProjectionOptions projectionOptions,
       CancellationToken cancellationToken

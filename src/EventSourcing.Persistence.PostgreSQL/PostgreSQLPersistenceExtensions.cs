@@ -15,11 +15,11 @@ public static class PostgreSQLPersistenceExtensions
 {
   extension(IServiceCollection services)
   {
-    public EntityFrameworkCoreDomainEventStorageBuilder AddPostgreSQLDomainEventStorage(
-      Func<EntityFrameworkCoreDomainEventStorageOptions> configureOptions
+    public EntityFrameworkCoreDomainEventStoreBuilder AddPostgreSQLDomainEventStore(
+      Func<EntityFrameworkCoreDomainEventStoreOptions> configureOptions
     )
     {
-      var builder = services.AddDomainEventStorage<PostgreSQLDomainEventStorageDbProvider>(
+      var builder = services.AddDomainEventStore<PostgreSQLDomainEventStoreDbProvider>(
         configureOptions: configureOptions,
         configureDbOptions: () =>
           new EventSourcingDbContextOptions

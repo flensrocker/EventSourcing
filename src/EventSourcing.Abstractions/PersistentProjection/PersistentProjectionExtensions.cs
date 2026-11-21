@@ -28,7 +28,7 @@ public static partial class PersistentProjectionExtensions
 
     var timeProvider = serviceProvider.GetRequiredService<TimeProvider>();
 
-    var projectionEventStore = serviceProvider.GetRequiredService<IDomainEventStorage<PersistentProjectionEvent>>();
+    var projectionEventStore = serviceProvider.GetRequiredService<IDomainEventStore<PersistentProjectionEvent>>();
     var (_, projectionState) = await projectionEventStore
       .ReadStateFromStorage<PersistentProjectionState>(PersistentProjectionConstants.RegistryId, default)
       .ConfigureAwait(false);

@@ -1,6 +1,6 @@
 ﻿namespace Flensrocker.EventSourcing.Abstractions;
 
-public interface IDomainEventStorage<TEventBase>
+public interface IDomainEventStore<TEventBase>
   where TEventBase : class
 {
   string StreamType { get; }

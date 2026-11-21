@@ -10,7 +10,7 @@ namespace Flensrocker.ToDo.Persistence.PostgreSQL.Tasks;
 
 internal class TaskDailyStatsPersistentProjection(
   IDbContextFactory<ToDoDbContext> dbContextFactory,
-  IDomainEventStorage<TaskEvent> eventStore,
+  IDomainEventStore<TaskEvent> eventStore,
   ILogger<TaskDailyStatsPersistentProjection> logger,
   [FromKeyedServices(TaskConstants.TaskView.DailyStats)] PersistentProjectionOptions projectionOptions
 )

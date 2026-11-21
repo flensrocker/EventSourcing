@@ -8,30 +8,30 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 
-public static class EntityFrameworkCoreDomainEventStorageExtensions
+public static class EntityFrameworkCoreDomainEventStoreExtensions
 {
   extension(IServiceCollection services)
   {
-    public IServiceCollection AddDomainEventStorageDbProvider<TDbProvider>()
-      where TDbProvider : class, IDomainEventStorageDbProvider
+    public IServiceCollection AddDomainEventStoreDbProvider<TDbProvider>()
+      where TDbProvider : class, IDomainEventStoreDbProvider
     {
       services.AddScoped<TDbProvider>();
-      services.AddScoped<IDomainEventStorageDbProvider>(sp => sp.GetRequiredService<TDbProvider>());
+      services.AddScoped<IDomainEventStoreDbProvider>(sp => sp.GetRequiredService<TDbProvider>());
 
       return services;
     }
 
-    public EntityFrameworkCoreDomainEventStorageBuilder AddDomainEventStorage<TDbProvider>(
-      Func<EntityFrameworkCoreDomainEventStorageOptions> configureOptions,
+    public EntityFrameworkCoreDomainEventStoreBuilder AddDomainEventStore<TDbProvider>(
+      Func<EntityFrameworkCoreDomainEventStoreOptions> configureOptions,
       Func<EventSourcingDbContextOptions> configureDbOptions,
       Action<string?, DbContextOptionsBuilder> configureDbContext
     )
-      where TDbProvider : class, IDomainEventStorageDbProvider
+      where TDbProvider : class, IDomainEventStoreDbProvider
     {
       var storageOptions = configureOptions();
       services.TryAddSingleton(storageOptions);
 
-      services.AddDomainEventStorageDbProvider<TDbProvider>();
+      services.AddDomainEventStoreDbProvider<TDbProvider>();
 
       var contextOptions = configureDbOptions();
       services.AddSingleton(contextOptions);
@@ -45,10 +45,7 @@ public static class EntityFrameworkCoreDomainEventStorageExtensions
         }
       );
 
-      return new EntityFrameworkCoreDomainEventStorageBuilder(services).ForDomainEvents<
-        PersistentProjectionEvent,
-        EventSourcingDbContext
-      >();
+      return new EntityFrameworkCoreDomainEventStoreBuilder(services).ForDomainEvents<PersistentProjectionEvent, EventSourcingDbContext>();
     }
   }
 

@@ -3,7 +3,7 @@ using Flensrocker.EventSourcing.Abstractions;
 
 namespace Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 
-public interface IDomainEventStorageDbProvider
+public interface IDomainEventStoreDbProvider
 {
   (string InsertScript, IEnumerable<object> Parameters) GenerateInsertSql(
     IReadOnlyList<DomainEvent> domainEvents,

@@ -55,9 +55,9 @@ public static class ToDoPostgreSQLPersistenceExtensions
     }
   }
 
-  extension(EntityFrameworkCoreDomainEventStorageBuilder builder)
+  extension(EntityFrameworkCoreDomainEventStoreBuilder builder)
   {
-    public EntityFrameworkCoreDomainEventStorageBuilder ForToDoEvents()
+    public EntityFrameworkCoreDomainEventStoreBuilder ForToDoEvents()
     {
       return builder.ForDomainEvents<TaskEvent, ToDoDbContext>();
     }

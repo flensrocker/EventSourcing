@@ -7,7 +7,7 @@ namespace Flensrocker.EventSourcing.Extensions.EntityFrameworkCore;
 
 public abstract partial class EntityFrameworkCorePersistentProjection<TDbContext, TEntity, TEventBase>(
   IDbContextFactory<TDbContext> dbContextFactory,
-  IDomainEventStorage<TEventBase> eventStore,
+  IDomainEventStore<TEventBase> eventStore,
   ILogger logger,
   PersistentProjectionOptions projectionOptions
 ) : IPersistentProjection
@@ -16,7 +16,7 @@ public abstract partial class EntityFrameworkCorePersistentProjection<TDbContext
   where TEventBase : class
 {
   private readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;
-  private readonly IDomainEventStorage<TEventBase> _eventStore = eventStore;
+  private readonly IDomainEventStore<TEventBase> _eventStore = eventStore;
   private readonly ILogger _logger = logger;
   private readonly PersistentProjectionOptions _projectionOptions = projectionOptions;
 

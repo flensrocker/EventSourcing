@@ -74,7 +74,7 @@ public abstract partial class EntityFrameworkCoreUpdateProjectionGrain<TDbContex
       .ExecuteAsync(async () =>
       {
         var dbContext = scope.ServiceProvider.GetRequiredService<TDbContext>();
-        var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStorage<TEventBase>>();
+        var eventStore = scope.ServiceProvider.GetRequiredService<IDomainEventStore<TEventBase>>();
 
         try
         {

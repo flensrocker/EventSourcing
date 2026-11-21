@@ -17,9 +17,9 @@ var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOpti
 
 builder.Services.AddFlensrockerEventSourcingCore(globalJsonOptions);
 builder
-  .Services.AddPostgreSQLDomainEventStorage(() =>
+  .Services.AddPostgreSQLDomainEventStore(() =>
   {
-    return new EntityFrameworkCoreDomainEventStorageOptions { ConnectionName = ServiceKeys.PostgresDb };
+    return new EntityFrameworkCoreDomainEventStoreOptions { ConnectionName = ServiceKeys.PostgresDb };
   })
   .ForToDoEvents();
 

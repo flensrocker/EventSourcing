@@ -31,7 +31,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
-    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
@@ -50,7 +50,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
-    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
@@ -69,7 +69,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
-    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
@@ -87,7 +87,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
-    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
@@ -157,7 +157,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
-    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
@@ -282,7 +282,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     Assert.AreEqual(HttpStatusCode.NotFound, testResponse.StatusCode);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
-    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(taskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNull(taskEventList);
@@ -426,7 +426,7 @@ public class TaskEndpointsTests : ToDoBaseEndpointTests<TaskEndpointsTests>
     CollectionAssert.Contains(listResult.ItemList.Select(item => item.TaskId).ToArray(), openResult.TaskId);
 
     await using var assertScope = _factory.Services.CreateAsyncScope();
-    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStorage<TaskEvent>>();
+    var eventStore = assertScope.ServiceProvider.GetRequiredService<IDomainEventStore<TaskEvent>>();
 
     var taskEventList = await eventStore.ReadEventsFromStorage(openResult.TaskId, 1, 0, _cancellationToken).ConfigureAwait(false);
     Assert.IsNotNull(taskEventList);

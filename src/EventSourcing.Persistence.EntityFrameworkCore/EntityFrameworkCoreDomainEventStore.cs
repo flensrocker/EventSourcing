@@ -5,26 +5,26 @@ using Microsoft.Extensions.Logging;
 
 namespace Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 
-internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>(
+internal partial class EntityFrameworkCoreDomainEventStore<TEventBase, TDbContext>(
   EventSourcingJsonSerializerOptions jsonOptions,
-  IDomainEventStorageDbProvider dbProvider,
+  IDomainEventStoreDbProvider dbProvider,
   IDbContextFactory<TDbContext> dbContextFactory,
   IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> strongConsistentProjections,
-  ILogger<EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>> logger
-) : IDomainEventStorage<TEventBase>
+  ILogger<EntityFrameworkCoreDomainEventStore<TEventBase, TDbContext>> logger
+) : IDomainEventStore<TEventBase>
   where TEventBase : class
   where TDbContext : DbContext
 {
   private readonly EventSourcingJsonSerializerOptions _jsonOptions = jsonOptions;
-  private readonly IDomainEventStorageDbProvider _dbProvider = dbProvider;
+  private readonly IDomainEventStoreDbProvider _dbProvider = dbProvider;
   private readonly IDbContextFactory<TDbContext> _dbContextFactory = dbContextFactory;
   private readonly IEnumerable<IDbStrongConsistentProjection<TEventBase, TDbContext>> _strongConsistentProjections =
     strongConsistentProjections;
-  private readonly ILogger<EntityFrameworkCoreDomainEventStorage<TEventBase, TDbContext>> _logger = logger;
+  private readonly ILogger<EntityFrameworkCoreDomainEventStore<TEventBase, TDbContext>> _logger = logger;
 
   public string StreamType { get; } = jsonOptions.GetTypeName(typeof(TEventBase));
 
-  async Task<KeyValuePair<int, TState>> IDomainEventStorage<TEventBase>.ReadStateFromStorage<TState>(
+  async Task<KeyValuePair<int, TState>> IDomainEventStore<TEventBase>.ReadStateFromStorage<TState>(
     Guid streamId,
     CancellationToken cancellationToken
   )
@@ -52,7 +52,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
     return new KeyValuePair<int, TState>(0, state);
   }
 
-  async Task<bool> IDomainEventStorage<TEventBase>.ApplyUpdatesToStorage(
+  async Task<bool> IDomainEventStore<TEventBase>.ApplyUpdatesToStorage(
     Guid streamId,
     IReadOnlyList<DomainEvent> updates,
     int expectedVersion
@@ -104,7 +104,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
     }
   }
 
-  async Task<IReadOnlyList<DomainEvent>?> IDomainEventStorage<TEventBase>.ReadEventsFromStorage(
+  async Task<IReadOnlyList<DomainEvent>?> IDomainEventStore<TEventBase>.ReadEventsFromStorage(
     Guid streamId,
     int fromVersionIncl,
     int toVersionExcl,
@@ -142,7 +142,7 @@ internal partial class EntityFrameworkCoreDomainEventStorage<TEventBase, TDbCont
     return null;
   }
 
-  async IAsyncEnumerable<DomainEvent> IDomainEventStorage<TEventBase>.ReadAllEventsFromStorage(
+  async IAsyncEnumerable<DomainEvent> IDomainEventStore<TEventBase>.ReadAllEventsFromStorage(
     [EnumeratorCancellation] CancellationToken cancellationToken
   )
   {

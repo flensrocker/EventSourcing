@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace Flensrocker.EventSourcing.Persistence.PostgreSQL;
 
-internal sealed class PostgreSQLDomainEventStorageDbProvider : IDomainEventStorageDbProvider
+internal sealed class PostgreSQLDomainEventStoreDbProvider : IDomainEventStoreDbProvider
 {
   private static readonly string[] _insertColumnList =
   [

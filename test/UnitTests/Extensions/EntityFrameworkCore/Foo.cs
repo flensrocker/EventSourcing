@@ -137,7 +137,7 @@ public class FooDbContext : DbContext
 
 public class FooViewVersionTrackerPersistentProjection(
   IDbContextFactory<FooDbContext> dbContextFactory,
-  IDomainEventStorage<FooEvent> eventStore,
+  IDomainEventStore<FooEvent> eventStore,
   ILogger<FooViewVersionTrackerPersistentProjection> logger,
   [FromKeyedServices(FooConstants.VersionTrackerView)] PersistentProjectionOptions projectionOptions
 )
@@ -155,7 +155,7 @@ public class FooViewVersionTrackerStrongConsistentProjection(ILogger<FooViewVers
   private FooView.VersionTracker? _item = null;
 
   async Task IDbStrongConsistentProjection<FooEvent, FooDbContext>.ApplyEvents(
-    IDomainEventStorage<FooEvent> eventStore,
+    IDomainEventStore<FooEvent> eventStore,
     FooDbContext dbContext,
     IReadOnlyList<DomainEvent> domainEvents
   )
@@ -209,9 +209,9 @@ public static class FooExtensions
     }
   }
 
-  extension(EntityFrameworkCoreDomainEventStorageBuilder builder)
+  extension(EntityFrameworkCoreDomainEventStoreBuilder builder)
   {
-    public EntityFrameworkCoreDomainEventStorageBuilder ForFooEvents()
+    public EntityFrameworkCoreDomainEventStoreBuilder ForFooEvents()
     {
       return builder.ForDomainEvents<FooEvent, FooDbContext>();
     }

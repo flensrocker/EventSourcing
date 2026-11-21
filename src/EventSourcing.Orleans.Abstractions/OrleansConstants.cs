@@ -2,7 +2,7 @@
 
 public static class OrleansConstants
 {
-  public const string LogStorageProviderName = "EventStorage";
+  public const string LogStorageProviderName = "EventStore";
   public const string DomainEventStreamProviderName = "DomainEvent";
   public const string PublicMessageStreamNamespace = "PublicMessage";
 }
