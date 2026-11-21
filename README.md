@@ -1,6 +1,6 @@
 ﻿# Implementing Event Sourcing and CQRS
 
-> **Disclaimer:**  
+> **DISCLAIMER:**  
 > "Cogito ergo sum" - "I think, therefore I am"  
 > Or as I put it: _"I think, therefore I have opinions"_  
 > In this repository you will find **my** opinions on how to implement event sourcing and CQRS,
@@ -44,15 +44,19 @@ npm install --global corepack@latest
 corepack enable pnpm
 ```
 
-Build and run.
+Restore, build, and test.
 
 ```sh
-dotnet restore --force
-dotnet build
+dotnet cake.cs --install --rebuild --target Test
+```
+
+Run.
+
+```sh
 aspire run
 ```
 
-Or use your compatible IDE of choice.
+Or use the devcontainer or your compatible IDE of choice.
 
 ## Why Microsoft Orleans?
 
@@ -81,13 +85,13 @@ And it has this feature of "logical replication" which I always wanted to try us
 Because with every kind of "event store" you are really interested in having some kind of outbox to publish these events for consumers like projections.
 Please read [this post by Oskar Dudycz](https://event-driven.io/en/push_based_outbox_pattern_with_postgres_logical_replication/) for more information.
 
-## Why NATS/Garnet/Entity Framework Core/ASP.NET Core/Angular?
+## Why NATS/Redis/Entity Framework Core/ASP.NET Core/Angular?
 
 "Well, actually" these don't matter.
 
 Orleans needs some kind of storage for making its clustering work.
 And you should separate that from your grains' storage.
-In this repository I use Garnet as a Redis replacement for that.
+In this repository I use Redis for that.
 But you can use whatever you need - even "localhost clustering" works.
 
 Speaking of "grain storage", since there's already a PostgreSQL database involved, I just use the Ado.Net storage provider of Orleans.
@@ -110,6 +114,71 @@ I know how to use ASP.NET Core and it integrates very well with Orleans.
 Handcrafting HTTP requests with curl or http-files is a good point to start.
 But in the end you want some kind of frontend, which is accessable.
 Angular is the framework where I'm comfortable with.
+
+## Glossary
+
+> **DISCLAIMER:**
+> Work in Progress - not used consistently throughout this repository.
+
+### Domain
+
+The bounded context where the domain-events have a dedicated meaning.
+
+### Domain-Event
+
+A data structure containing metadata and a payload.
+It describes a changed to a "thing" inside a domain.
+
+### Domain-Event-Metadata
+
+Common data available on every domain-event like the Event-Id, Stream-Type, Stream-Id, Stream-Version, Tenant-Id, Created-At timestamp, User-Id, Trace-Id, and Span-Id
+
+### Payload
+
+Application defined part of the domain-event.
+Can be empty.
+
+### Public-Message
+
+Like a domain-event but used for communication with other systems.
+It has meaning outside of the domain and must be handled like a public api.
+
+### Event-Store
+
+The part of the persistence layer where all the domain-events and public-messages are stored.
+
+### Event-Stream / Stream
+
+The sequence of domain events sharing the same stream-type and stream-id ordered by their stream-version.
+
+### Stream-Type
+
+A string describing the type of the stream represented by a collection of domain-events.
+
+### Stream-Id
+
+A unique identifier represented by a UUID (`Guid`), the id of the "thing" behind this stream.
+
+### Stream-Version
+
+A consecutive numbering on the domain-events of one stream.
+They start at 1 and have no gaps.
+The combination of stream-id and stream-version is unique in the whole system.
+
+### Projection
+
+Aggregation of one or multiple event-streams into a data structure.
+Can be used as a read-model or as the state of a command-handler.
+A projection can be persisted or held in memory.
+
+### Command
+
+A data structure send to a command-handler describing an intent to changing a stream.
+
+### Command-Handler
+
+The business logic that decides if a command can be executed on the current state of a stream.
+It emits one or more domain-events which will be added to the event-stream.
 
 ## Execute Command
 

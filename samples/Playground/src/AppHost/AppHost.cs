@@ -4,11 +4,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 builder.AddDockerComposeEnvironment("compose");
 
-// TODO not working anymore?
-//var garnetClusteringStorage = builder.AddGarnet(ServiceKeys.OrleansClustering).WithOrleansProviderType("Redis");
-var garnetClusteringStorage = builder.AddRedis(ServiceKeys.OrleansClustering)
+var redisClusteringStorage = builder.AddRedis(ServiceKeys.OrleansClustering)
 // We don't need persistent clustering data because we always restart the whole thing and sometimes it tries to connect to the old silo
-//.WithDataVolume("playground-garnet-data")
+//.WithDataVolume("playground-redis-data")
 ;
 
 var nats = builder.AddNats(ServiceKeys.OrleansStreaming).WithImageTag("2").WithJetStream().WithDataVolume("playground-nats-data");
@@ -33,7 +31,7 @@ var orleans = builder
   .AddOrleans("playground-orleans")
   .WithServiceId("playground")
   .WithClusterId("default")
-  .WithClustering(garnetClusteringStorage)
+  .WithClustering(redisClusteringStorage)
   // NOTE does not work yet: .WithStreaming(Flensrocker.EventSourcing.Orleans.Abstractions.OrleansConstants.DomainEventStreamProviderName, nats)
   .WithMemoryGrainStorage("PubSubStore");
 
@@ -49,7 +47,7 @@ if (hostAllServicesInOneProcess)
     .WithReference(orleans)
     .WithExternalHttpEndpoints()
     .WaitFor(nats)
-    .WaitFor(garnetClusteringStorage)
+    .WaitFor(redisClusteringStorage)
     .WaitForCompletion(dbMigration);
 }
 else
@@ -60,7 +58,7 @@ else
     .WithReference(db)
     .WithReference(orleans)
     .WaitFor(nats)
-    .WaitFor(garnetClusteringStorage)
+    .WaitFor(redisClusteringStorage)
     .WaitForCompletion(dbMigration);
 
   var outbox = builder
@@ -69,7 +67,7 @@ else
     .WithReference(db)
     .WithReference(orleans.AsClient())
     .WaitFor(nats)
-    .WaitFor(garnetClusteringStorage)
+    .WaitFor(redisClusteringStorage)
     .WaitForCompletion(dbMigration)
     .WaitFor(silo);
 
@@ -80,7 +78,7 @@ else
     .WithReference(orleans.AsClient())
     .WithExternalHttpEndpoints()
     .WaitFor(nats)
-    .WaitFor(garnetClusteringStorage)
+    .WaitFor(redisClusteringStorage)
     .WaitForCompletion(dbMigration)
     .WaitFor(silo);
 }
