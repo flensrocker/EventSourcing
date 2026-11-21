@@ -10,20 +10,24 @@
     "event-sourcing-angular": {
       "projectType": "library",
       "root": "projects/event-sourcing-angular",
-      "sourceRoot": "projects/event-sourcing-angular/src",
+      "sourceRoot": "projects/event-sourcing-angular",
       "prefix": "fr-es",
       "architect": {
         "build": {
-          "builder": "@angular/build:ng-packagr",
+          "builder": "@angular/build:library",
           "configurations": {
             "production": {
               "tsConfig": "projects/event-sourcing-angular/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/event-sourcing-angular/tsconfig.lib.json"
+              "compilationMode": "full"
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "production",
+          "options": {
+            "tsConfig": "projects/event-sourcing-angular/tsconfig.lib.json",
+            "outputPath": "dist/event-sourcing-angular"
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test",

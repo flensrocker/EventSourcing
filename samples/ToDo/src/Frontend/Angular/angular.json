@@ -10,20 +10,24 @@
     "to-do-angular": {
       "projectType": "library",
       "root": "projects/to-do-angular",
-      "sourceRoot": "projects/to-do-angular/src",
+      "sourceRoot": "projects/to-do-angular",
       "prefix": "to-do",
       "architect": {
         "build": {
-          "builder": "@angular/build:ng-packagr",
+          "builder": "@angular/build:library",
           "configurations": {
             "production": {
               "tsConfig": "projects/to-do-angular/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/to-do-angular/tsconfig.lib.json"
+              "compilationMode": "full"
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "production",
+          "options": {
+            "tsConfig": "projects/to-do-angular/tsconfig.lib.json",
+            "outputPath": "dist/to-do-angular"
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test",
