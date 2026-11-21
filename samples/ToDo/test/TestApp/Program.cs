@@ -11,6 +11,8 @@ using Flensrocker.ToDo.Orleans.Server;
 using Flensrocker.ToDo.Persistence.PostgreSQL;
 using Flensrocker.ToDo.WebApi;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +29,12 @@ builder.Logging.AddOpenTelemetry(logging =>
 });
 builder
   .Services.AddOpenTelemetry()
-  .WithMetrics(metrics => metrics.AddMeter(EventSourcingConstants.MeterName))
-  .WithTracing(tracing => tracing.AddSource(EventSourcingConstants.TraceSourceName));
+  .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddMeter(EventSourcingConstants.MeterName))
+  .WithTracing(tracing =>
+  {
+    tracing.AddSource(builder.Environment.ApplicationName).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation();
+    tracing.AddSource(EventSourcingConstants.TraceSourceName);
+  });
 
 // Register the migration service as early as possible so it runs before all other hosted services
 builder.Services.AddHostedService<MigrationService>();
