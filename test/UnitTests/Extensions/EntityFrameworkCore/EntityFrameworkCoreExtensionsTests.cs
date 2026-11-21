@@ -56,7 +56,7 @@ public class EntityFrameworkCoreExtensionsTests
     var eventSourcingDbContext = setupScope.ServiceProvider.GetRequiredService<EventSourcingDbContext>();
     await eventSourcingDbContext.Database.MigrateAsync(TestContext.CancellationToken).ConfigureAwait(false);
 
-    await setupScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync().ConfigureAwait(false);
+    await setupScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync(forceRebuild: false).ConfigureAwait(false);
   }
 
   [TestCleanup]
@@ -342,6 +342,7 @@ public class EntityFrameworkCoreExtensionsTests
         {
           TypeName = FooConstants.VersionTrackerView,
           Version = FooView.VersionTracker.ProjectionVersion - 1,
+          Forced = false,
         },
         null,
         null,
@@ -355,7 +356,7 @@ public class EntityFrameworkCoreExtensionsTests
 
     await using (var actScope = _serviceProvider.CreateAsyncScope())
     {
-      await actScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync().ConfigureAwait(false);
+      await actScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync(forceRebuild: false).ConfigureAwait(false);
     }
 
     await using (var assertScope = _serviceProvider.CreateAsyncScope())

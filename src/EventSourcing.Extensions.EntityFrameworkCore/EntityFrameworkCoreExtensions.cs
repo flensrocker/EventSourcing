@@ -144,44 +144,33 @@ public static class EntityFrameworkCoreExtensions
 
         await foreach (var domainEvent in eventStore.ReadAllEventsFromStorage(cancellationToken).ConfigureAwait(false))
         {
-          TEntity? projection;
-
-          // TODO if "creation event"
-          if (domainEvent.Metadata.StreamVersion == 1)
+          // TODO if "deletion event" => remove projection, end batch to SaveChanges and clear ChangeTracker?
+          var projection = dbContext.Set<TEntity>().Local.Where(TEntity.GetWhereKey(domainEvent).Compile().Invoke).FirstOrDefault();
+          if (projection is null)
           {
-            projection = new();
-            var entity = dbContext.Attach(projection);
-            entity.State = EntityState.Added;
-
-            batchCount++;
-          }
-          // TODO else if "deletion event" => remove projection, end batch to SaveChanges and clear ChangeTracker?
-          else
-          {
-            projection = dbContext.Set<TEntity>().Local.Where(TEntity.GetWhereKey(domainEvent).Compile().Invoke).FirstOrDefault();
+            projection = await dbContext
+              .Set<TEntity>()
+              .Where(TEntity.GetWhereKey(domainEvent))
+              .FirstOrDefaultAsync(cancellationToken)
+              .ConfigureAwait(false);
             if (projection is null)
             {
-              projection = await dbContext
-                .Set<TEntity>()
-                .Where(TEntity.GetWhereKey(domainEvent))
-                .FirstOrDefaultAsync(cancellationToken)
-                .ConfigureAwait(false);
-              if (projection is null)
+              // TODO review: log error only if single-stream projection and not creation event
+              if (domainEvent.Metadata.StreamVersion > 1)
               {
-                // TODO review: should this really create a new projection? This cannot be in the right state for this event => LogError?
                 logger.LogWarning(
                   "Missing projection {ProjectionType}, entity-id {EntityId}, version {EntityVersion}",
                   projectionOptions.TypeName,
                   domainEvent.Metadata.StreamId,
                   domainEvent.Metadata.StreamVersion
                 );
-
-                projection = new();
-                var entity = dbContext.Attach(projection);
-                entity.State = EntityState.Added;
-
-                batchCount++;
               }
+
+              projection = new();
+              var entity = dbContext.Attach(projection);
+              entity.State = EntityState.Added;
+
+              batchCount++;
             }
           }
 

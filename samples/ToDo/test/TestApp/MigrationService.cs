@@ -18,7 +18,7 @@ internal partial class MigrationService(IServiceScopeFactory scopeFactory, ILogg
     LogRebuildStarting(_logger);
 
     await using (var rebuildScope = _scopeFactory.CreateAsyncScope())
-      await rebuildScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync();
+      await rebuildScope.ServiceProvider.RebuildOutdatedPersistentProjectionsAsync(forceRebuild: false);
 
     LogRebuildFinished(_logger);
   }

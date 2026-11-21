@@ -22,7 +22,7 @@ public static partial class PersistentProjectionExtensions
     return services;
   }
 
-  public static async Task RebuildOutdatedPersistentProjectionsAsync(this IServiceProvider serviceProvider)
+  public static async Task RebuildOutdatedPersistentProjectionsAsync(this IServiceProvider serviceProvider, bool forceRebuild)
   {
     var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(PersistentProjection));
 
@@ -46,13 +46,14 @@ public static partial class PersistentProjectionExtensions
         if (expectedVersion < actualVersion)
         {
           LogErrorActualVersionIsGreaterThanExpected(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
-          continue;
+          if (!forceRebuild)
+            continue;
         }
-
-        if (expectedVersion == actualVersion)
+        else if (expectedVersion == actualVersion)
         {
           LogInfoActualVersionEqualsExpected(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
-          continue;
+          if (!forceRebuild)
+            continue;
         }
       }
       else
@@ -89,7 +90,11 @@ public static partial class PersistentProjectionExtensions
         }
       }
 
-      LogInfoActualVersionIsLessThanExpected(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
+      if (actualVersion < expectedVersion)
+        LogInfoActualVersionIsLessThanExpected(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
+
+      if (forceRebuild)
+        LogInfoForcedRebuild(logger, projectionOptions.TypeName, actualVersion, expectedVersion);
 
       try
       {
@@ -107,6 +112,7 @@ public static partial class PersistentProjectionExtensions
           {
             TypeName = projectionOptions.TypeName,
             Version = projectionOptions.CurrentVersion,
+            Forced = forceRebuild,
           },
           tenantId: null,
           userId: null,
@@ -180,6 +186,12 @@ public static partial class PersistentProjectionExtensions
     int actualVersion,
     int expectedVersion
   );
+
+  [LoggerMessage(
+    LogLevel.Information,
+    Message = "Projection {ProjectionTypeName}: forced rebuild, actual version {ActualVersion}, expected version {ExpectedVersion}"
+  )]
+  internal static partial void LogInfoForcedRebuild(ILogger logger, string projectionTypeName, int actualVersion, int expectedVersion);
 
   [LoggerMessage(LogLevel.Error, Message = "Projection {ProjectionTypeName}: rebuild failed")]
   internal static partial void LogErrorRebuildFailed(ILogger logger, Exception ex, string projectionTypeName);

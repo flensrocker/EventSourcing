@@ -18,7 +18,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddMeasureJsonOptions().AddToDoJsonOptions().MakeReadOnly();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddMeasureJsonOptions().AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 

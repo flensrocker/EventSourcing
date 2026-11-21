@@ -30,5 +30,9 @@ public abstract record PersistentProjectionEvent
     [Id(1)]
     [JsonPropertyName("Version")]
     public required int Version { get; init; }
+
+    [Id(2)]
+    [JsonPropertyName("Forced")]
+    public bool Forced { get; init; }
   }
 }

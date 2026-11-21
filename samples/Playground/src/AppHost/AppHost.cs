@@ -24,6 +24,7 @@ var db = postgres.AddDatabase(ServiceKeys.PostgresDb, databaseName: "playground"
 
 var dbMigration = builder
   .AddDotnetProject("playground-db-migration", "../Migration")
+  //.WithArgs("--force")
   .WithReference(db)
   .WithParentRelationship(db)
   .WaitFor(db);

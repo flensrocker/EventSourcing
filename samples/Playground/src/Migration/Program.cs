@@ -9,6 +9,8 @@ using Playground.ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+var forceRebuild = args.Any(arg => "--force".Equals(arg, StringComparison.OrdinalIgnoreCase));
+
 builder.AddServiceDefaults();
 
 var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddToDoJsonOptions().MakeReadOnly();
@@ -26,6 +28,6 @@ builder.Services.AddToDoPostgreSQLPersistence(() =>
   return new ToDoPostgreSQLPersistenceOptions { ConnectionName = ServiceKeys.PostgresDb };
 });
 
-builder.Services.AddHostedService<MigrationService>();
+builder.Services.AddSingleton(new MigrationOptions { ForceRebuild = forceRebuild }).AddHostedService<MigrationService>();
 
 builder.Build().Run();

@@ -20,7 +20,7 @@ public static class EventSourcingExtensions
   {
     public IServiceCollection AddFlensrockerEventSourcingCore(EventSourcingJsonSerializerOptions jsonOptions)
     {
-      services.TryAddSingleton(jsonOptions.MakeReadOnly());
+      services.TryAddSingleton(jsonOptions);
       services.TryAddSingleton(_ => new EventSourcingActivitySource());
       services.TryAddSingleton<DomainEventPublisherMetrics>();
 

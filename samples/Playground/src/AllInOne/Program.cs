@@ -19,11 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-var globalJsonOptions = new EventSourcingJsonSerializerOptions()
-  .AddAspNetCoreJsonOptions()
-  .AddMeasureJsonOptions()
-  .AddToDoJsonOptions()
-  .MakeReadOnly();
+var globalJsonOptions = new EventSourcingJsonSerializerOptions().AddAspNetCoreJsonOptions().AddMeasureJsonOptions().AddToDoJsonOptions();
 
 builder.AddKeyedRedisClient(ServiceKeys.OrleansClustering);
 
