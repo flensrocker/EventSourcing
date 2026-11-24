@@ -144,15 +144,13 @@ public static class EntityFrameworkCoreExtensions
 
         await foreach (var domainEvent in eventStore.ReadAllEventsFromStorage(cancellationToken).ConfigureAwait(false))
         {
+          var whereKey = TEntity.GetWhereKey(domainEvent);
+
           // TODO if "deletion event" => remove projection, end batch to SaveChanges and clear ChangeTracker?
-          var projection = dbContext.Set<TEntity>().Local.Where(TEntity.GetWhereKey(domainEvent).Compile().Invoke).FirstOrDefault();
+          var projection = dbContext.Set<TEntity>().Local.Where(whereKey.Compile().Invoke).FirstOrDefault();
           if (projection is null)
           {
-            projection = await dbContext
-              .Set<TEntity>()
-              .Where(TEntity.GetWhereKey(domainEvent))
-              .FirstOrDefaultAsync(cancellationToken)
-              .ConfigureAwait(false);
+            projection = await dbContext.Set<TEntity>().Where(whereKey).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             if (projection is null)
             {
               // TODO review: log error only if single-stream projection and not creation event
@@ -174,19 +172,18 @@ public static class EntityFrameworkCoreExtensions
             }
           }
 
-          projection?.Apply(domainEvent);
+          projection.Apply(domainEvent);
           domainEventCount++;
 
           if (batchCount >= batchSize)
           {
             logger.LogInformation("Batch save after {BatchCount} projections with {DomainEventCount} events", batchCount, domainEventCount);
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            batchTotalCount += batchCount;
+            domainEventTotalCount += domainEventCount;
 
             await dbContext.DisposeAsync().ConfigureAwait(false);
             dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken).ConfigureAwait(false);
-
-            batchTotalCount += batchCount;
-            domainEventTotalCount += domainEventCount;
             batchCount = 0;
             domainEventCount = 0;
           }
@@ -194,9 +191,9 @@ public static class EntityFrameworkCoreExtensions
 
         logger.LogInformation("Final save after {BatchCount} projections with {DomainEventCount} events", batchCount, domainEventCount);
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
         batchTotalCount += batchCount;
         domainEventTotalCount += domainEventCount;
+
         logger.LogInformation(
           "Rebuilt {BatchTotalCount} projections with {DomainEventTotalCount} events",
           batchTotalCount,
