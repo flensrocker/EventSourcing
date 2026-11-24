@@ -1,0 +1,20 @@
+@host=localhost
+@port=5188
+
+###
+# @name signin
+POST http://{{host}}:{{port}}/api/identity/auth/signin
+Content-Type: application/json
+
+{
+  "DisplayName": "Flens Rocker",
+  "Email": "noreply@flensrocker.de"
+}
+
+###
+# @name signout
+PUT http://{{host}}:{{port}}/api/identity/auth/signout
+Content-Type: application/json
+
+{
+}

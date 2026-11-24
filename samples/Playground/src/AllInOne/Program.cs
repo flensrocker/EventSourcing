@@ -3,6 +3,7 @@ using Flensrocker.EventSourcing.Extensions.AspNetCore;
 using Flensrocker.EventSourcing.Orleans.Abstractions;
 using Flensrocker.EventSourcing.Persistence.EntityFrameworkCore;
 using Flensrocker.EventSourcing.Persistence.PostgreSQL;
+using Flensrocker.Identity.WebApi;
 using Flensrocker.Measure.Orleans.Abstractions;
 using Flensrocker.Measure.Orleans.Server;
 using Flensrocker.Measure.WebApi;
@@ -27,6 +28,8 @@ builder.Services.AddFlensrockerEventSourcingCore(globalJsonOptions);
 builder
   .Services.AddPostgreSQLDomainEventStore(() => new EntityFrameworkCoreDomainEventStoreOptions { ConnectionName = ServiceKeys.PostgresDb })
   .ForToDoEvents();
+
+builder.Services.AddIdentityWebApi();
 
 builder
   .Services.AddToDoOrleansClient()
@@ -66,8 +69,11 @@ builder.Services.ConfigureHttpJsonOptions(jsonOptions =>
 
 using var app = builder.Build();
 
+app.UseIdentityWebApi();
+
 app.MapDefaultEndpoints();
 
+app.MapIdentityWebApi();
 app.MapMeasure();
 app.MapToDo();
 

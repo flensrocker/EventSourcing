@@ -31,6 +31,7 @@
     <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.2" />
     <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.2" />
     <PackageVersion Include="Microsoft.Orleans.Streaming.NATS" Version="10.4.2-alpha.1" />
+    <PackageVersion Include="MimeKit" Version="5.0.0" />
     <PackageVersion Include="Npgsql" Version="10.0.4" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.4" />
     <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.21.0" />

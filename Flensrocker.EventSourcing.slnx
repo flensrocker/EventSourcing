@@ -9,6 +9,10 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/samples/" />
+  <Folder Name="/samples/Identity/" />
+  <Folder Name="/samples/Identity/src/">
+    <Project Path="samples/Identity/src/WebApi/Flensrocker.Identity.WebApi.csproj" />
+  </Folder>
   <Folder Name="/samples/Measure/" />
   <Folder Name="/samples/Measure/src/">
     <Project Path="samples/Measure/src/Orleans.Abstractions/Flensrocker.Measure.Orleans.Abstractions.csproj" />

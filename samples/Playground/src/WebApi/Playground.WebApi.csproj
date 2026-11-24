@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Persistence.PostgreSQL\Flensrocker.EventSourcing.Persistence.PostgreSQL.csproj" />
+    <ProjectReference Include="..\..\..\Identity\src\WebApi\Flensrocker.Identity.WebApi.csproj" />
     <ProjectReference Include="..\..\..\Measure\src\Orleans.Abstractions\Flensrocker.Measure.Orleans.Abstractions.csproj" />
     <ProjectReference Include="..\..\..\Measure\src\WebApi\Flensrocker.Measure.WebApi.csproj" />
     <ProjectReference Include="..\..\..\ToDo\src\Orleans.Client\Flensrocker.ToDo.Orleans.Client.csproj" />
