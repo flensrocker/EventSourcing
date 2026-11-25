@@ -41,6 +41,8 @@ public static class IdentityWebApiExtensions
       app.UseAuthentication();
       app.UseAuthorization();
 
+      app.UseMiddleware<CurrentUserMiddleware>();
+
       return app;
     }
   }

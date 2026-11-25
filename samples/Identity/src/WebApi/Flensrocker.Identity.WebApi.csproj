@@ -9,5 +9,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\EventSourcing.Extensions.AspNetCore\Flensrocker.EventSourcing.Extensions.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\..\src\EventSourcing.Orleans.Abstractions\Flensrocker.EventSourcing.Orleans.Abstractions.csproj" />
   </ItemGroup>
 </Project>

@@ -32,9 +32,8 @@ public abstract class CommandHandlerGrain<TEventBase, TCommandBase, TCommandStat
 
   protected void RaiseDomainEvents(DateTimeOffset createdAt, TEventBase[] payloads)
   {
-    var user = OrleansRequestContextExtensions.GetUser();
-    var tenantId = user?.TenantId;
-    var userId = user?.UserId;
+    var tenantId = OrleansRequestContextExtensions.GetActiveTenant();
+    var userId = OrleansRequestContextExtensions.GetUser()?.UserId;
 
     // TODO Enable adding public messages to domain events.
     var streamId = this.GetPrimaryKey();
