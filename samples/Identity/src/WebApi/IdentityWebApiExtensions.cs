@@ -54,24 +54,34 @@ public static class IdentityWebApiExtensions
       authGroup
         .MapPost(
           "signin",
-          static async Task<Results<BadRequest, Ok<AuthSignedInDto>>> (HttpContext context, [FromBody] AuthSignInDto request) =>
+          static async Task<Results<BadRequest, NotFound, Ok<AuthSignedInDto>>> (HttpContext context, [FromBody] AuthSignInDto request) =>
           {
             if (string.IsNullOrWhiteSpace(request.DisplayName) || string.IsNullOrWhiteSpace(request.Email))
             {
               return TypedResults.BadRequest();
             }
 
-            var displayName = NormalizeDisplayName(request.DisplayName);
-            var email = NormalizeEmail(request.Email);
+            var user = AuthUserData.GetUserId(request.Email);
+            if (!user.HasValue)
+            {
+              return TypedResults.NotFound();
+            }
 
-            Claim[] claims = [new(ClaimTypes.Name, displayName), new(ClaimTypes.Email, email)];
+            var displayName = AuthUserData.NormalizeDisplayName(request.DisplayName);
+
+            Claim[] claims =
+            [
+              new(ClaimTypes.NameIdentifier, user.Value.UserId.ToString()),
+              new(ClaimTypes.Name, displayName),
+              new(ClaimTypes.Email, user.Value.NormalizedEmail),
+            ];
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
             var authProperties = new AuthenticationProperties { IsPersistent = true };
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal, authProperties);
 
-            return TypedResults.Ok(new AuthSignedInDto { DisplayName = displayName, Email = email });
+            return TypedResults.Ok(new AuthSignedInDto { DisplayName = displayName, Email = user.Value.NormalizedEmail });
           }
         )
         .AllowAnonymous();
@@ -88,15 +98,31 @@ public static class IdentityWebApiExtensions
       return builder;
     }
   }
+}
 
-  private static string NormalizeDisplayName(string displayName)
+internal static class AuthUserData
+{
+  private static readonly IReadOnlyDictionary<string, Guid> _emailUserIdMapping = new Dictionary<string, Guid>
+  {
+    { NormalizeEmail("user1@flensrocker.de"), Guid.Parse("11669e29-b187-4d68-b461-e4b99452fa44") },
+    { NormalizeEmail("user1+1@flensrocker.de"), Guid.Parse("11669e29-b187-4d68-b461-e4b99452fa44") },
+    { NormalizeEmail("user2@flensrocker.de"), Guid.Parse("ef59b503-f7b0-4433-b4d9-cae90d972fce") },
+  };
+
+  internal static string NormalizeDisplayName(string displayName)
   {
     return displayName.Trim();
   }
 
-  private static string NormalizeEmail(string email)
+  internal static string NormalizeEmail(string email)
   {
     return MailboxAddress.EncodeAddrspec(email.Trim()).ToLowerInvariant();
+  }
+
+  internal static (string NormalizedEmail, Guid UserId)? GetUserId(string email)
+  {
+    var normalizedEmail = NormalizeEmail(email);
+    return _emailUserIdMapping.TryGetValue(normalizedEmail, out var userId) ? (normalizedEmail, userId) : null;
   }
 }
 

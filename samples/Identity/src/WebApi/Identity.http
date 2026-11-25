@@ -7,8 +7,18 @@ POST http://{{host}}:{{port}}/api/identity/auth/signin
 Content-Type: application/json
 
 {
-  "DisplayName": "Flens Rocker",
-  "Email": "noreply@flensrocker.de"
+  "DisplayName": "User 1",
+  "Email": "user1@flensrocker.de"
+}
+
+###
+# @name invalid_signin
+POST http://{{host}}:{{port}}/api/identity/auth/signin
+Content-Type: application/json
+
+{
+  "DisplayName": "User 3",
+  "Email": "user3@flensrocker.de"
 }
 
 ###
